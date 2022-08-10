@@ -1,3 +1,4 @@
+//<?php ob_start(); ?>
 #include <stdio.h>
 #define function 
 
@@ -9,4 +10,4 @@ function main(int $x)
 }
 
 // ?>
-// <?php main(10);
+// <?php ob_end_clean(); main(1);
