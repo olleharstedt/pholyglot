@@ -6,7 +6,15 @@ int
 // <?php
 function main(int $x)
 {
-    printf("Hello %d\n", $x);
+    // ?> 
+    int
+    // <?php
+    $arr[] = [1, 2, 3];
+    // ?> <?php $arr = $arr[0]; ?>
+    float 
+    // <?php
+    $y = 1.0;
+    printf("Hello %f\n", $x + $y);
 }
 
 // ?>

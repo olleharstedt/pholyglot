@@ -13,6 +13,15 @@
     #define \u003C ?
     #define \u002F /
 
-Class can be struct.
-String can use smart strings from PHP core.
+* Class can be struct.
+* String can use smart strings from PHP core.
+* Array can use same array.
+* Hashtable gonna be hard. Must use class for that?
+* Nested assoc arrays... Impossible?
+* GC with Boehm, no long-running scripts?
 
+## Use-cases
+
+* Contact database and spit out JSON
+* CURL call together with database interaction
+* Some mathematical thing
