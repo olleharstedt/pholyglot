@@ -12,3 +12,7 @@
     #define \u0024 $
     #define \u003C ?
     #define \u002F /
+
+Class can be struct.
+String can use smart strings from PHP core.
+

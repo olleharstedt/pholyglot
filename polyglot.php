@@ -1,4 +1,4 @@
-//<?php ob_start(); ?>
+//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #define function 
 
