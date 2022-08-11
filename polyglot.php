@@ -71,6 +71,7 @@ function main(int $s)
     $arr[2] = 3;
 
     // Example of point struct
+    // TODO: Possible to do with macro instead of wrapping function?
     // ?>
     struct Point* // <?php
     $p = new_Point();
