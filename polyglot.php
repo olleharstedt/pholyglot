@@ -1,16 +1,21 @@
-//<?php echo "\x08\x08"; ob_implicit_flush(false); ob_start(); ?>
+//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
 #define function 
 #define class struct
 #define new 
 
+// Stubbs
+void ob_start() {}
+void ob_end_clean() {}
+
 // <?php
 
-#define public int
 class Point
 {
+#define public int
     public $x;
+#define public int
     public $y;
 };
 
@@ -28,6 +33,7 @@ int
 // <?php
 function main(int $s)
 {
+    ob_start();
     // Example of int array
     // ?>
     int // <?php $arr = [5 => 0];
@@ -46,11 +52,12 @@ function main(int $s)
     // ?>
     char* // <?php
     $y = "y";
-    printf("Point data: x = %d, y = %d\n", $p->$x, $p->$y);
 
     // ?>
     float // <?php
     $t = 1.0;
+    ob_end_clean();
+    printf("Point data: x = %d, y = %d\n", $p->$x, $p->$y);
     printf("Hello %f\n", $s + $t);
     printf("Hello %d\n", $arr[0]);
 }
