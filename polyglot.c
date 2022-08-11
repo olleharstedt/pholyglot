@@ -10,12 +10,31 @@
 void ob_start() {}
 void ob_end_clean() {}
 
+// Wrap C functions to look like PHP.
 MYSQL* mysqli_connect()
 {
-    // TODO: Missing defensive programming
     MYSQL* $connection = mysql_init(NULL);
-    mysql_real_connect($connection, "localhost", "user", "password", "db", 0, NULL, 0);
+    if (!mysql_real_connect($connection, "localhost", "olle", "password", "db", 0, NULL, 0)) {
+        fprintf(
+            stderr,
+            "Failed to connect to database: Error: %s\n",
+            mysql_error($connection)
+        );
+    }
     return $connection;
+}
+
+MYSQL_RES* mysqli_query(MYSQL* $connection, char* query)
+{
+    // TODO: Defensive programming
+    mysql_query($connection, query);
+    MYSQL_RES* result = mysql_store_result($connection);
+    return result;
+}
+
+MYSQL_ROW mysqli_fetch_row(MYSQL_RES* res)
+{
+    return mysql_fetch_row(res);
 }
 
 // <?php
@@ -68,6 +87,16 @@ function main(int $s)
     MYSQL*
     // <?php
     $connection = mysqli_connect("localhost", "olle", "password", "db");
+    // ?>
+    MYSQL_RES* // <?php 
+    $result = mysqli_query($connection, "SELECT username FROM users WHERE id = 1");
+    // ?> 
+    MYSQL_ROW // <?php
+    $row = mysqli_fetch_row($result);
+    // ?>
+    char*
+    // <?php
+    $username = $row[0];
 
     // ?>
     float // <?php
@@ -76,6 +105,7 @@ function main(int $s)
     printf("Point data: x = %d, y = %d\n", $p->$x, $p->$y);
     printf("Hello %f\n", $s + $t);
     printf("Hello %d\n", $arr[0]);
+    printf("Username: %s\n", $username);
 }
 
 // ?>
