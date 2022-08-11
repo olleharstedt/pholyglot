@@ -1,4 +1,4 @@
-//<?php echo "\x08\x08"; ob_start(); ?>
+//<?php echo "\x08\x08"; ob_implicit_flush(false); ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
 #define function 
@@ -30,7 +30,7 @@ function main(int $s)
 {
     // Example of int array
     // ?>
-    int // <?php
+    int // <?php $arr = [5 => 0];
     $arr[5];
     $arr[0] = 1;
     $arr[1] = 2;

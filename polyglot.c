@@ -30,7 +30,7 @@ function main(int $s)
 {
     // Example of int array
     // ?>
-    int // <?php
+    int // <?php $arr = [5 => 0];
     $arr[5];
     $arr[0] = 1;
     $arr[1] = 2;
