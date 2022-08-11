@@ -17,8 +17,20 @@
 * String can use smart strings from PHP core.
 * Array can use same array.
 * Hashtable gonna be hard. Must use class for that?
-* Nested assoc arrays... Impossible?
 * GC with Boehm, no long-running scripts?
+
+**Impossible:**
+
+* Nested assoc arrays
+* Array init in both C and PHP
+
+**Snippets:**
+
+To include PHP which is ignored in C:
+
+```php
+// ?> <?php $arr = $arr[0]; ?>
+```
 
 ## Use-cases
 
