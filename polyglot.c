@@ -4,7 +4,6 @@
 #include <mysql.h>
 #define function 
 #define class struct
-#define new 
 
 // Stubbs
 void ob_start() {}
