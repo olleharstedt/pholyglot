@@ -13,6 +13,14 @@
     #define \u003C ?
     #define \u002F /
 
+    #define EMPTY
+    EMPTY#ifdef
+
+    GOTO here;
+    here:
+
+    gcc polyglot.c -I/usr/include/mysql -I/usr/include/mysql/mysql -lmysqlclient
+
 * Class can be struct.
 * String can use smart strings from PHP core.
 * Array can use same array.
@@ -34,6 +42,7 @@ To include PHP which is ignored in C:
 
 ## Use-cases
 
-* Contact database and spit out JSON
-* CURL call together with database interaction
-* Some mathematical thing
+* Read database config from JSON file
+* Read/write from/to database
+* Curl call somewhere
+* Some mathematical thing (n-body problem?)

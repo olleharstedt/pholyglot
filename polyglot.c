@@ -1,6 +1,7 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
+#include <mysql.h>
 #define function 
 #define class struct
 #define new 
@@ -8,6 +9,14 @@
 // Stubbs
 void ob_start() {}
 void ob_end_clean() {}
+
+MYSQL* mysqli_connect()
+{
+    // TODO: Missing defensive programming
+    MYSQL* $connection = mysql_init(NULL);
+    mysql_real_connect($connection, "localhost", "user", "password", "db", 0, NULL, 0);
+    return $connection;
+}
 
 // <?php
 
@@ -21,11 +30,11 @@ class Point
 
 // ?>
 
-// <?php function new_point() { return new Point; } // <?php
+// <?php function new_Point() { return new Point; } // <?php
 
 // ?>
 
-struct Point* new_point() {
+struct Point* new_Point() {
     return (struct Point*) malloc(sizeof(struct Point));
 }
 
@@ -35,6 +44,7 @@ function main(int $s)
 {
     ob_start();
     // Example of int array
+    // TODO: How to init with [1, 2, 3]? {1, 2, 3} in C. :(
     // ?>
     int // <?php $arr = [5 => 0];
     $arr[5];
@@ -45,13 +55,19 @@ function main(int $s)
     // Example of point struct
     // ?>
     struct Point* // <?php
-    $p = new_point();
+    $p = new_Point();
     // ?>
     char* // <?php
     $x = "x";
     // ?>
     char* // <?php
     $y = "y";
+
+    // Database test
+    // ?>
+    MYSQL*
+    // <?php
+    $connection = mysqli_connect("localhost", "olle", "password", "db");
 
     // ?>
     float // <?php
