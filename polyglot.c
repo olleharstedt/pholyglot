@@ -1,5 +1,6 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
+#include <stdlib.h>
 #define function 
 #define class struct
 #define new 
@@ -13,17 +14,19 @@ class Point
     public $y;
 };
 
+// ?>
+
 // <?php function new_point() { return new Point; } // <?php
 
 // ?>
 
-struct Point new_point() {
-    return (struct Point) {};
+struct Point* new_point() {
+    return (struct Point*) malloc(sizeof(struct Point));
 }
 
 int
 // <?php
-function main(int $x)
+function main(int $s)
 {
     // Example of int array
     // ?>
@@ -35,14 +38,20 @@ function main(int $x)
 
     // Example of point struct
     // ?>
-    struct Point // <?php
+    struct Point* // <?php
     $p = new_point();
-    printf("Point data: x = %d, y = %d\n", $p.$x, $p.$y);
+    // ?>
+    char* // <?php
+    $x = "x";
+    // ?>
+    char* // <?php
+    $y = "y";
+    printf("Point data: x = %d, y = %d\n", $p->$x, $p->$y);
 
     // ?>
     float // <?php
-    $y = 1.0;
-    printf("Hello %f\n", $x + $y);
+    $t = 1.0;
+    printf("Hello %f\n", $s + $t);
     printf("Hello %d\n", $arr[0]);
 }
 
