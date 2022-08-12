@@ -5,16 +5,17 @@
 #include <glib.h>
 #define function 
 #define class struct
+#define __PHP__ 0
 
 // Stubbs
 void ob_start() {}
 void ob_end_clean() {}
 
 // Wrap C functions to look like PHP.
-MYSQL* mysqli_connect()
+MYSQL* mysqli_connect(char* host, char* username, char* password, char* database_name)
 {
     MYSQL* $connection = mysql_init(NULL);
-    if (!mysql_real_connect($connection, "localhost", "olle", "password", "db", 0, NULL, 0)) {
+    if (!mysql_real_connect($connection, host, username, password, database_name, 0, NULL, 0)) {
         fprintf(
             stderr,
             "Failed to connect to database: Error: %s\n",
@@ -36,6 +37,37 @@ MYSQL_ROW mysqli_fetch_row(MYSQL_RES* res)
 {
     return mysql_fetch_row(res);
 }
+
+struct database_config {
+    gchar* username;
+    gchar* password;
+    gchar* host;
+    gchar* database_name;
+};
+
+// Wrap GLib key file functions to look like PHP.
+struct database_config* parse_ini_file(char* filename)
+{
+    GKeyFile* key_file = g_key_file_new();
+    GError** error = NULL;
+    GKeyFileFlags flags;
+    g_key_file_load_from_file(key_file, filename, flags, error);
+
+    struct database_config* config = malloc(sizeof(struct database_config));
+    config->username = g_key_file_get_value(key_file, "database", "username", error);
+    config->password = g_key_file_get_value(key_file, "database", "password", error);
+    config->host = g_key_file_get_value(key_file, "database", "host", error);
+    config->database_name = g_key_file_get_value(key_file, "database", "database_name", error);
+
+    return config;
+}
+
+gchar* ini_file_get_value(GKeyFile *key_file, const gchar *group_name, const gchar *key)
+{
+    GError** error = NULL;
+    return g_key_file_get_value( key_file, group_name, key, error);
+}
+
 
 // <?php
 
@@ -83,11 +115,20 @@ function main(int $s)
     char* // <?php
     $y = "y";
 
+    // Read from ini config file test
+    // ?>
+    struct database_config* // <?php
+    $config = 
+#if __PHP__
+    (object)
+#endif
+    parse_ini_file("config.ini");
+
     // Database test
     // ?>
     MYSQL*
     // <?php
-    $connection = mysqli_connect("localhost", "olle", "password", "db");
+    $connection = mysqli_connect($config->host, $config->username, $config->password, $config->database_name);
     // ?>
     MYSQL_RES* // <?php 
     $result = mysqli_query($connection, "SELECT username FROM users WHERE id = 1");
