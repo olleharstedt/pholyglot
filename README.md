@@ -46,3 +46,40 @@ To include PHP which is ignored in C:
 * Read/write from/to database
 * Curl call somewhere
 * Some mathematical thing (n-body problem?)
+
+## Open questions
+
+* String concat
+* Local type inference
+* Assoc array is banned, hash table with string keys is ok
+
+## Benchmark
+
+strip binary first
+
+    $ time f r a in {1..100}; do php polyglot.php; done
+    $ time for a in {1..100}; do ./polyglot; done
+
+    C version:
+    real    0m0,532s
+    user    0m0,266s
+    sys     0m0,217s
+
+    PHP version:
+    real    0m2,211s
+    user    0m1,338s
+    sys     0m0,810s
+
+## Transpiler
+
+* What type information is needed?
+
+```php
+function add(int $x, int $t): int {
+    return $x + $y;
+}
+
+function add_points(Point $p1, Point $p2) {
+    return new Point($x->x
+}
+```

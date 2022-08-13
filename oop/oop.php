@@ -6,26 +6,49 @@
 #define function 
 #define class struct
 #define __PHP__ 0
+#define METHOD_NAME(n) (fnptr_n)
+
+// Stubbs
+void ob_start() {}
+void ob_end_clean() {}
 
 // <?php
 
 class PluginBase
 {
+#define public char*
     public $name;
-    public function getName(): string
-    {
-        return $this->name;
-    }
-}
 
-class MyPlugin extends PluginBase
+#define public char*
+    # public function (*METHOD_NAME(PluginBase_getName)) (struct PluginBase*);
+    // <?php
+#if __PHP__
+    public function getName(static $self): string
+    {
+        // TODO: Duplicated function body.
+        $name = "name";
+        return $self->$name;
+    }
+#endif
+};
+
+// ?>
+char* METHOD_NAME(PluginBase_getName) (struct PluginBase* $this)
 {
-    public function doTheThing()
-    {
-        printf("Doing the thing\n");
-    }
+    return $this->$name;
+}
+// <?php
+
+char* fnptr_getName(struct PluginBase* this)
+{
+    return this->$name;
 }
 
-$myPlugin = new MyPlugin();
-printf("Plugin name: %s", $myPlugin->getName());
-$myPlugin->doTheThing();
+int
+// <?php
+function main(int $s)
+{
+}
+
+// ?>
+// <?php ob_end_clean(); main(1);
