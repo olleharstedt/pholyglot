@@ -43,6 +43,8 @@ class PluginBase
 function main(int $s)
 {
     $pb = new PluginBase();
+    printf("Hello\n");
     return 0;
 }
+// ?>
 // <?php ob_end_clean(); main(1);
