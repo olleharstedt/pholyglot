@@ -19,31 +19,72 @@ class PluginBase
     public $name;
 
     #__C__ char* (*getName) (struct PluginBase*);
-// End of C struct def
+    #__C__ void (*setName) (struct PluginBase*, char*);
+// End of C struct def. Class methods are outside the struct.
 #__C__ };
 
 #if __PHP__
-    public function getName($self): string
+    public function getName(PluginBase $self): string
 #endif
     #__C__ char* PluginBase_getName (struct PluginBase* $self)
     {
-        #__C__ char*
+#if __PHP__
         $name = "name";
+#endif
         return $self->$name;
     }
 
 #if __PHP__
-// End of PHP class def
+    public function setName(PluginBase $self, string $newName): void
+#endif
+    #__C__ void PluginBase_setName (struct PluginBase* $self, char* $newName)
+    {
+#if __PHP__
+        $name = "name";
+#endif
+        $self->$name = $newName;
+    }
+
+#if __PHP__
+// End of PHP class def.
 }
 #endif
 
+// ?>
+
+struct PluginBase* new_PluginBase()
+{
+    struct PluginBase* pb = malloc(sizeof(struct PluginBase));
+    pb->getName = &PluginBase_getName;
+    pb->setName = &PluginBase_setName;
+    return pb;
+}
+
 // <?php
 
-#__C__ int
-function main(int $s)
+#if __PHP__
+function new_PluginBase()
 {
-    $pb = new PluginBase();
-    printf("Hello\n");
+    return new PluginBase();
+}
+#endif
+
+#__C__ int
+function main()
+{
+    #__C__ char*
+    $newName = "MyNicePlugin";
+
+    #__C__ struct PluginBase*
+    $pb = new_PluginBase();
+    $pb->setName($pb, $newName);
+
+#if __PHP__
+    $name = "name";
+#endif
+
+    printf("Hello, my plugin name is %s\n", $pb->getName($pb));
+
     return 0;
 }
 // ?>
