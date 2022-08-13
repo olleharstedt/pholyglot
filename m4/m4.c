@@ -6,8 +6,9 @@
 #define __PHP__ 0
 #define METHOD_NAME(n) (fnptr_n)
 
-// m4 definitions
-define(Blubb, Blabberi)
+
+#REMOVEME escape this line in PHP but not in C
+
 
 // ?>
 int

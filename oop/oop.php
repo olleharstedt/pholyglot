@@ -13,17 +13,15 @@ void ob_start() {}
 void ob_end_clean() {}
 
 // <?php
-
 class PluginBase
 {
 #define public char*
     public $name;
 
 #define public char*
-    # public function (*METHOD_NAME(PluginBase_getName)) (struct PluginBase*);
-    // <?php
+    #REMOVEME public function (*METHOD_NAME(PluginBase_getName)) (struct PluginBase*);
 #if __PHP__
-    public function getName(static $self): string
+    public function getName($self): string
     {
         // TODO: Duplicated function body.
         $name = "name";
@@ -36,12 +34,6 @@ class PluginBase
 char* METHOD_NAME(PluginBase_getName) (struct PluginBase* $this)
 {
     return $this->$name;
-}
-// <?php
-
-char* fnptr_getName(struct PluginBase* this)
-{
-    return this->$name;
 }
 
 int
