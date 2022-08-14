@@ -1,0 +1,17 @@
+(executable
+  (preprocess (pps ppx_deriving.show ppx_deriving.ord))
+  (name pholyglot))
+
+(ocamllex
+  (modules lexer))
+
+(menhir
+  (modules parser))
+
+(env
+  (dev
+    (flags (:standard -warn-error -A))))
+
+(rule
+    (alias runtest)
+    (action (run ./test.exe)))
