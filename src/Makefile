@@ -1,5 +1,5 @@
 all:
-	dune build pholyglot.exe --profile release
+	dune build
 
 test:
 	dune runtest

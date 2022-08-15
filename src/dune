@@ -1,9 +1,0 @@
-(rule
-    (alias runtest)
-    (action (run ./test.exe)))
-
-; (library
-  ; (name foo)
-  ; (libraries base stdio)
-  ; (inline_tests)
-  ; (preprocess (pps ppx_inline_test)))
