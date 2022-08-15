@@ -1,0 +1,4 @@
+(executable
+  (public_name pholyglot)
+  (name main)
+  (libraries pholyglot))
