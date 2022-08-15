@@ -1,6 +1,6 @@
 (library
   (preprocess (pps ppx_deriving.show ppx_deriving.ord))
-  (name pholyglot))
+ (name pholyglot))
 
 (ocamllex
   (modules lexer))
@@ -11,7 +11,3 @@
 (env
   (dev
     (flags (:standard -warn-error -A))))
-
-(test
-  (modules pholyglot)
-  (name moo))

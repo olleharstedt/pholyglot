@@ -1,4 +1,4 @@
 (executable
-  (public_name pholyglot)
-  (name main)
-  (libraries pholyglot))
+ (public_name pholyglot)
+ (name main)
+ (libraries pholyglot))
