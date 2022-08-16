@@ -19,6 +19,7 @@
 %token <int> INT
 %token <string> NAME
 %token CONSTANT STRING_LITERAL
+%token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"
 (*%token TIMES DIV*)

@@ -32,6 +32,7 @@ rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
+  | "<?php // @pholyglot"         { START_SCRIPT }
   | "0"                           { INT 0 }
   | "="                           { EQ }
   | "=="                          { EQEQ }
@@ -51,7 +52,6 @@ rule token = parse
   | ','                           { COMMA }
   | "return"                      { RETURN }
   | "new"                         { NEW }
-  | "function"                    { FUNCTION }
   | "function"                    { FUNCTION }
   | identifier as id              { NAME id }
   | eof                           { EOF }
