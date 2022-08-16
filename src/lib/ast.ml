@@ -2,9 +2,12 @@
  * AST for EscapeLang
  *)
 
+open Ppx_compare_lib.Builtin
+open Base
+
 type program = 
     | Declaration_list of declaration list
-[@@deriving show]
+[@@deriving show, compare, sexp]
 
 (**
  * TODO: Implement as kind 

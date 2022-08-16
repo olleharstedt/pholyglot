@@ -4,4 +4,6 @@ module Test = struct
     let make () = "Hello"
 end
 
+module Ast = Ast
+
 let a = 10

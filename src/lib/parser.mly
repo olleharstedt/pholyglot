@@ -65,7 +65,7 @@
 %%
 
 program:
-    | d=list(declaration); EOF {Declaration_list d}
+    | s=START_SCRIPT d=list(declaration); EOF {Declaration_list d}
 
 (*NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE*)
 (*int main() { return 0; }*)

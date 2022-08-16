@@ -1,2 +1,3 @@
 (test
- (name pholyglot))
+ (name pholyglot)
+ (preprocess (pps ppx_inline_test)))
