@@ -5,5 +5,7 @@ module Test = struct
 end
 
 module Ast = Ast
+module Lexer = Lexer
+module Parser = Parser
 
 let a = 10
