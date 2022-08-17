@@ -37,3 +37,15 @@ and expression =
 
 and includes =
     | Include of include_lib
+
+and defines =
+    | Define of identifier * string option
+
+let string_of_start_line (s :start_line) : string = {|//<?php echo "\x08\x08"; ob_start(); ?>|}
+
+let string_of_program (p : program) : string = match p with
+    | (s, is, ds, decs, e) ->
+        String.concat
+        [
+            string_of_start_line s
+        ]

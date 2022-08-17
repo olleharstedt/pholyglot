@@ -42,8 +42,6 @@
 %token RETURN "return"
 %token NEW "new"
 %token LET "let"
-%token LOCAL "local"
-%token REGION "region"
 %token WITH "with"
 %token STRUCT "struct"
 %token FUNCTION "function"
@@ -77,19 +75,17 @@ declaration:
 statement: 
   | "return" n=INT ";"          {Return (Num n)}
   | "let" v=NAME "=" e=expr ";" {Assignment (Infer_me, v, e)}
-  | "new" "region" r=NAME ";"   {New_region r}
 
 struct_field: t=typ s=NAME ";"  {(s, t)}
 
 typ:
-  | n=NAME                      {type_of_string n Nonlocal }
-  | TILDE n=NAME                {type_of_string n Local }
-  | AT n=NAME                   {type_of_string n (Regional None)}
+  | n=NAME                      {type_of_string n }
+  | TILDE n=NAME                {type_of_string n }
 
 expr:
   | i=INT                                                                   {Num i}
   | e=expr "+" f=expr                                                       {Plus (e, f)} 
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
-  | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (add_region_to_typ t r, struct_init)}
+  | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (Int, struct_init)}
 
 (* let p = new Point {1, 2}; *)

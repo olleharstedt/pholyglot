@@ -17,3 +17,5 @@ let%test_unit "trivial main" =
             Return (Num 0)
         ], Int)
     ])
+
+(*let%test_unit "trivial transpile" =*)
