@@ -36,6 +36,7 @@ let string_of_token (token : Parser.token) : string =
         | _ -> failwith "Unknown token"
 
 let _ =
+    (** TODO: Read from file *)
     let source = "<?php // @pholyglot
     function main(): int {
         return 0;
@@ -70,4 +71,5 @@ let _ =
           print_endline msg;
           raise (Internal_error (sprintf "line = %d; col = %d" linebuf.lex_curr_p.pos_lnum linebuf.lex_curr_p.pos_cnum))
     in
-    ignore(ast)
+    let phast = Pholyglot.Transpile.run ast in
+    print_endline (Pholyglot.Pholyglot_ast.string_of_program phast)
