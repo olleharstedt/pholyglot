@@ -77,7 +77,7 @@ function %s(%s)
         (String.concat (List.map stmts ~f:string_of_statement))
 
 let string_of_end_line = function End_line -> {|// ?>
-// <?php ob_end_clean(); main(1);|}
+// <?php ob_end_clean(); main();|}
 
 let string_of_program (p : program) : string = match p with
     | (s, is, ds, decs, e) ->
@@ -86,6 +86,7 @@ let string_of_program (p : program) : string = match p with
             string_of_start_line s;
             String.concat (List.map is ~f:string_of_include);
             String.concat (List.map ds ~f:string_of_define);
+            "//<?php\n";
             String.concat (List.map decs ~f:string_of_declare);
             string_of_end_line e
         ]

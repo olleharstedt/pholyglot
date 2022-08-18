@@ -31,10 +31,11 @@ let%test_unit "trivial transpile" =
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #define function 
+//<?php
 #__C__ int
 function main()
 {
     return 0;
 }
 // ?>
-// <?php ob_end_clean(); main(1);|}
+// <?php ob_end_clean(); main();|}
