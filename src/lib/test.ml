@@ -1,3 +1,5 @@
+open Base
+
 let%test_unit "trivial" =
     let source = "<?php // @pholyglot" in
     let linebuf = Lexing.from_string source in
@@ -26,4 +28,13 @@ let%test_unit "trivial transpile" =
         ], Int)
     ] in
     let phast = Transpile.run ast in
-    [%test_eq: bool] true true
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
+#define function 
+#__C__ int
+function main()
+{
+    return 0;
+}
+// ?>
+// <?php ob_end_clean(); main(1);|}
