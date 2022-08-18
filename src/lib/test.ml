@@ -18,5 +18,12 @@ let%test_unit "trivial main" =
         ], Int)
     ])
 
-(** Transpile from Pholly AST to polyglot AST *)
-(*let%test_unit "trivial transpile" =*)
+(* Transpile from Pholly AST to polyglot AST *)
+let%test_unit "trivial transpile" =
+    let ast = Ast.Declaration_list [
+        Function ("main", [], [
+            Return (Num 0)
+        ], Int)
+    ] in
+    let phast = Transpile.run ast in
+    [%test_eq: bool] true true
