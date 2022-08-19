@@ -1,9 +1,6 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
-#include <stdlib.h>
 #include <glib.h>
-#include "gprintf.h"
-
 #define function 
 #define __PHP__ 0
 
