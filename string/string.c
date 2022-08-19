@@ -4,12 +4,10 @@
 #define function 
 #define __PHP__ 0
 
-#if __PHP__
-//<?php
+#if __PHP__ //<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
 function g_string_new($str) { return new GString($str); }
-//?>
-#endif
+#endif //?>
 
 //<?php
 #__C__ int
