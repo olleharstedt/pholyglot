@@ -6,7 +6,8 @@
 
 #if __PHP__ //<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
-function g_string_new($str) { return new GString($str); }
+function g_string_new(string $str) { return new GString($str); }
+function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
 #endif //?>
 
 //<?php
@@ -14,8 +15,10 @@ function g_string_new($str) { return new GString($str); }
 function main()
 {
     #__C__ GString*
-    $a = g_string_new("Hello world!");
-    printf("%s\n", $a->str);
+    $a = g_string_new("world! ");
+    #__C__ GString*
+    $b = g_string_append(g_string_new("Hello "), $a->str);
+    printf("%s\n", $b->str);
     return 0;
 }
 
