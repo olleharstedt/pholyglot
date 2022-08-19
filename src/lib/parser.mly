@@ -37,6 +37,7 @@
 %token RBRACE "}"
 %token LBRACK "["
 %token RBRACK "]"
+%token DOLLAR "$"
 %token TILDE "~"
 %token AT "@"
 %token RETURN "return"
@@ -75,9 +76,8 @@ declaration:
     | "struct" s=NAME "=" "{" f=list(struct_field) "}" {Struct (s, f)}
 
 statement: 
-  | "return" n=INT ";"          {Return (Num n)}
-  | "let" v=NAME "=" e=expr ";" {Assignment (Infer_me, v, e)}
-  | "new" "region" r=NAME ";"   {New_region r}
+  | "return" e=expr ";"         {Return e}
+  | "$" v=NAME "=" e=expr ";"   {Assignment (Infer_me, v, e)}
 
 struct_field: t=typ s=NAME ";"  {(s, t)}
 
@@ -87,6 +87,7 @@ typ:
 expr:
   | i=INT                                                                   {Num i}
   | e=expr "+" f=expr                                                       {Plus (e, f)} 
+  | "$" n=NAME                                                              {Variable n}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}
 

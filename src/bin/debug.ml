@@ -38,7 +38,8 @@ let string_of_token (token : Parser.token) : string =
 let _ =
     let source = "<?php // @pholyglot
     function main(): int {
-        return 0;
+        $a = 0;
+        return $a;
     }
     " in
 

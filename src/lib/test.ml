@@ -20,6 +20,39 @@ let%test_unit "trivial main" =
         ], Int)
     ])
 
+let%test_unit "trivial assignment" =
+    let source = "<?php // @pholyglot
+    function main(): int {
+        $a = 0;
+        return $a;
+    }
+    " in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "a", Num 0);
+            Return (Variable "a")
+        ], Int)
+    ])
+
+let%test_unit "trivial assignment" =
+    let source = "<?php // @pholyglot
+    function main(): int {
+        $a = 0;
+        return $a;
+    }
+    " in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "a", Num 0);
+            Return (Variable "a")
+        ], Int)
+    ])
+
+
 (* Transpile from Pholly AST to polyglot AST *)
 let%test_unit "trivial transpile" =
     let ast = Ast.Declaration_list [

@@ -1,6 +1,13 @@
 (executable
  (public_name pholyglot)
  (name main)
+ (modules main)
+ (libraries pholyglot))
+
+(executable
+ (public_name debug)
+ (name debug)
+ (modules debug)
  (libraries pholyglot))
 
 (env

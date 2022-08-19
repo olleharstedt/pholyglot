@@ -53,6 +53,7 @@ rule token = parse
   | "return"                      { RETURN }
   | "new"                         { NEW }
   | "function"                    { FUNCTION }
+  | "$"                           { DOLLAR }
   | identifier as id              { NAME id }
   | eof                           { EOF }
   | _ { raise (Error (Printf.sprintf "At offset %d: unexpected character.\n" (Lexing.lexeme_start lexbuf))) }
