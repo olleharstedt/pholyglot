@@ -1,6 +1,8 @@
 (* This is the AST for the PHP+C polyglot code *)
 
 open Base
+open Printf
+open String
 
 type program = 
     start_line * 
@@ -30,9 +32,15 @@ and include_lib = string
 
 and statement =
     | Return of expression
+    | Assignment of typ * identifier * expression
 
 and expression =
     | Num of int
+    | Plus of expression * expression
+    | Minus of expression * expression
+    | Times of expression * expression
+    | Div of expression * expression
+    | Variable of identifier
 
 and includes =
     | Include of include_lib
@@ -48,45 +56,57 @@ let string_of_include = function
     | Include l -> "#include " ^ l
 
 let string_of_define (d : define) : string = match d with
-    | Define (id, Some s) -> Printf.sprintf "#define %s %s\n" id s
-    | Define (id, None) -> Printf.sprintf "#define %s \n" id
+    | Define (id, Some s) -> sprintf "#define %s %s\n" id s
+    | Define (id, None) -> sprintf "#define %s \n" id
 
 let string_of_typ (t : typ) : string = match t with
     | Int -> "int"
+    | Infer_me -> failwith "Cannot convert Infer_me to a C type"
     | _ -> failwith "string_of_typ"
 
 let string_of_param (p: param) : string = match p with
     | Param (id, t) -> string_of_typ t ^ " " ^ id
 
-let string_of_expression = function
+let rec string_of_expression = function
     | Num i -> Int.to_string i
+    | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)
+    | Minus (i, j) -> (string_of_expression i) ^ " - " ^ (string_of_expression j)
+    | Times (i, j) -> (string_of_expression i) ^ " * " ^ (string_of_expression j)
+    | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
+    | Variable id -> "$" ^ id
 
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
+    | Assignment (typ, id, expr) -> sprintf {|#__C__ %s
+$%s = %s;
+    |}
+    (string_of_typ typ)
+    id
+    (string_of_expression expr)
 
 let string_of_declare (d : declaration) : string = match d with
     | Function (name, params, stmts, typ) ->
-        Printf.sprintf {|#__C__ %s
+        sprintf {|#__C__ %s
 function %s(%s)
 {
     %s}
 |}
         (string_of_typ typ)
         name
-        (String.concat ~sep:", " (List.map params ~f:string_of_param))
-        (String.concat (List.map stmts ~f:string_of_statement))
+        (concat ~sep:", " (List.map params ~f:string_of_param))
+        (concat (List.map stmts ~f:string_of_statement))
 
 let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
 
 let string_of_program (p : program) : string = match p with
     | (s, is, ds, decs, e) ->
-        String.concat
+        concat
         [
             string_of_start_line s;
-            String.concat (List.map is ~f:string_of_include);
-            String.concat (List.map ds ~f:string_of_define);
+            concat (List.map is ~f:string_of_include);
+            concat (List.map ds ~f:string_of_define);
             "//<?php\n";
-            String.concat (List.map decs ~f:string_of_declare);
+            concat (List.map decs ~f:string_of_declare);
             string_of_end_line e
         ]

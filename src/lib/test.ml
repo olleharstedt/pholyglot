@@ -48,7 +48,7 @@ let%test_unit "trivial arith" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Infer_me, "a", Num 0);
-             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
+            Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ])
 
@@ -72,5 +72,27 @@ function main()
 // ?>
 // <?php ob_end_clean(); main();|}
 
-(* $a = 10; *)
+let%test_unit "trivial arith transpile" =
+    let ast  = Ast.Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "a", Num 0);
+            Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
+        ], Int)
+    ] in
+    let phast = Transpile.run ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
+#define function 
+//<?php
+#__C__ int
+function main()
+{
+    #__C__ int
+    $a = 0;
+    return $a + 1 - 1 * 1 / 1;
+}
+// ?>
+// <?php ob_end_clean(); main();|}
+
 (* $b = [1, 2, 3]; *)
+(* $c = "Hello" . " world!"; *)
