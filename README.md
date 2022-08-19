@@ -25,6 +25,8 @@
 
     $a = parse_int($_GET['used_id']);
 
+`g_printf` vs `printf`?
+
 https://stackoverflow.com/questions/25144963/converting-a-mysql-result-into-a-json-string-in-c/25523088#25523088
 
 https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-cgi-bin-program-written-in-c
