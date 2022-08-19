@@ -79,6 +79,7 @@ let%test_unit "trivial arith transpile" =
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ] in
+    let ast = Infer.run ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>

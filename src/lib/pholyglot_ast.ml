@@ -78,7 +78,7 @@ let rec string_of_expression = function
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
     | Assignment (typ, id, expr) -> sprintf {|#__C__ %s
-$%s = %s;
+    $%s = %s;
     |}
     (string_of_typ typ)
     id

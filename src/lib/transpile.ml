@@ -2,7 +2,7 @@
 let typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
-    | Ast.Infer_me -> Pholyglot_ast.Infer_me
+    | Ast.Infer_me -> failwith "Infer before transpiling"
     | _ -> failwith "typ_to_pholyglot"
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with

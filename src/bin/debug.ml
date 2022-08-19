@@ -71,4 +71,6 @@ let _ =
           print_endline msg;
           raise (Internal_error (sprintf "line = %d; col = %d" linebuf.lex_curr_p.pos_lnum linebuf.lex_curr_p.pos_cnum))
     in
-    ignore(ast)
+    let ast = Pholyglot.Infer.run ast in
+    let phast = Pholyglot.Transpile.run ast in
+    print_endline (Pholyglot.Pholyglot_ast.string_of_program phast)
