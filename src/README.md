@@ -4,4 +4,3 @@ Main folder for the Pholyglot compiler code.
 
     # pacman -S ocaml dune opam
     $ opam install ppx_deriving
-

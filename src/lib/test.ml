@@ -39,3 +39,6 @@ function main()
 }
 // ?>
 // <?php ob_end_clean(); main();|}
+
+(* $a = 10; *)
+(* $b = [1, 2, 3]; *)

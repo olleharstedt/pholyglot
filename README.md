@@ -21,16 +21,28 @@
 
     gcc polyglot.c -I/usr/include/mysql -I/usr/include/mysql/mysql -lmysqlclient
 
+    #include "fcgi_stdio.h"
+
+    $a = parse_int($_GET['used_id']);
+
+https://stackoverflow.com/questions/25144963/converting-a-mysql-result-into-a-json-string-in-c/25523088#25523088
+
+https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-cgi-bin-program-written-in-c
+
 * Class can be struct.
 * String can use smart strings from PHP core.
 * Array can use same array.
 * Hashtable gonna be hard. Must use class for that?
 * GC with Boehm, no long-running scripts?
 
+
 **Impossible:**
 
 * Nested assoc arrays
+* Read/write from PHP session
 * Array init in both C and PHP
+** BUT: Maybe possible with `#__C__` and sed? Or just sed?
+* UTF8
 
 **Snippets:**
 
