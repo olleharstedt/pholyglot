@@ -39,7 +39,7 @@ let _ =
     let source = "<?php // @pholyglot
     function main(): int {
         $a = 0;
-        return $a;
+        return $a + 1 - 1 * 1 / 2;
     }
     " in
 

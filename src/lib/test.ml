@@ -36,11 +36,11 @@ let%test_unit "trivial assignment" =
         ], Int)
     ])
 
-let%test_unit "trivial assignment" =
+let%test_unit "trivial arith" =
     let source = "<?php // @pholyglot
     function main(): int {
         $a = 0;
-        return $a;
+        return $a + 1 - 1 * 1 / 1;
     }
     " in
     let linebuf = Lexing.from_string source in
@@ -48,10 +48,9 @@ let%test_unit "trivial assignment" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Infer_me, "a", Num 0);
-            Return (Variable "a")
+             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ])
-
 
 (* Transpile from Pholly AST to polyglot AST *)
 let%test_unit "trivial transpile" =

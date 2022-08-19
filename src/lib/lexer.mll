@@ -43,6 +43,8 @@ rule token = parse
   | ':'                           { COLON }
   | '+'                           { PLUS }
   | '-'                           { MINUS }
+  | '*'                           { TIMES }
+  | '/'                           { DIV }
   | "{"                           { LBRACE }
   | "}"                           { RBRACE }
   | "["                           { LBRACK }

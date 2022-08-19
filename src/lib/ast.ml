@@ -54,6 +54,9 @@ and struct_init = (struct_field * expression) list
 and expression =
     | Num of int
     | Plus of expression * expression
+    | Minus of expression * expression
+    | Times of expression * expression
+    | Div of expression * expression
     | New of typ * expression list
     | Variable of identifier
 

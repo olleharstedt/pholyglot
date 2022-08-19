@@ -22,7 +22,8 @@
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"
-(*%token TIMES DIV*)
+%token TIMES "*"
+%token DIV "/"
 %token COLON ":"
 %token SEMICOLON ";"
 %token COMMA ","
@@ -51,7 +52,7 @@
 %token IN "in"
 
 %left PLUS MINUS        /* lowest precedence */
-(*%left TIMES DIV         /* medium precedence */*)
+%left TIMES DIV         /* medium precedence */
 %nonassoc UMINUS        /* highest precedence */
 
 %type <declaration> declaration
@@ -87,6 +88,9 @@ typ:
 expr:
   | i=INT                                                                   {Num i}
   | e=expr "+" f=expr                                                       {Plus (e, f)} 
+  | e=expr "-" f=expr                                                       {Minus (e, f)} 
+  | e=expr "*" f=expr                                                       {Times (e, f)} 
+  | e=expr "/" f=expr                                                       {Div (e, f)} 
   | "$" n=NAME                                                              {Variable n}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}
