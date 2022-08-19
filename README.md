@@ -27,6 +27,8 @@
 
 `g_printf` vs `printf`?
 
+`g_slice` instead of malloc?
+
 https://stackoverflow.com/questions/25144963/converting-a-mysql-result-into-a-json-string-in-c/25523088#25523088
 
 https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-cgi-bin-program-written-in-c
@@ -35,8 +37,7 @@ https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-c
 * String can use smart strings from PHP core.
 * Array can use same array.
 * Hashtable gonna be hard. Must use class for that?
-* GC with Boehm, no long-running scripts?
-
+* GC with Boehm, no long-running scripts? Or glib slice/manual ref count
 
 **Impossible:**
 
