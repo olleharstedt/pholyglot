@@ -43,7 +43,10 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
     (
         Start_line,
         (* Include list *)
-        [],
+        [
+            Include "stdio.h";
+            Include "glib.h"
+        ],
         (* Define list *)
         [
             Define ("function", None)

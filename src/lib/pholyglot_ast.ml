@@ -55,7 +55,7 @@ let string_of_start_line = function Start_line -> {|//<?php echo "\x08\x08"; ob_
 
 
 let string_of_include = function
-    | Include l -> "#include " ^ l
+    | Include l -> sprintf "#include <%s>\n" l
 
 let string_of_define (d : define) : string = match d with
     | Define (id, Some s) -> sprintf "#define %s %s\n" id s

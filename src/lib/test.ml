@@ -62,6 +62,8 @@ let%test_unit "trivial transpile" =
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
+#include <stdio.h>
+#include <glib.h>
 #define function 
 //<?php
 #__C__ int
@@ -83,6 +85,8 @@ let%test_unit "trivial arith transpile" =
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
+#include <stdio.h>
+#include <glib.h>
 #define function 
 //<?php
 #__C__ int
@@ -139,7 +143,20 @@ let%test_unit "transpile concat" =
     let ast = Infer.run ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>|}
+    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
+#include <stdio.h>
+#include <glib.h>
+#define function 
+//<?php
+#__C__ int
+function main()
+{
+    #__C__ GString*
+    $str = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
+    return 0;
+}
+// ?>
+// <?php ob_end_clean(); main();|}
 
 (* TODO: *)
 (* $b = [1, 2, 3]; *)
