@@ -36,10 +36,12 @@ and statement =
 
 and expression =
     | Num of int
+    | String of string
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression
     | Div of expression * expression
+    | Concat of expression * expression
     | Variable of identifier
 
 and includes =
@@ -61,6 +63,7 @@ let string_of_define (d : define) : string = match d with
 
 let string_of_typ (t : typ) : string = match t with
     | Int -> "int"
+    | String -> "GString*"
     | Infer_me -> failwith "Cannot convert Infer_me to a C type"
     | _ -> failwith "string_of_typ"
 
@@ -69,10 +72,12 @@ let string_of_param (p: param) : string = match p with
 
 let rec string_of_expression = function
     | Num i -> Int.to_string i
+    | String s -> sprintf "g_string_new(%s)" s
     | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)
     | Minus (i, j) -> (string_of_expression i) ^ " - " ^ (string_of_expression j)
     | Times (i, j) -> (string_of_expression i) ^ " * " ^ (string_of_expression j)
     | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
+    | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
 
 let string_of_statement = function

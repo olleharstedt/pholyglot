@@ -13,9 +13,7 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function main()
 {
     #__C__ GString*
-    $a = g_string_new("world! ");
-    #__C__ GString*
-    $b = g_string_append(g_string_new("Hello "), $a->str);
+    $b = g_string_append(g_string_new("Hello "), g_string_new("world!")->str);
     printf("%s\n", $b->str);
     return 0;
 }

@@ -127,6 +127,20 @@ let%test_unit "trivial concat" =
         ], Int)
     ])
 
+let%test_unit "transpile concat" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $str = "Hello" . " world" . "!";
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    let ast = Infer.run ast in
+    let phast = Transpile.run ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>|}
+
 (* TODO: *)
 (* $b = [1, 2, 3]; *)
 (* $c = "Hello" . " world!"; *)

@@ -4,14 +4,13 @@ open Printf
 exception Parser_error of string
 exception Lexer_error of string
 exception Internal_error of string
-
 let _ =
     (** TODO: Read from file *)
-    let source = "<?php // @pholyglot
+    let source = {|<?php // @pholyglot
     function main(): int {
+        $str = "Hello" . " world" . "!";
         return 0;
-    }
-    " in
+    } |} in
 
     (* NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE *)
     let linebuf = Lexing.from_string source in
