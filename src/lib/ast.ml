@@ -2,7 +2,6 @@
  * AST for Pholly
  *)
 
-open Ppx_compare_lib.Builtin
 open Base
 
 type program = 
@@ -12,8 +11,10 @@ type program =
 (** TODO: Differ between value type and reference type? Always pass by reference except primitive types (int, string) *)
 and typ =
     | Int
+    | String
     | Struct_typ of struct_name
     | Infer_me
+    | Mixed
 
 and param =
     | Param of identifier * typ
@@ -53,10 +54,12 @@ and struct_init = (struct_field * expression) list
 
 and expression =
     | Num of int
+    | String of string
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression
     | Div of expression * expression
+    | Concat of expression * expression
     | New of typ * expression list
     | Variable of identifier
 
@@ -70,5 +73,6 @@ let type_of_string (s : string) : typ = match s with
 
 let string_of_typ (t : typ) : string = match t with
     | Int -> "Int"
+    | String -> "String"
     | Struct_typ _  -> "Struct_typ"
     | Infer_me -> "Infer_me"

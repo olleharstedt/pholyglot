@@ -5,36 +5,6 @@ exception Parser_error of string
 exception Lexer_error of string
 exception Internal_error of string
 
-let string_of_token (token : Parser.token) : string =
-    let open Parser in
-    match token with
-        | WITH -> "WITH"
-        | STRUCT -> "STRUCT"
-        | STRING_LITERAL -> "STRING_LITERAL"
-        | SEMICOLON -> "SEMICOLON"
-        | RPAREN -> "RPAREN"
-        | RETURN -> "RETURN"
-        | RBRACK -> "RBRACE"
-        | RBRACE -> "RBRACE"
-        | PLUS -> "PLUS"
-        | NEW -> "NEW"
-        | NAME s  -> "NAME " ^ s
-        | MINUS -> "MINUS"
-        | LT -> "LT"
-        | LPAREN -> "LPAREN"
-        | LET -> "LET"
-        | LBRACK -> "LBRACK"
-        | LBRACE -> "LBRACE"
-        | INT i -> "INT" ^ string_of_int i
-        | GT -> "GT"
-        | EQEQ -> "EQEQ"
-        | EQ -> "EQ"
-        | EOF -> "EOF"
-        | CONSTANT -> "CONSTANT"
-        | START_SCRIPT -> "START_SCRIPT"
-        | FUNCTION -> "FUNCTION"
-        | _ -> failwith "Unknown token"
-
 let _ =
     (** TODO: Read from file *)
     let source = "<?php // @pholyglot
@@ -45,18 +15,6 @@ let _ =
 
     (* NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE *)
     let linebuf = Lexing.from_string source in
-
-    (*
-    let rec dump_tokens linebuf =
-        let token = Lexer.token linebuf in
-        match token with
-            | Parser.EOF -> ()
-            | t ->
-                printf "%s" ((string_of_token t) ^ " ");
-                dump_tokens linebuf
-    in
-    dump_tokens linebuf;
-    *)
 
     let ast = try (Parser.program Lexer.token linebuf) with
       | Lexer.Error msg ->

@@ -18,7 +18,8 @@
 
 %token <int> INT
 %token <string> NAME
-%token CONSTANT STRING_LITERAL
+%token <string> STRING_LITERAL
+%token CONSTANT
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"
@@ -27,6 +28,8 @@
 %token COLON ":"
 %token SEMICOLON ";"
 %token COMMA ","
+%token DOT "."
+%token QUOTE "\""
 %token EOF
 %token EQEQ "=="
 %token EQ "="
@@ -51,6 +54,7 @@
 %token FUNCTION "function"
 %token IN "in"
 
+%left DOT
 %left PLUS MINUS        /* lowest precedence */
 %left TIMES DIV         /* medium precedence */
 %nonassoc UMINUS        /* highest precedence */
@@ -87,10 +91,12 @@ typ:
 
 expr:
   | i=INT                                                                   {Num i}
+  | s=STRING_LITERAL                                                        {String s}
   | e=expr "+" f=expr                                                       {Plus (e, f)} 
   | e=expr "-" f=expr                                                       {Minus (e, f)} 
   | e=expr "*" f=expr                                                       {Times (e, f)} 
   | e=expr "/" f=expr                                                       {Div (e, f)} 
+  | e=expr "." f=expr                                                       {Concat (e, f)} 
   | "$" n=NAME                                                              {Variable n}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}

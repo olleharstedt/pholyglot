@@ -1,11 +1,13 @@
 (* Module to infer types of local variables *)
 
 let infer_expression : (Ast.expression -> Ast.typ) = function
+    | String _ -> String
     | Num _ -> Int
     | Plus (_, _) -> Int
     | Minus (_, _) -> Int
     | Times (_, _) -> Int
     | Div (_, _) -> Int
+    | Concat (_, _) -> String
     | Variable id -> failwith ("Can't infer type of variable " ^ id)
 
 let infer_stmt : (Ast.statement -> Ast.statement) = function

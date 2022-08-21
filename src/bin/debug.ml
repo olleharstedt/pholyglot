@@ -10,7 +10,7 @@ let string_of_token (token : Parser.token) : string =
     match token with
         | WITH -> "WITH"
         | STRUCT -> "STRUCT"
-        | STRING_LITERAL -> "STRING_LITERAL"
+        | STRING_LITERAL s -> "STRING_LITERAL " ^ s
         | SEMICOLON -> "SEMICOLON"
         | RPAREN -> "RPAREN"
         | RETURN -> "RETURN"
@@ -33,15 +33,19 @@ let string_of_token (token : Parser.token) : string =
         | CONSTANT -> "CONSTANT"
         | START_SCRIPT -> "START_SCRIPT"
         | FUNCTION -> "FUNCTION"
-        | _ -> failwith "Unknown token"
+        | DOT -> "DOT"
+        | COLON -> "COLON"
+        | DOLLAR -> "DOLLAR"
+        | QUOTE -> "QUOTE"
+        | _ -> failwith "string_of_token: Unknown token"
 
 let _ =
-    let source = "<?php // @pholyglot
+    let source = {|<?php // @pholyglot
     function main(): int {
-        $a = 0;
-        return $a + 1 - 1 * 1 / 2;
+        $str = "Hello" . "world";
+        return 0;
     }
-    " in
+    |} in
 
     (* NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE *)
     let linebuf = Lexing.from_string source in
@@ -55,7 +59,7 @@ let _ =
                 printf "%s" ((string_of_token t) ^ " ");
                 dump_tokens linebuf
     in
-    dump_tokens linebuf;
+    dump_tokens linebuf
     *)
 
     let ast = try (Parser.program Lexer.token linebuf) with
@@ -64,7 +68,15 @@ let _ =
           raise (Lexer_error (sprintf "%s token = %s" msg tok))
       | Parser.Error ->
           let tok = Lexing.lexeme linebuf in
-          raise (Parser_error (sprintf "tok = %s, Could not parse '%s': error at %c" tok source (String.get source (Lexing.lexeme_start linebuf))))
+          raise (
+              Parser_error (
+                  sprintf 
+                      "tok = '%s', Could not parse '%s': error at '%c'" 
+                      tok 
+                      source 
+                      (String.get source ((Lexing.lexeme_start linebuf) - 1))
+              )
+          )
           (*raise (Parser_error (sprintf "Could not parse '%s'" source ))*)
       | Failure msg ->
           let open Lexing in

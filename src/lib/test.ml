@@ -95,6 +95,23 @@ function main()
 // ?>
 // <?php ob_end_clean(); main();|}
 
+let%test_unit "trivial string" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $str = "Hello";
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "str", String "\"Hello\"");
+            Return (Num 0)
+        ], Int)
+    ])
+
+
 (* TODO: *)
 (* $b = [1, 2, 3]; *)
 (* $c = "Hello" . " world!"; *)
