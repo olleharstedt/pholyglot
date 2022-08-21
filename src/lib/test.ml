@@ -95,5 +95,8 @@ function main()
 // ?>
 // <?php ob_end_clean(); main();|}
 
+(* TODO: *)
 (* $b = [1, 2, 3]; *)
 (* $c = "Hello" . " world!"; *)
+(* function foo(mixed $a): array *)
+(* Array value semantics - must use '&'? *)

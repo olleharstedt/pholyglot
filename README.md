@@ -38,6 +38,11 @@ https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-c
 * Array can use same array.
 * Hashtable gonna be hard. Must use class for that?
 * GC with Boehm, no long-running scripts? Or glib slice/manual ref count
+* Need docblock for arrays - no collection class built-in in PHP
+** Array (as in C); can't change size
+** Vector, as array but can change size
+** (Double-linked) list
+** Hashtable
 
 **Impossible:**
 
