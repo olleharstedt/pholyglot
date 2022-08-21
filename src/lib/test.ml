@@ -111,6 +111,21 @@ let%test_unit "trivial string" =
         ], Int)
     ])
 
+let%test_unit "trivial concat" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $str = "Hello" . "world";
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "str", Concat (String "\"Hello\"", String "\"world\""));
+            Return (Num 0)
+        ], Int)
+    ])
 
 (* TODO: *)
 (* $b = [1, 2, 3]; *)
