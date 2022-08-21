@@ -54,6 +54,7 @@ and struct_init = (struct_field * expression) list
 
 and expression =
     | Num of int
+    (** TODO: Actually string literal *)
     | String of string
     | Plus of expression * expression
     | Minus of expression * expression
@@ -68,11 +69,9 @@ and expression =
     | Function_call of ...
     *)
 
-let type_of_string (s : string) : typ = match s with
-    | s -> Struct_typ s
-
 let string_of_typ (t : typ) : string = match t with
     | Int -> "Int"
     | String -> "String"
     | Struct_typ _  -> "Struct_typ"
     | Infer_me -> "Infer_me"
+    | Mixed -> "Mixed"

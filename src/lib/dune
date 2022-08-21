@@ -1,5 +1,6 @@
 (library
- (preprocess (pps ppx_deriving.show ppx_deriving.ord ppx_inline_test ppx_assert ppx_compare ppx_sexp_conv))
+ (libraries base stdio)
+ (preprocess (pps ppx_deriving.show ppx_deriving.ord ppx_inline_test ppx_assert ppx_expect ppx_compare ppx_sexp_conv))
  (inline_tests)
  (name pholyglot))
 

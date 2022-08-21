@@ -131,6 +131,22 @@ let%test_unit "trivial concat" =
         ], Int)
     ])
 
+let%test "trivial concat type error" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $str = "Hello" . 1;
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    try 
+        ignore (Infer.run ast);
+        false
+    with
+         | Infer.Type_error s -> true
+         | _ -> false
+
 let%test_unit "transpile concat" =
     let source = {|<?php // @pholyglot
     function main(): int {

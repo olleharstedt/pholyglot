@@ -1,14 +1,35 @@
 (* Module to infer types of local variables *)
 
-let infer_expression : (Ast.expression -> Ast.typ) = function
-    | String _ -> String
+exception Type_error of string
+
+let rec typ_of_expression : (Ast.expression -> Ast.typ) = function
     | Num _ -> Int
-    | Plus (_, _) -> Int
-    | Minus (_, _) -> Int
-    | Times (_, _) -> Int
-    | Div (_, _) -> Int
-    | Concat (_, _) -> String
-    | Variable id -> failwith ("Can't infer type of variable " ^ id)
+    | String s -> String
+    | Plus (e, f)
+    | Minus (e, f)
+    | Times (e, f)
+    | Div (e, f) -> 
+        let check e = 
+            match typ_of_expression e with 
+            | Int -> () 
+            | _ -> raise (Type_error "typ_of_expression: Found non-int in arith")
+        in
+        check e;
+        check f;
+        Int
+    | Concat (e, f) -> 
+        let check e = 
+            match typ_of_expression e with 
+            | String -> () 
+            | _ -> raise (Type_error "typ_of_expression: Found non-string in concat")
+        in
+        check e;
+        check f;
+        String
+
+let infer_expression : (Ast.expression -> Ast.typ) = function
+    | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
+    | e -> typ_of_expression e
 
 let infer_stmt : (Ast.statement -> Ast.statement) = function
     | Assignment (Infer_me, id, expr) -> Assignment (infer_expression expr, id, expr)
