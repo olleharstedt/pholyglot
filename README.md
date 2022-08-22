@@ -7,6 +7,8 @@
     "Before C++11, C++ didn't allow Unicode escapes with a code point under 0xA0, except for 0x24 ($), 0x40 (@), and 0x60 (`)."
     "C still has the same restrictions as C++98."
 
+    -w #include <dlfcn.h> void callbyname(const char *name, const char *arg) { ((int (*)(const char *)) dlsym(RTLD_DEFAULT, name))(arg); } callbyname("puts", "YOLO");
+
 ## Notes
 
     #define \u0024 $
@@ -103,3 +105,6 @@ function add_points(Point $p1, Point $p2) {
     return new Point($x->x
 }
 ```
+
+setVariableAndTokenMappingsForExpressionManager
+
