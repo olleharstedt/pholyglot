@@ -65,6 +65,12 @@ let%test_unit "trivial transpile" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define __PHP__ 0
+#if __PHP__//<?php
+class GString { public $str; public function __construct($str) { $this->str = $str; } }
+function g_string_new(string $str) { return new GString($str); }
+function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
+#endif//?>
 //<?php
 #__C__ int
 function main()
@@ -88,6 +94,12 @@ let%test_unit "trivial arith transpile" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define __PHP__ 0
+#if __PHP__//<?php
+class GString { public $str; public function __construct($str) { $this->str = $str; } }
+function g_string_new(string $str) { return new GString($str); }
+function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
+#endif//?>
 //<?php
 #__C__ int
 function main()
@@ -163,6 +175,12 @@ let%test_unit "transpile concat" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define __PHP__ 0
+#if __PHP__//<?php
+class GString { public $str; public function __construct($str) { $this->str = $str; } }
+function g_string_new(string $str) { return new GString($str); }
+function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
+#endif//?>
 //<?php
 #__C__ int
 function main()
@@ -176,6 +194,5 @@ function main()
 
 (* TODO: *)
 (* $b = [1, 2, 3]; *)
-(* $c = "Hello" . " world!"; *)
 (* function foo(mixed $a): array *)
 (* Array value semantics - must use '&'? *)

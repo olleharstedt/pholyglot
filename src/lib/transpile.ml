@@ -49,7 +49,14 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
         ],
         (* Define list *)
         [
-            Define ("function", None)
+            Define ("function", None);
+            Define ("__PHP__", Some "0")
+        ],
+        (* Stubs *)
+        [
+            "class GString { public $str; public function __construct($str) { $this->str = $str; } }\n";
+            "function g_string_new(string $str) { return new GString($str); }\n";
+            "function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }\n";
         ],
         (* Declarations *)
         declares,

@@ -8,6 +8,7 @@ type program =
     start_line * 
     includes list * 
     define list * 
+    php_stubs list * 
     declaration list * 
     end_line
 [@@deriving show, compare, sexp]
@@ -29,6 +30,7 @@ and declaration =
 and function_name = string
 and identifier = string
 and include_lib = string
+and php_stubs = string
 
 and statement =
     | Return of expression
@@ -105,12 +107,15 @@ let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
 
 let string_of_program (p : program) : string = match p with
-    | (s, is, ds, decs, e) ->
+    | (s, is, ds, stubs, decs, e) ->
         concat
         [
             string_of_start_line s;
             concat (List.map is ~f:string_of_include);
             concat (List.map ds ~f:string_of_define);
+            "#if __PHP__//<?php\n";
+            concat stubs;
+            "#endif//?>\n";
             "//<?php\n";
             concat (List.map decs ~f:string_of_declare);
             string_of_end_line e
