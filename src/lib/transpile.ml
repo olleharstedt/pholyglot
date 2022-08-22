@@ -18,7 +18,9 @@ let rec expression_to_pholyglot exp = match exp with
     | Ast.Div (i, j) -> Pholyglot_ast.Div (expression_to_pholyglot i, expression_to_pholyglot j)
     | Ast.Concat (s, t) -> Pholyglot_ast.Concat (expression_to_pholyglot s, expression_to_pholyglot t)
     | Ast.Variable id -> Pholyglot_ast.Variable id
-    | _ -> failwith "expression_to_pholyglot"
+    | Ast.Array_init (t, exprs) -> Pholyglot_ast.Array_init (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
+    | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
+    | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
 
 let statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)

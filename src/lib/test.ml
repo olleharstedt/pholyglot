@@ -188,7 +188,7 @@ let%test_unit "trivial array infer" =
     let ast = Infer.run ast in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array Int, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array Int, "arr", Array_init (Fixed_array Int, [Num 1; Num 2; Num 3]));
             Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)

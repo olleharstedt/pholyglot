@@ -45,6 +45,9 @@ and expression =
     | Div of expression * expression
     | Concat of expression * expression
     | Variable of identifier
+    | Array_init of typ * expression list
+    | Array_access of identifier * expression
+    | Function_call of typ * identifier * expression list
 
 and includes =
     | Include of include_lib
