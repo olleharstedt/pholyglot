@@ -13,8 +13,13 @@ and typ =
     | Int
     | String
     | Struct_typ of struct_name
-    | Infer_me
     | Mixed
+    | Fixed_array of typ
+    | Dynamic_array of typ
+    | Tuple
+    | Linked_list
+    | Hash_table
+    | Infer_me
 
 and param =
     | Param of identifier * typ
@@ -63,6 +68,7 @@ and expression =
     | Concat of expression * expression
     | New of typ * expression list
     | Variable of identifier
+    | Array_init of typ * expression list
 
     (*
     | Struct_access of expression * expression

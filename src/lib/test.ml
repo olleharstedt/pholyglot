@@ -159,6 +159,23 @@ let%test "trivial concat type error" =
          | Infer.Type_error s -> true
          | _ -> false
 
+let%test_unit "trivial array" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $arr = [1, 2, 3];
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Return (Num 0)
+        ], Int)
+    ])
+
+
 let%test_unit "transpile concat" =
     let source = {|<?php // @pholyglot
     function main(): int {
@@ -193,6 +210,17 @@ function main()
 // <?php ob_end_clean(); main();|}
 
 (* TODO: *)
-(* $b = [1, 2, 3]; *)
-(* function foo(mixed $a): array *)
+(* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
+(* $b = [1, "Moo"];  Tuple *)
+(* return [1, 2, 3]; *)
 (* Array value semantics - must use '&'? *)
+(* $arr["moo"] = 4 Hash table *)
+(* foreach ([1, 2, 3] as $i) *)
+(* function foo(mixed $a): array *)
+(* new Foo() *)
+(* MySQL *)
+(* Curl *)
+(* ini file *)
+(* $a = 1 + 2.0; int vs float *)
+(* enum? *)
+(* array_map([1, 2, 3], fn (x) => x + 1); *)
