@@ -26,8 +26,10 @@ let rec typ_of_expression : (Ast.expression -> Ast.typ) = function
         check e;
         check f;
         String
+    | Array_init (Infer_me, exprs) -> ()
 
 let infer_expression : (Ast.expression -> Ast.typ) = function
+    (* TODO: Namespace *)
     | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
     | e -> typ_of_expression e
 

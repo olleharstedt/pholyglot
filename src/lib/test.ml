@@ -156,7 +156,7 @@ let%test "trivial concat type error" =
         ignore (Infer.run ast);
         false
     with
-         | Infer.Type_error s -> true
+         | Infer.Type_error _ -> true
          | _ -> false
 
 let%test_unit "trivial array" =
@@ -175,6 +175,22 @@ let%test_unit "trivial array" =
         ], Int)
     ])
 
+let%test_unit "trivial array infer" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $arr = [1, 2, 3];
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    let ast = Infer.run ast in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Return (Num 0)
+        ], Int)
+    ])
 
 let%test_unit "transpile concat" =
     let source = {|<?php // @pholyglot
