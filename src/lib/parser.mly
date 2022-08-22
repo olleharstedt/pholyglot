@@ -81,8 +81,9 @@ declaration:
     | "struct" s=NAME "=" "{" f=list(struct_field) "}" {Struct (s, f)}
 
 statement: 
-  | "return" e=expr ";"         {Return e}
-  | "$" v=NAME "=" e=expr ";"   {Assignment (Infer_me, v, e)}
+  | "return" e=expr ";"                                      {Return e}
+  | "$" v=NAME "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
+  | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Void, n, args_list)}
 
 struct_field: t=typ s=NAME ";"  {(s, t)}
 
@@ -97,6 +98,8 @@ expr:
   | e=expr "*" f=expr                                                       {Times (e, f)} 
   | e=expr "/" f=expr                                                       {Div (e, f)} 
   | e=expr "." f=expr                                                       {Concat (e, f)} 
+  | n=NAME "(" args_list=separated_list(COMMA, expr) ")"                    {Function_call (Infer_me, n, args_list)}
+  | "$" n=NAME "[" e=expr "]"                                               {Array_access (n, e)}
   | "$" n=NAME                                                              {Variable n}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}

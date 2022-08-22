@@ -16,10 +16,11 @@ and typ =
     | Mixed
     | Fixed_array of typ
     | Dynamic_array of typ
-    | Tuple
+    | Tuple of typ              (* Example: Fixed_array (Tuple Int) *)
     | Linked_list
     | Hash_table
     | Infer_me
+    | Void
 
 and param =
     | Param of identifier * typ
@@ -30,16 +31,12 @@ and declaration =
     | Struct of struct_name * struct_field list
 
 and function_name = string
-
 and struct_name = string
-
 and struct_field_name = string
-
 and struct_field = struct_field_name * typ
-
 and identifier = string
-
 and region_name = string
+and index = int
 
 and statement =
     (* Struct_alloc is an internal statement used by C pass *)
@@ -51,7 +48,7 @@ and statement =
     (* return ...; *)
     | Return of expression
     | New_region of region_name
-    (* Function_call that returns void *)
+    | Function_call of typ * identifier * expression list
     (* If-statement, or only if-expression *)
     (* While-loop *)
 
@@ -69,6 +66,8 @@ and expression =
     | New of typ * expression list
     | Variable of identifier
     | Array_init of typ * expression list
+    | Array_access of identifier * expression
+    | Function_call of typ * identifier * expression list
 
     (*
     | Struct_access of expression * expression

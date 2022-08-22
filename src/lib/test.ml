@@ -179,6 +179,7 @@ let%test_unit "trivial array infer" =
     let source = {|<?php // @pholyglot
     function main(): int {
         $arr = [1, 2, 3];
+        printf("%d", $arr[0]);
         return 0;
     }
     |} in
@@ -187,7 +188,8 @@ let%test_unit "trivial array infer" =
     let ast = Infer.run ast in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array Int, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
     ])
@@ -227,6 +229,7 @@ function main()
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
+(* $b = [];  Empty list, expect error *)
 (* $b = [1, "Moo"];  Tuple *)
 (* return [1, 2, 3]; *)
 (* Array value semantics - must use '&'? *)
