@@ -194,6 +194,19 @@ let%test_unit "trivial array infer" =
         ], Int)
     ])
 
+let%test_unit "trivial array infer and print" =
+    let ast = Ast.Declaration_list [
+        Function ("main", [], [
+            Assignment (Fixed_array Int, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
+            Return (Num 0)
+        ], Int)
+    ] in
+    let phast = Transpile.run ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>|}
+
+
 let%test_unit "transpile concat" =
     let source = {|<?php // @pholyglot
     function main(): int {
@@ -243,3 +256,5 @@ function main()
 (* $a = 1 + 2.0; int vs float *)
 (* enum? *)
 (* array_map([1, 2, 3], fn (x) => x + 1); *)
+(* Nullable types *)
+(* instanceof to refine types, requires runtime type info *)
