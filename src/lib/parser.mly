@@ -103,6 +103,6 @@ expr:
   | "$" n=NAME                                                              {Variable n}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
   | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}
-  | "[" array_init=separated_list(COMMA, expr) "]"                           {Array_init (Infer_me, array_init)}
+  | "[" array_init=separated_list(COMMA, expr) "]"                           {Array_init array_init}
 
 (* let p = new Point {1, 2}; *)

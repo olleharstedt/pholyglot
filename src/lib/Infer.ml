@@ -26,7 +26,7 @@ let rec typ_of_expression : (Ast.expression -> Ast.typ) = function
         check e;
         check f;
         String
-    | Array_init (Infer_me, exprs) ->
+    | Array_init (exprs) ->
         if List.length exprs = 0 then raise (Type_error "array_init cannot be empty list");
         let first_elem = List.nth exprs 0 in
         if List.for_all (fun x -> typ_of_expression x = typ_of_expression first_elem) exprs then

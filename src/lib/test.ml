@@ -170,7 +170,7 @@ let%test_unit "trivial array" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Assignment (Infer_me, "arr", Array_init ([Num 1; Num 2; Num 3]));
             Return (Num 0)
         ], Int)
     ])
@@ -188,7 +188,7 @@ let%test_unit "trivial array infer" =
     let ast = Infer.run ast in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array Int, "arr", Array_init (Fixed_array Int, [Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -197,7 +197,7 @@ let%test_unit "trivial array infer" =
 let%test_unit "trivial array infer and print" =
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array Int, "arr", Array_init (Infer_me, [Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -240,6 +240,17 @@ function main()
 // ?>
 // <?php ob_end_clean(); main();|}
 
+let%test_unit "trivial escape" =
+    let ast = Ast.Declaration_list [
+        Function ("main", [], [
+            Assignment (Infer_me, "a", Num 0);
+            Assignment (Infer_me, "a", Num 1);
+            Return (Variable "a")
+        ], Int)
+    ] in
+    let escape_status = Escape.run ast in
+    ()
+
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
@@ -258,3 +269,4 @@ function main()
 (* array_map([1, 2, 3], fn (x) => x + 1); *)
 (* Nullable types *)
 (* instanceof to refine types, requires runtime type info *)
+(* $a = 0;  return $a; // $a escapes *)

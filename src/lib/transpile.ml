@@ -1,10 +1,11 @@
 (** Transpile from Pholly AST to Pholyglot AST *)
-let typ_to_pholyglot t = match t with
+let rec typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
     | Ast.String -> Pholyglot_ast.String
+    | Ast.Fixed_array t -> Pholyglot_ast.Fixed_array (typ_to_pholyglot t)
+    | Ast.Void -> Pholyglot_ast.Void
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Ast.Infer_me -> failwith "Infer before transpiling"
-    | _ -> failwith "typ_to_pholyglot"
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | Param (id, typ) -> Pholyglot_ast.Param (id, typ_to_pholyglot typ)
@@ -18,14 +19,14 @@ let rec expression_to_pholyglot exp = match exp with
     | Ast.Div (i, j) -> Pholyglot_ast.Div (expression_to_pholyglot i, expression_to_pholyglot j)
     | Ast.Concat (s, t) -> Pholyglot_ast.Concat (expression_to_pholyglot s, expression_to_pholyglot t)
     | Ast.Variable id -> Pholyglot_ast.Variable id
-    | Ast.Array_init (t, exprs) -> Pholyglot_ast.Array_init (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
+    | Ast.Array_init (exprs) -> Pholyglot_ast.Array_init (List.map expression_to_pholyglot exprs)
     | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
     | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
 
 let statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
     | Ast.Assignment (typ, id, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, id, expression_to_pholyglot expr)
-    | _ -> failwith "statement_to_pholyglot"
+    | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
 
 let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration = match d with
     | Function (name, params, statements, typ) ->

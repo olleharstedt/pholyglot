@@ -19,6 +19,8 @@ and end_line = End_line
 and typ =
     | Int
     | String
+    | Void
+    | Fixed_array of typ
     | Infer_me
 
 and param =
@@ -35,6 +37,7 @@ and php_stubs = string
 and statement =
     | Return of expression
     | Assignment of typ * identifier * expression
+    | Function_call of typ * identifier * expression list
 
 and expression =
     | Num of int
@@ -45,7 +48,7 @@ and expression =
     | Div of expression * expression
     | Concat of expression * expression
     | Variable of identifier
-    | Array_init of typ * expression list
+    | Array_init of expression list
     | Array_access of identifier * expression
     | Function_call of typ * identifier * expression list
 
@@ -84,9 +87,13 @@ let rec string_of_expression = function
     | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
+    | Function_call _ -> failwith "Not implemented: Function_call"
+    | Array_init _ -> failwith "Not implemented: Array_init"
+    | Array_access _ -> failwith "Not implemented: Array_access"
 
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
+    | Function_call _ -> failwith "Not implemented"
     | Assignment (typ, id, expr) -> sprintf {|#__C__ %s
     $%s = %s;
     |}
