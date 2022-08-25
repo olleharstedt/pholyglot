@@ -54,6 +54,7 @@ and expression =
     | Array_init of expression list
     | Array_access of identifier * expression
     | Function_call of typ * identifier * expression list
+    | Coerce of typ * expression
 
 and includes =
     | Include of include_lib
@@ -86,6 +87,8 @@ let rec string_of_expression = function
     | Num i -> Int.to_string i
 	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
     | String s -> sprintf "g_string_new(%s)" s
+    | Coerce (String_literal, String s) -> s
+    | Coerce (_, _) -> failwith "string_of_expression: Coerce: Do not know what to coerce"
     | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)
     | Minus (i, j) -> (string_of_expression i) ^ " - " ^ (string_of_expression j)
     | Times (i, j) -> (string_of_expression i) ^ " * " ^ (string_of_expression j)

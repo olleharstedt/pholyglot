@@ -52,9 +52,23 @@ let infer_printf (s : string) : Ast.typ list =
  *)
 let infer_stmt (s : Ast.statement) (namespace : Namespace.t) : Ast.statement = match s with
     | Assignment (Infer_me, id, expr) -> Assignment (typ_of_expression expr, id, expr)
+    (* printf is hard-coded *)
     | Function_call (Infer_me, "printf", exprs) ->
         begin match exprs with
-        | String s :: xs -> Function_call (Function_type (Void, infer_printf s), "printf", exprs)
+        | String s :: xs -> 
+            let expected_types = infer_printf s in
+            (*
+            let head = List.hd exprs in
+            let tail = List.tl exprs in
+            (* Head of exprs is always a format string to printf *)
+            let exprs = head :: List.map2 (fun e t -> match e, t with
+                | Ast.String s, Ast.String_literal -> Ast.Coerce (String_literal, e)
+                | e, t -> failwith (Ast.show_expression e)
+            ) tail expected_types
+            in
+            *)
+            let exprs = Ast.Coerce (String_literal, String s) :: xs in
+            Function_call (Function_type (Void, expected_types), "printf", exprs)
         end
     | Function_call (Infer_me, id, exprs) ->
         begin match Namespace.find namespace id with

@@ -70,6 +70,7 @@ and expression =
     | Array_init of expression list
     | Array_access of identifier * expression
     | Function_call of typ * identifier * expression list
+    | Coerce of typ * expression
 
     (*
     | Struct_access of expression * expression

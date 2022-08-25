@@ -188,7 +188,7 @@ let%test_unit "trivial array infer" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (Function_type (Void, [String_literal]), "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
+            Function_call (Function_type (Void, [String_literal]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
     ])
