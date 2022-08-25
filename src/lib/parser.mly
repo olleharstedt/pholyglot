@@ -83,7 +83,7 @@ declaration:
 statement: 
   | "return" e=expr ";"                                      {Return e}
   | "$" v=NAME "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
-  | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Void, n, args_list)}
+  | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 struct_field: t=typ s=NAME ";"  {(s, t)}
 

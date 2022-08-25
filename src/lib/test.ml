@@ -184,12 +184,11 @@ let%test_unit "trivial array infer" =
     }
     |} in
     let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
-    let ast = Infer.run ast in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
+            Function_call (Function_type (Void, [String; Var_args]), "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
     ])
@@ -198,13 +197,13 @@ let%test_unit "trivial array infer and print" =
     let ast = Ast.Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (Void, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
+            Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
-    ] in
+    ] |> Infer.run in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>|}
+    [%test_eq: string] pholyglot_code ""
 
 
 let%test_unit "transpile concat" =
@@ -270,3 +269,4 @@ let%test_unit "trivial escape" =
 (* Nullable types *)
 (* instanceof to refine types, requires runtime type info *)
 (* $a = 0;  return $a; // $a escapes *)
+(* Lambda, or anonym function inside function scope $fn = fn (x) => "moo"; *)

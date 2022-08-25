@@ -20,7 +20,9 @@ and typ =
     | Int
     | String
     | Void
+    | Var_args
     | Fixed_array of typ
+    | Function_type of typ * typ list
     | Infer_me
 
 and param =
@@ -81,6 +83,7 @@ let string_of_param (p: param) : string = match p with
 
 let rec string_of_expression = function
     | Num i -> Int.to_string i
+	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
     | String s -> sprintf "g_string_new(%s)" s
     | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)
     | Minus (i, j) -> (string_of_expression i) ^ " - " ^ (string_of_expression j)
@@ -88,7 +91,7 @@ let rec string_of_expression = function
     | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
-    | Function_call _ -> failwith "Not implemented: Function_call"
+    | Function_call _ -> failwith "string_of_expression: Not implemented: Function_call"
     | Array_init exprs -> sprintf {|
 #__C__ {
 #if __PHP__
@@ -101,11 +104,23 @@ let rec string_of_expression = function
 #__C__ }
     |}
         (concat ~sep:", " (List.map exprs ~f:string_of_expression))
-    | Array_access _ -> failwith "Not implemented: Array_access"
+    | Array_access (id, expr) ->
+        (* TODO: It's assumed that expr has type Int here *)
+        sprintf {|$%s[%s]|} id (string_of_expression expr)
 
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
-    | Function_call _ -> failwith "Not implemented: Function_call"
+    | Function_call (Function_type (Void, arg_types), id, exprs) ->
+        sprintf {| %s(%s);\n |}
+        id
+        (concat ~sep:", " (List.map exprs ~f:string_of_expression))
+    | Function_call (fun_type, id, _) ->
+        failwith (
+            sprintf
+            "string_of_statement: Function_call: Can only call functions that return void as statements; %s does not: %s"
+            id
+            (string_of_typ fun_type)
+        )
     | Assignment (typ, id, expr) -> sprintf {|#__C__ %s
     $%s = %s;
     |}

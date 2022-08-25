@@ -1,5 +1,7 @@
 (* Module to infer types of local variables *)
 
+open Printf
+
 exception Type_error of string
 
 let rec typ_of_expression : (Ast.expression -> Ast.typ) = function
@@ -41,8 +43,16 @@ let infer_expression : (Ast.expression -> Ast.typ) = function
     | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
     | e -> typ_of_expression e
 
-let infer_stmt : (Ast.statement -> Ast.statement) = function
+(**
+ * Infer types inside Ast.statement
+ *)
+let infer_stmt (s : Ast.statement) (namespace : Namespace.t) : Ast.statement = match s with
     | Assignment (Infer_me, id, expr) -> Assignment (infer_expression expr, id, expr)
+    | Function_call (Infer_me, id, exprs) ->
+        begin match Namespace.find namespace id with
+        | Some fun_type -> Function_call (fun_type, id, exprs)
+        | None -> raise (Type_error (sprintf "Could not find function type %s in namespace" id))
+        end
     | s -> s
 
 let infer_declaration : (Ast.declaration -> Ast.declaration) = function
@@ -50,7 +60,10 @@ let infer_declaration : (Ast.declaration -> Ast.declaration) = function
     | Function of function_name * param list * statement list * typ
     | Struct of struct_name * struct_field list
     *)
-    | Function (name, params, stmts, typ) -> Function (name, params, List.map infer_stmt stmts, typ)
+    | Function (name, params, stmts, typ) ->
+        let namespace = Namespace.create () |> Namespace.populate in
+        let inf = fun s -> infer_stmt s namespace in
+        Function (name, params, List.map inf stmts, typ)
     | d -> d
 
 let run : (Ast.program -> Ast.program) = function

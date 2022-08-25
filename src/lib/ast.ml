@@ -12,6 +12,7 @@ type program =
 and typ =
     | Int
     | String
+    | GString
     | Struct_typ of struct_name
     | Mixed
     | Fixed_array of typ
@@ -20,6 +21,8 @@ and typ =
     | Linked_list
     | Hash_table
     | Infer_me
+    | Function_type of typ * typ list
+    | Var_args                  (* Used by printf etc *)
     | Void
 
 and param =
@@ -76,6 +79,7 @@ and expression =
 let string_of_typ (t : typ) : string = match t with
     | Int -> "Int"
     | String -> "String"
+    | GString -> "GString"
     | Struct_typ _  -> "Struct_typ"
     | Infer_me -> "Infer_me"
     | Mixed -> "Mixed"
