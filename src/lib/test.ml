@@ -273,3 +273,7 @@ let%test_unit "trivial escape" =
 (* $a = 0;  return $a; // $a escapes *)
 (* Lambda, or anonym function inside function scope $fn = fn (x) => "moo"; *)
 (* printf("%s %d %i") etc, format processing *)
+(* class Foo { public $moo; } *)
+(* class Foo { private $moo; } *)
+(* class Foo { private $moo; public function hey() {} } *)
+(* class Foo extends Bar; *)
