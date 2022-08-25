@@ -22,7 +22,7 @@ and typ =
     | String_literal
     | Void
     | Var_args
-    | Fixed_array of typ
+    | Fixed_array of typ * int
     | Function_type of typ * typ list
     | Infer_me
 
@@ -77,8 +77,14 @@ let rec string_of_typ (t : typ) : string = match t with
     | Int -> "int"
     | String -> "GString*"
     | Void -> "void"
-    | Fixed_array t -> (string_of_typ t) ^ "[]"
+    | Fixed_array (t, n) -> string_of_typ t
     | Infer_me -> failwith "Cannot convert Infer_me to a C type"
+
+(** Type notation that goes AFTER the variable name, as in array init *)
+let string_of_typ_post = function
+    | Fixed_array (t, n) -> sprintf {|
+    #__C__ [%d]|} n
+    | _ -> ""
 
 let string_of_param (p: param) : string = match p with
     | Param (id, t) -> string_of_typ t ^ " " ^ id
@@ -115,7 +121,8 @@ let rec string_of_expression = function
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
     | Function_call (Function_type (Void, arg_types), id, exprs) ->
-        sprintf {| %s(%s);\n |}
+        sprintf {| %s(%s);
+    |}
         id
         (concat ~sep:", " (List.map exprs ~f:string_of_expression))
     | Function_call (fun_type, id, _) ->
@@ -126,10 +133,12 @@ let string_of_statement = function
             (string_of_typ fun_type)
         )
     | Assignment (typ, id, expr) -> sprintf {|#__C__ %s
-    $%s = %s;
+    $%s %s
+    = %s;
     |}
     (string_of_typ typ)
     id
+    (string_of_typ_post typ)
     (string_of_expression expr)
 
 let string_of_declare (d : declaration) : string = match d with

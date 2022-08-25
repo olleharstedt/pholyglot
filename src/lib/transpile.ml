@@ -5,7 +5,7 @@ let rec typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
     | Ast.String -> Pholyglot_ast.String
     | Ast.String_literal -> Pholyglot_ast.String_literal
-    | Ast.Fixed_array t -> Pholyglot_ast.Fixed_array (typ_to_pholyglot t)
+    | Ast.Fixed_array (t, n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
     | Ast.Void -> Pholyglot_ast.Void
     | Ast.Var_args -> Pholyglot_ast.Var_args
     | Ast.Function_type (t, ts) -> Pholyglot_ast.Function_type (typ_to_pholyglot t, List.map typ_to_pholyglot ts)

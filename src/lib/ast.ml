@@ -15,7 +15,7 @@ and typ =
     | String_literal            (* For library code *)
     | Struct_typ of struct_name
     | Mixed
-    | Fixed_array of typ
+    | Fixed_array of typ * int
     | Dynamic_array of typ
     | Tuple of typ              (* Example: Fixed_array (Tuple Int) *)
     | Linked_list

@@ -105,7 +105,8 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function main()
 {
     #__C__ int
-    $a = 0;
+    $a 
+    = 0;
     return $a + 1 - 1 * 1 / 1;
 }
 // ?>
@@ -187,7 +188,7 @@ let%test_unit "trivial array infer" =
     let ast = Parser.program Lexer.token linebuf |> Infer.run in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, 3), "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Function_type (Void, [String_literal]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -196,7 +197,7 @@ let%test_unit "trivial array infer" =
 let%test_unit "trivial array infer and print" =
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array Int, "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, 3), "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -233,7 +234,8 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function main()
 {
     #__C__ GString*
-    $str = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
+    $str 
+    = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
 }
 // ?>
