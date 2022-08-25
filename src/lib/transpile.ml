@@ -1,14 +1,17 @@
+exception Transpile_error of string
+
 (** Transpile from Pholly AST to Pholyglot AST *)
 let rec typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
     | Ast.String -> Pholyglot_ast.String
+    | Ast.String_literal -> Pholyglot_ast.String_literal
     | Ast.Fixed_array t -> Pholyglot_ast.Fixed_array (typ_to_pholyglot t)
     | Ast.Void -> Pholyglot_ast.Void
     | Ast.Var_args -> Pholyglot_ast.Var_args
     | Ast.Function_type (t, ts) -> Pholyglot_ast.Function_type (typ_to_pholyglot t, List.map typ_to_pholyglot ts)
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Ast.Infer_me -> failwith "Infer before transpiling"
-    | t -> failwith (Ast.show_typ t)
+    | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | Param (id, typ) -> Pholyglot_ast.Param (id, typ_to_pholyglot typ)

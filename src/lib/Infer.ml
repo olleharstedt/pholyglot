@@ -41,13 +41,21 @@ let rec typ_of_expression : (Ast.expression -> Ast.typ) = function
 let infer_expression : (Ast.expression -> Ast.typ) = function
     (* TODO: Namespace *)
     | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
-    | e -> typ_of_expression e
+
+(** Parse format string from printf etc *)
+let infer_printf (s : string) : Ast.typ list =
+    (* TODO *)
+    [Ast.String_literal]
 
 (**
  * Infer types inside Ast.statement
  *)
 let infer_stmt (s : Ast.statement) (namespace : Namespace.t) : Ast.statement = match s with
-    | Assignment (Infer_me, id, expr) -> Assignment (infer_expression expr, id, expr)
+    | Assignment (Infer_me, id, expr) -> Assignment (typ_of_expression expr, id, expr)
+    | Function_call (Infer_me, "printf", exprs) ->
+        begin match exprs with
+        | String s :: xs -> Function_call (Function_type (Void, infer_printf s), "printf", exprs)
+        end
     | Function_call (Infer_me, id, exprs) ->
         begin match Namespace.find namespace id with
         | Some fun_type -> Function_call (fun_type, id, exprs)

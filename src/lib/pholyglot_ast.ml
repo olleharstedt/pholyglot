@@ -18,7 +18,8 @@ and end_line = End_line
 
 and typ =
     | Int
-    | String
+    | String                (* Actually GString pointer *)
+    | String_literal
     | Void
     | Var_args
     | Fixed_array of typ
