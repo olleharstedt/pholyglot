@@ -51,13 +51,12 @@ let infer_printf (s : string) : Ast.typ list =
         | i -> 
             let m = Str.matched_string s in
             (match m with 
-                | "%s" -> Some String_literal
-                | "%d" -> Some Int
+                | "%s" -> String_literal
+                | "%d" -> Int
             ) :: get_all_matches (i + 1)
         | exception Not_found -> []
     in
-    let ts = get_all_matches 0 in
-    List.filter_map (fun s -> s) ts
+    get_all_matches 0
 
 (**
  * Infer types inside Ast.statement
