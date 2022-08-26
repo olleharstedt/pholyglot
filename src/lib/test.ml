@@ -189,7 +189,7 @@ let%test_unit "trivial array infer" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array (Int, 3), "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (Function_type (Void, [String_literal]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
+            Function_call (Function_type (Void, [Int]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
     ])
@@ -282,6 +282,39 @@ let%test_unit "trivial escape" =
     ] in
     let escape_status = Escape.run ast in
     ()
+
+let%test_unit "double printf" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        printf("%s %d", "Hello", 1);
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Assignment (Fixed_array (Int, 3), "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
+            Return (Num 0)
+        ], Int)
+    ])
+
+let%test_unit "infer_printf 1" =
+    let t = Infer.infer_printf "%d" in
+    [%test_eq: Ast.typ list] t [Ast.Int]
+
+let%test_unit "infer_printf 2" =
+    let t = Infer.infer_printf "%s" in
+    [%test_eq: Ast.typ list] t [Ast.String_literal]
+
+let%test_unit "infer_printf 3" =
+    let t = Infer.infer_printf "%s %d" in
+    [%test_eq: Ast.typ list] t [Ast.String_literal; Ast.Int]
+
+let%test_unit "infer_printf 4" =
+    let t = Infer.infer_printf "Bla bla $something !!! %s moo foo %deee" in
+    [%test_eq: Ast.typ list] t [Ast.String_literal; Ast.Int]
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
