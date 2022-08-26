@@ -108,3 +108,29 @@ function add_points(Point $p1, Point $p2) {
 
 setVariableAndTokenMappingsForExpressionManager
 
+## Notes
+
+Topic is language design and type-inference.
+
+PHP has a weird "array" type that's basically a hash table that also acts as a list. When transpiling PHP to a more machine-close language, one optimization is to infer the "array" type to a more precise type, e.g. to an actual C-like array, linked list, dynamic vector, or a traditional hash table.
+
+Some example code:
+
+```php
+$arr = [1, 2, 3];     // Fixed size integer array
+$arr[] = 4;           // Pushing a new element on top of $arr, so either dynamic vector or linked list
+$arr["moo"] = 5;      // Now it's a hash table
+$tuple = [1, "moo"];  // This could be a tuple, since it has different types
+```
+
+The challenge is to deal with these different alternatives when only limited information is available.
+
+```php
+function foo(array $arr): string {
+    return $arr[0];  // Assume a string array, that is, string[]
+}
+
+function foo(int $a, string $b): array {
+    return [$a, $b];  // Tuple with size 2
+}
+```
