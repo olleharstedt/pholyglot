@@ -79,7 +79,7 @@ let infer_stmt (s : statement) (namespace : Namespace.t) : statement = match s w
             in
             *)
             let exprs = Coerce (String_literal, String s) :: xs in
-            Function_call (Function_type (Void, expected_types), "printf", exprs)
+            Function_call (Function_type (Void, String_literal :: expected_types), "printf", exprs)
         end
     | Function_call (Infer_me, id, exprs) ->
         begin match Namespace.find namespace id with
