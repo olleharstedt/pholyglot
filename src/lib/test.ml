@@ -356,3 +356,6 @@ let%test_unit "double printf" =
 (* class Foo extends Bar; *)
 (* Class name must start with capital letter *)
 (* Escape analysis of returning linked list *)
+(* Use escape analysis to free strings that do not escape, by injecting free() before return. *)
+(* function foo(): int { return "moo"; } Invalid return type *)
+(* Different alloc types: heap, stack, pool, depending on escape status *)

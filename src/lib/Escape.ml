@@ -6,10 +6,11 @@ type escape_status = Escapes | Safe
 
 (* Simple assoc list as graph *)
 (* var points to var1, var2, ... *)
-type connection_graph = (identifier, identifier list) Hashtbl.t
+type alias_graph = (identifier, identifier) Hashtbl.t
 
 type escapes_data = (identifier, escape_status) Hashtbl.t
 
+(* TODO: Replace with alloc type: heap, stack, pool *)
 let allowed_to_escape : (typ -> bool) = function
     | Int -> true
     | _ -> false
@@ -49,6 +50,14 @@ let get_basic_escapes_data (namespace : Namespace.t) (f : declaration) : escapes
             end;
             iter_stmts ss
         end
+        | Return expr :: ss -> begin
+            let t = Infer.typ_of_expression expr in
+            if allowed_to_escape t then
+                iter_stmts ss
+            else
+                failwith "get_basic_escapes_data: expression type is not allowed to escape: " (show_typ t)
+        end
+        | Function_call (_, _, _) :: ss -> iter_stmts ss
         | Assignment _ :: ss -> iter_stmts ss
     in
     match f with
@@ -59,21 +68,30 @@ let get_basic_escapes_data (namespace : Namespace.t) (f : declaration) : escapes
     | _ -> failwith "get_basic_escapes_data: Can only get escape data from function declaration"
     (* TODO: Method escape data *)
 
-(*
-let get_connection_graph fun_decl namespace =
-    let graph : connection_graph = Hashtbl.create 10 in
+let get_alias_graph (namespace : Namespace.t) (fun_decl : declaration) : alias_graph =
+    let aliases : alias_graph = Hashtbl.create 10 in
+    let rec iter_stmts : (statement list -> unit) = function
+        | [] -> ()
+        | Assignment (typ, id, Variable id2 ) :: tail ->
+            Hashtbl.add aliases id id2;
+            iter_stmts tail
+        | Assignment (typ, id, expr) :: tail ->
+            (* TODO: Check type of expr? *)
+            iter_stmts tail
+        | s :: ss -> iter_stmts ss
+    in
     match fun_decl with
     | Function (name, params, stmts, typ) as f ->
         let _ = Namespace.add_assignments namespace f in
-        (* Every Variables inside a Return statements escapes? Not return $a + $b; But return [$a]; *)
-        let ed = get_basic_escapes_data namespace f in
-        ()
-*)
+        iter_stmts stmts;
+        aliases
+
+(* TODO: Combine basic escape data with connection graph to figure out what escapes *)
 
 let%test_unit "trivial string escape" =
     let source = {|<?php // @pholyglot
     function main(): int {
-        $a = "Moo";
+        $a = "moo";
         return $a;
     }
     |} in
@@ -86,3 +104,43 @@ let%test_unit "trivial string escape" =
     let l = Hashtbl.to_seq ed |> List.of_seq in
     let open Base in
     [%test_eq: (string * escape_status) list] [("a", Escapes)] l
+
+let%test_unit "trivial no string escape" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $a = "moo";
+        printf("%s", $a);
+        return 0;
+    }
+    |} in
+    let Declaration_list [fn] =
+        Lexing.from_string source |>
+        Parser.program Lexer.token
+    in
+    let namespace = Namespace.create () in
+    let ed = get_basic_escapes_data namespace fn in
+    let l = Hashtbl.to_seq ed |> List.of_seq in
+    let open Base in
+    [%test_eq: (string * escape_status) list] [] l
+
+
+let%test_unit "trivial alias graph" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $a = "moo";
+        $b = $a;
+        $c = $a;
+        return $b;
+    }
+    |} in
+    let Declaration_list [fn] =
+        Lexing.from_string source |>
+        Parser.program Lexer.token
+    in
+    let namespace = Namespace.create () in
+    let aliases = get_alias_graph namespace fn in
+    let l = Hashtbl.to_seq aliases |> List.of_seq in
+    let open Base in
+    [%test_eq: (string * string) list] [("b", "a"); ("c", "a")] l
+
+(* $a = moo; return $a . "foo"; *)

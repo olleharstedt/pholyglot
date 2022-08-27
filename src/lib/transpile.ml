@@ -7,7 +7,6 @@ let rec typ_to_pholyglot t = match t with
     | Ast.String_literal -> Pholyglot_ast.String_literal
     | Ast.Fixed_array (t, n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
     | Ast.Void -> Pholyglot_ast.Void
-    | Ast.Var_args -> Pholyglot_ast.Var_args
     | Ast.Function_type (t, ts) -> Pholyglot_ast.Function_type (typ_to_pholyglot t, List.map typ_to_pholyglot ts)
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Ast.Infer_me -> failwith "Infer before transpiling"

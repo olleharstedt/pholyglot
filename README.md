@@ -134,3 +134,12 @@ function foo(int $a, string $b): array {
     return [$a, $b];  // Tuple with size 2
 }
 ```
+
+Possible to enforce stack alloc for class? So can't combine with heap alloc classes.
+
+```php
+/** @pholyglot stack-only */
+class Point
+{
+}
+```

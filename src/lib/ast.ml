@@ -8,21 +8,23 @@ type program =
     | Declaration_list of declaration list
 [@@deriving show, compare, sexp]
 
-(** TODO: Differ between value type and reference type? Always pass by reference except primitive types (int, string) *)
+(* TODO: Differ between value type and reference type? Always pass by reference except primitive types (int, string) *)
+(* TODO: Add alloc type? Heap vs stack vs pool/region *)
 and typ =
     | Int
+    (*| GChar Static glib string*)
+    (*| GString Glib string buffer *)
     | String
     | String_literal            (* For library code *)
     | Struct_typ of struct_name
-    | Mixed
+    (*| Mixed*)
     | Fixed_array of typ * int
-    | Dynamic_array of typ
-    | Tuple of typ              (* Example: Fixed_array (Tuple Int) *)
-    | Linked_list
-    | Hash_table
+    (*| Dynamic_array of typ*)
+    (*| Tuple of typ              (* Example: Fixed_array (Tuple Int) *) *)
+    (*| Linked_list*)
+    (*| Hash_table*)
     | Infer_me
     | Function_type of typ * typ list
-    | Var_args                  (* Used by printf etc *)
     | Void
 
 and param =
@@ -76,10 +78,3 @@ and expression =
     | Struct_access of expression * expression
     | Function_call of ...
     *)
-
-let string_of_typ (t : typ) : string = match t with
-    | Int -> "Int"
-    | String -> "String"
-    | Struct_typ _  -> "Struct_typ"
-    | Infer_me -> "Infer_me"
-    | Mixed -> "Mixed"

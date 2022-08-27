@@ -32,5 +32,5 @@ let add_assignments t func = match func with
  * Return namespace to do a pipe
  *)
 let populate t : t=
-    add t "printf" (Function_type (Void, [String_literal; Var_args]));
+    add t "printf" (Function_type (Void, [String_literal]));
     t
