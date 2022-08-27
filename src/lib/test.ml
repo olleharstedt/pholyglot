@@ -308,6 +308,12 @@ let%test_unit "double printf" =
     |} in
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf |> Infer.run in
+    (*
+    let phast = Transpile.run ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: string] pholyglot_code ""
+    *)
+
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Function_call (
@@ -315,7 +321,7 @@ let%test_unit "double printf" =
                 "printf",
                 [
                     Coerce (String_literal, String "\"%s %d\"");
-                    String "\"Hello\"";
+                    Coerce (String_literal, String "\"Hello\"");
                     Num 1
                 ]
             );

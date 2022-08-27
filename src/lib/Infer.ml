@@ -64,23 +64,16 @@ let infer_printf (s : string) : Ast.typ list =
 let infer_stmt (s : statement) (namespace : Namespace.t) : statement = match s with
     | Assignment (Infer_me, id, expr) -> Assignment (typ_of_expression expr, id, expr)
     (* printf is hard-coded *)
-    | Function_call (Infer_me, "printf", exprs) ->
-        begin match exprs with
-        | String s :: xs -> 
-            let expected_types = infer_printf s in
-            (*
-            let head = List.hd exprs in
-            let tail = List.tl exprs in
-            (* Head of exprs is always a format string to printf *)
-            let exprs = head :: List.map2 (fun e t -> match e, t with
-                | String s, String_literal -> Coerce (String_literal, e)
-                | e, t -> failwith (show_expression e)
-            ) tail expected_types
-            in
-            *)
-            let exprs = Coerce (String_literal, String s) :: xs in
-            Function_call (Function_type (Void, String_literal :: expected_types), "printf", exprs)
-        end
+    (* Head of expressions is always a format string to printf *)
+    | Function_call (Infer_me, "printf", String s :: xs) ->
+        let expected_types = infer_printf s in
+        let exprs : expression list = Coerce (String_literal, String s) :: List.map2 (fun e t -> match e, t with
+            | String s, String_literal -> Coerce (String_literal, e)
+            | e, t -> e
+        ) xs expected_types in
+        Function_call (Function_type (Void, String_literal :: expected_types), "printf", exprs)
+    | Function_call (Infer_me, "printf", _ :: xs) ->
+        failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, exprs) ->
         begin match Namespace.find namespace id with
         | Some fun_type -> Function_call (fun_type, id, exprs)
