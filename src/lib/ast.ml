@@ -58,14 +58,14 @@ and struct_init = (struct_field * expression) list
 
 and expression =
     | Num of int
-    (** TODO: Actually string literal *)
+    (** TODO: GString *)
     | String of string
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression
     | Div of expression * expression
     | Concat of expression * expression
-    | New of typ * expression list
+    (*| New of typ * expression list*)
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression

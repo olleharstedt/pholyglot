@@ -273,10 +273,10 @@ function main()
 // <?php ob_end_clean(); main();|}
 
 let%test_unit "trivial escape" =
+    (* TODO: Int is allowed to escape since it's copied *)
     let ast = Ast.Declaration_list [
         Function ("main", [], [
             Assignment (Infer_me, "a", Num 0);
-            Assignment (Infer_me, "a", Num 1);
             Return (Variable "a")
         ], Int)
     ] in
@@ -354,3 +354,5 @@ let%test_unit "double printf" =
 (* class Foo { private $moo; } *)
 (* class Foo { private $moo; public function hey() {} } *)
 (* class Foo extends Bar; *)
+(* Class name must start with capital letter *)
+(* Escape analysis of returning linked list *)

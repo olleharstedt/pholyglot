@@ -101,8 +101,8 @@ expr:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"                    {Function_call (Infer_me, n, args_list)}
   | "$" n=NAME "[" e=expr "]"                                               {Array_access (n, e)}
   | "$" n=NAME                                                              {Variable n}
-  | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}
-  | "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}
+  (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}*)
+  (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"                           {Array_init array_init}
 
 (* let p = new Point {1, 2}; *)
