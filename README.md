@@ -9,6 +9,9 @@
 
     -w #include <dlfcn.h> void callbyname(const char *name, const char *arg) { ((int (*)(const char *)) dlsym(RTLD_DEFAULT, name))(arg); } callbyname("puts", "YOLO");
 
+    olle: for your c target, probably easiest to say: int *temp = &a->b; *temp = 1
+    iow the code generator treats lvalues uniformly as pointers
+
 ## Notes
 
     #define \u0024 $
