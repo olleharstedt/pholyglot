@@ -92,7 +92,8 @@ typ:
   | s=NAME                  {failwith ("Unknown type: " ^ s)}
 
 lvalue:
-  | id=NAME     {Identifier id}
+  | id=NAME                 {Identifier id}
+  | n=NAME "->" v=lvalue    {Object_access (n, v)}
 
 expr:
   | i=INT                                                                   {Num i}

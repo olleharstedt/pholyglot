@@ -75,21 +75,3 @@ and initial_linebegin = parse
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | whitespace_char_no_newline    { initial_linebegin lexbuf }
   | ""                            { token lexbuf }
-
-  (*
-and read_string buf = parse
-    | '"'       { STRING_LITERAL (Buffer.contents buf) }
-    | '\\' '/'  { Buffer.add_char buf '/'; read_string buf lexbuf }
-    | '\\' '\\' { Buffer.add_char buf '\\'; read_string buf lexbuf }
-    | '\\' 'b'  { Buffer.add_char buf '\b'; read_string buf lexbuf }
-    | '\\' 'f'  { Buffer.add_char buf '\012'; read_string buf lexbuf }
-    | '\\' 'n'  { Buffer.add_char buf '\n'; read_string buf lexbuf }
-    | '\\' 'r'  { Buffer.add_char buf '\r'; read_string buf lexbuf }
-    | '\\' 't'  { Buffer.add_char buf '\t'; read_string buf lexbuf }
-    | [^ '"' '\\']+
-        { Buffer.add_string buf (Lexing.lexeme lexbuf);
-        read_string buf lexbuf
-    }
-    | _ { raise (Error ("Illegal string character: " ^ Lexing.lexeme lexbuf)) }
-    | eof { raise (Error ("String is not terminated")) }
-    *)

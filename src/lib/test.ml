@@ -383,9 +383,7 @@ let%test_unit "object access" =
     }
     function main(): int {
         $p = new Point();
-        $p->x = 10;
-        $p->y= 10;
-        printf("%d %d", $p->x, $p->y);
+        $p->x = 1;
         return 0;
     }
     |} in
@@ -398,6 +396,7 @@ let%test_unit "object access" =
         ]);
         Function ("main", [], [
             Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Object_access ("p", Identifier "x"), (Num 1));
             Return (Num 0)
         ], Int)
     ])
