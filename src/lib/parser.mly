@@ -19,6 +19,7 @@
 %token <int> INT
 %token <string> NAME
 %token <string> STRING_LITERAL
+%token <string> CLASS_NAME
 %token CONSTANT
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
@@ -74,11 +75,11 @@ program:
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
     | "function" f=NAME "(" ")" ":" t=typ "{" s=list(statement) "}" {Function (f, [], s, t)}
-    | "class" s=NAME "{" f=list(class_property) "}" {Class (s, f)}
+    | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, f)}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
-  | "$" v=NAME "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
+  | "$" n=NAME "=" e=expr ";"                                {Assignment (Infer_me, n, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 class_property: "public" t=typ "$" s=NAME ";"  {(s, t)}
@@ -100,7 +101,7 @@ expr:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"                    {Function_call (Infer_me, n, args_list)}
   | "$" n=NAME "[" e=expr "]"                                               {Array_access (n, e)}
   | "$" n=NAME                                                              {Variable n}
-  | "new" t=typ "(" ")"                                                     {New (Class_name t, [])}
+  | "new" s=CLASS_NAME "(" ")"                                              {New (Class_type s, [])}
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}*)
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"                           {Array_init array_init}

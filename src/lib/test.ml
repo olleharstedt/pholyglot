@@ -359,9 +359,6 @@ let%test_unit "class new and access" =
     }
     function main(): int {
         $p = new Point();
-        $p->x = 10;
-        $p->y = 20;
-        printf("%d %d, $p->x, $p->y);
         return 0;
     }
     |} in
@@ -373,7 +370,7 @@ let%test_unit "class new and access" =
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, "a", (New (Class_type "Point", [])));
+            Assignment (Infer_me, "p", (New (Class_type "Point", [])));
             Return (Num 0)
         ], Int)
     ])

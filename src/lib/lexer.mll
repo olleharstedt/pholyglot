@@ -22,9 +22,12 @@ exception Error of string
 (** Copied from Jacques-Henri Jourdan, Inria Paris *)
 let digit = ['0'-'9']
 let nondigit = ['_' 'a'-'z' 'A'-'Z']
+let uppercase = ['A'-'Z']
+let lowercase = ['a'-'z']
 let nonzero_digit = ['1'-'9']
 let decimal_constant = nonzero_digit digit*
-let identifier = nondigit (nondigit|digit)*
+let identifier = lowercase (nondigit|digit)*
+let class_name = uppercase (nondigit|digit)*
 let whitespace_char_no_newline = [' ' '\t' '\012' '\r']
 let integer_constant = decimal_constant
 
@@ -61,8 +64,8 @@ rule token = parse
   | "int"                         { INT_TYPE }
   | "string"                      { STRING_TYPE }
   | "$"                           { DOLLAR }
-  (*| '"'                           { read_string (Buffer.create 17) lexbuf }*)
   | ['"'] [^ '"']+ ['"'] as s     { STRING_LITERAL s }
+  | class_name as n               { CLASS_NAME n}
   | identifier as id              { NAME id }
   | eof                           { EOF }
   | _ { raise (Error (Printf.sprintf "At offset %d: unexpected character.\n" (Lexing.lexeme_start lexbuf))) }

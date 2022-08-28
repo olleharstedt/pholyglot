@@ -67,7 +67,7 @@ and expression =
     | Times of expression * expression
     | Div of expression * expression
     | Concat of expression * expression
-    | New of class_name * expression list
+    | New of typ * expression list
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
