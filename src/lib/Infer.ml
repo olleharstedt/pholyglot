@@ -100,7 +100,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement = match s with
         end
     | s -> s
 
-let infer_declaration : (declaration -> declaration) = function
+let infer_declaration decl ns : declaration = match decl with
     (*
     | Function of function_name * param list * statement list * typ
     | Struct of struct_name * struct_field list
@@ -111,5 +111,5 @@ let infer_declaration : (declaration -> declaration) = function
         Function (name, params, List.map inf stmts, typ)
     | d -> d
 
-let run : (program -> program) = function
-    | Declaration_list decls -> Declaration_list (List.map infer_declaration decls)
+let run (ns : Namespace.t) (p : program): program = match p with
+    | Declaration_list decls -> Declaration_list (List.map (fun d -> infer_declaration d ns) decls)

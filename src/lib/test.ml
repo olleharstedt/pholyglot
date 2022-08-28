@@ -87,7 +87,7 @@ let%test_unit "trivial arith transpile" =
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ] in
-    let ast = Infer.run ast in
+    let ast = Infer.run (Namespace.create ()) ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
@@ -154,7 +154,7 @@ let%test "trivial concat type error" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     try 
-        ignore (Infer.run ast);
+        ignore (Infer.run (Namespace.create ()) ast);
         false
     with
          | Infer.Type_error _ -> true
@@ -185,7 +185,8 @@ let%test_unit "trivial array infer" =
     }
     |} in
     let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf |> Infer.run in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
@@ -195,13 +196,14 @@ let%test_unit "trivial array infer" =
     ])
 
 let%test_unit "trivial array infer and print" =
+    let ns = Namespace.create () in
     let ast = Ast.Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
-    ] |> Infer.run in
+    ] |> Infer.run ns in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
@@ -247,7 +249,8 @@ let%test_unit "transpile concat" =
     |} in
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
-    let ast = Infer.run ast in
+    let ns = Namespace.create () in
+    let ast = Infer.run ns ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
@@ -307,7 +310,8 @@ let%test_unit "double printf" =
     }
     |} in
     let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf |> Infer.run in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     (*
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
@@ -430,6 +434,7 @@ let%test_unit "object object access in expression" =
     ])
 
 let%test_unit "infer object access" =
+    let ns = Namespace.create () in
     let ast : Ast.program = Declaration_list [
         Class ("Point", [
             ("x", Int);
@@ -441,7 +446,7 @@ let%test_unit "infer object access" =
             Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
             Return (Num 0)
         ], Int)
-    ] |> Infer.run in
+    ] |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class ("Point", [
             ("x", Int);
