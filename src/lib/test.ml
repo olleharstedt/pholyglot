@@ -65,6 +65,8 @@ let%test_unit "trivial transpile" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define $ 
+#define class struct
 #define __PHP__ 0
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
@@ -94,6 +96,8 @@ let%test_unit "trivial arith transpile" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define $ 
+#define class struct
 #define __PHP__ 0
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
@@ -210,6 +214,8 @@ let%test_unit "trivial array infer and print" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define $ 
+#define class struct
 #define __PHP__ 0
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
@@ -257,6 +263,8 @@ let%test_unit "transpile concat" =
 #include <stdio.h>
 #include <glib.h>
 #define function 
+#define $ 
+#define class struct
 #define __PHP__ 0
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }

@@ -15,8 +15,10 @@ void ob_end_clean() {}
 // <?php
 class PluginBase
 {
-#define public char*
+#if __PHP__
     public $name;
+#endif
+    #__C__ char* name;
 
     #__C__ char* (*getName) (struct PluginBase*);
     #__C__ void (*setName) (struct PluginBase*, char*);

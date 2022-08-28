@@ -91,6 +91,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
+    | Class_type n -> n
     | Infer_me -> failwith "Cannot convert Infer_me to a C type"
 
 (** Type notation that goes AFTER the variable name, as in array init *)
@@ -104,6 +105,8 @@ let string_of_param (p: param) : string = match p with
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
+    | Object_access (id, Property_access prop_name) -> id
+    | Property_access n -> n
 
 let rec string_of_expression = function
     | Num i -> Int.to_string i
@@ -118,6 +121,10 @@ let rec string_of_expression = function
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
     | Function_call _ -> failwith "string_of_expression: Not implemented: Function_call"
+    | New (t, exprs) -> 
+        let t_text = show_typ t in
+        sprintf {|
+|}
     | Array_init exprs -> sprintf {|
 #__C__ {
 #if __PHP__
@@ -133,6 +140,9 @@ let rec string_of_expression = function
     | Array_access (id, expr) ->
         (* TODO: It's assumed that expr has type Int here *)
         sprintf {|$%s[%s]|} id (string_of_expression expr)
+    | Object_access (id, Property_access prop_name) -> id
+    | Property_access n -> n
+    | e -> failwith ("string_of_expression: " ^ show_expression e)
 
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
@@ -157,6 +167,13 @@ let string_of_statement = function
     (string_of_typ_post typ)
     (string_of_expression expr)
 
+let string_of_prop (p : class_property) : string = match p with
+    | (n, t) -> sprintf {|#define public %s
+    public %s;
+|}
+    (string_of_typ t)
+    n
+
 let string_of_declare (d : declaration) : string = match d with
     | Function (name, params, stmts, typ) ->
         sprintf {|#__C__ %s
@@ -168,6 +185,14 @@ function %s(%s)
         name
         (concat ~sep:", " (List.map params ~f:string_of_param))
         (concat (List.map stmts ~f:string_of_statement))
+    | Class (name,  props) ->
+        sprintf {|
+class %s {
+    %s
+}
+|}
+        name
+        (concat (List.map ~f:string_of_prop props))
 
 let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
