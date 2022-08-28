@@ -57,7 +57,7 @@
 
 %type <declaration> declaration
 %type <statement> statement
-%type <struct_field> struct_field
+%type <class_property> class_property
 %type <typ> typ
 %type <expression> expr
 
@@ -74,14 +74,14 @@ program:
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
     | "function" f=NAME "(" ")" ":" t=typ "{" s=list(statement) "}" {Function (f, [], s, t)}
-    | "class" s=NAME "{" f=list(struct_field) "}" {Struct (s, f)}
+    | "class" s=NAME "{" f=list(class_property) "}" {Class (s, f)}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
   | "$" v=NAME "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
-struct_field: "public" t=typ "$" s=NAME ";"  {(s, t)}
+class_property: "public" t=typ "$" s=NAME ";"  {(s, t)}
 
 typ:
   | t=INT_TYPE              {Int : Ast.typ}
@@ -100,6 +100,7 @@ expr:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"                    {Function_call (Infer_me, n, args_list)}
   | "$" n=NAME "[" e=expr "]"                                               {Array_access (n, e)}
   | "$" n=NAME                                                              {Variable n}
+  | "new" t=typ "(" ")"                                                     {New (Class_name t, [])}
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"             {New (t, struct_init)}*)
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}" "in" r=NAME {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"                           {Array_init array_init}

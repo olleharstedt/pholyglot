@@ -342,7 +342,7 @@ let%test_unit "trivial class declare" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Struct ("Point", [
+        Class ("Point", [
             ("x", Int);
             ("y", Int)
         ]);
@@ -350,6 +350,34 @@ let%test_unit "trivial class declare" =
             Return (Num 0)
         ], Int)
     ])
+
+let%test_unit "class new and access" =
+    let source = {|<?php // @pholyglot
+    class Point {
+        public int $x;
+        public int $y;
+    }
+    function main(): int {
+        $p = new Point();
+        $p->x = 10;
+        $p->y = 20;
+        printf("%d %d, $p->x, $p->y);
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Assignment (Infer_me, "a", (New (Class_type "Point", [])));
+            Return (Num 0)
+        ], Int)
+    ])
+
 
 
 (* TODO: *)

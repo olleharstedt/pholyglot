@@ -16,7 +16,7 @@ and typ =
     (*| GString Glib string buffer *)
     | String
     | String_literal            (* For library code *)
-    | Struct_typ of struct_name
+    | Class_type of class_name
     (*| Mixed*)
     | Fixed_array of typ * int
     (*| Dynamic_array of typ*)
@@ -33,21 +33,21 @@ and param =
 (** Top-level constructs *)
 and declaration =
     | Function of function_name * param list * statement list * typ
-    | Struct of struct_name * struct_field list
+    | Class of class_name * class_property list
 
 and function_name = string
-and struct_name = string
-and struct_field_name = string
-and struct_field = struct_field_name * typ
+and class_name = string
+and class_property_name = string
+and class_property = class_property_name * typ
 and identifier = string
 and region_name = string
 and index = int
 
 and statement =
     (* Struct_alloc is an internal statement used by C pass *)
-    | Struct_alloc of typ * identifier * struct_init
+    (*| Struct_alloc of typ * identifier * struct_init*)
     (* Internal statement used by region pass *)
-    | Struct_pool_alloc of region_name * typ * identifier * struct_init
+    (*| Struct_pool_alloc of region_name * typ * identifier * struct_init*)
     (* let a = ...; *)
     | Assignment of typ * identifier * expression
     (* return ...; *)
@@ -56,7 +56,7 @@ and statement =
     (* If-statement, or only if-expression *)
     (* While-loop *)
 
-and struct_init = (struct_field * expression) list
+and class_init = (class_property * expression) list
 
 and expression =
     | Num of int
@@ -67,14 +67,10 @@ and expression =
     | Times of expression * expression
     | Div of expression * expression
     | Concat of expression * expression
-    (*| New of typ * expression list*)
+    | New of class_name * expression list
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
+    (* | Object_access of expression * expression *)
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
-
-    (*
-    | Struct_access of expression * expression
-    | Function_call of ...
-    *)
