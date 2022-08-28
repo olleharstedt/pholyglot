@@ -329,7 +329,7 @@ let%test_unit "double printf" =
         ], Int)
     ])
 
-let%test_unit "trivial class" =
+let%test_unit "trivial class declare" =
     let source = {|<?php // @pholyglot
     class Point {
         public int $x;

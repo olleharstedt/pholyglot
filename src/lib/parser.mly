@@ -81,7 +81,7 @@ statement:
   | "$" v=NAME "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
-struct_field: "public" t=typ s=NAME ";"  {(s, t)}
+struct_field: "public" t=typ "$" s=NAME ";"  {(s, t)}
 
 typ:
   | t=INT_TYPE              {Int : Ast.typ}
