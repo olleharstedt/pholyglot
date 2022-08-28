@@ -42,17 +42,13 @@
 %token LBRACK "["
 %token RBRACK "]"
 %token DOLLAR "$"
-%token TILDE "~"
-%token AT "@"
+%token INT_TYPE "int"
+%token STRING_TYPE "string"
 %token RETURN "return"
 %token NEW "new"
-%token LET "let"
-%token LOCAL "local"
-%token REGION "region"
-%token WITH "with"
-%token STRUCT "struct"
 %token FUNCTION "function"
-%token IN "in"
+%token CLASS "class"
+%token PUBLIC "public"
 
 %left DOT
 %left PLUS MINUS        /* lowest precedence */
@@ -78,17 +74,20 @@ program:
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
     | "function" f=NAME "(" ")" ":" t=typ "{" s=list(statement) "}" {Function (f, [], s, t)}
-    | "struct" s=NAME "=" "{" f=list(struct_field) "}" {Struct (s, f)}
+    | "class" s=NAME "{" f=list(struct_field) "}" {Struct (s, f)}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
   | "$" v=NAME "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
-struct_field: t=typ s=NAME ";"  {(s, t)}
+struct_field: "public" t=typ s=NAME ";"  {(s, t)}
 
 typ:
-  | n=NAME                   {Int}
+  | t=INT_TYPE              {Int : Ast.typ}
+  | "string"                {String : Ast.typ}
+  (* TODO: User-defined type, class must start with upper-case letter *)
+  | s=NAME                  {failwith ("Unknown type: " ^ s)}
 
 expr:
   | i=INT                                                                   {Num i}

@@ -329,6 +329,29 @@ let%test_unit "double printf" =
         ], Int)
     ])
 
+let%test_unit "trivial class" =
+    let source = {|<?php // @pholyglot
+    class Point {
+        public int $x;
+        public int $y;
+    }
+    function main(): int {
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Struct ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Return (Num 0)
+        ], Int)
+    ])
+
+
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)

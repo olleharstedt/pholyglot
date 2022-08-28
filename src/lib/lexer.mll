@@ -56,6 +56,10 @@ rule token = parse
   | "return"                      { RETURN }
   | "new"                         { NEW }
   | "function"                    { FUNCTION }
+  | "class"                       { CLASS }
+  | "public"                      { PUBLIC }
+  | "int"                         { INT_TYPE }
+  | "string"                      { STRING_TYPE }
   | "$"                           { DOLLAR }
   (*| '"'                           { read_string (Buffer.create 17) lexbuf }*)
   | ['"'] [^ '"']+ ['"'] as s     { STRING_LITERAL s }
