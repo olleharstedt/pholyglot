@@ -105,7 +105,7 @@ let string_of_param (p: param) : string = match p with
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
-    | Object_access (id, Property_access prop_name) -> id
+    | Object_access (id, Property_access prop_name) -> sprintf {|%s->%s|} id prop_name
     | Property_access n -> n
 
 let rec string_of_expression = function
@@ -121,10 +121,10 @@ let rec string_of_expression = function
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
     | Function_call _ -> failwith "string_of_expression: Not implemented: Function_call"
-    | New (t, exprs) -> 
-        let t_text = show_typ t in
-        sprintf {|
-|}
+    | New (Class_type ct, exprs) -> 
+        (*let t_text = show_typ t in*)
+        sprintf {|new_%s()|}
+        ct
     | Array_init exprs -> sprintf {|
 #__C__ {
 #if __PHP__
@@ -140,7 +140,7 @@ let rec string_of_expression = function
     | Array_access (id, expr) ->
         (* TODO: It's assumed that expr has type Int here *)
         sprintf {|$%s[%s]|} id (string_of_expression expr)
-    | Object_access (id, Property_access prop_name) -> id
+    | Object_access (id, Property_access prop_name) -> sprintf {|$%s->%s|} id prop_name
     | Property_access n -> n
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 
