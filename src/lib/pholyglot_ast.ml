@@ -36,6 +36,8 @@ and function_name = string
 and identifier = string
 and include_lib = string
 and php_stubs = string
+and class_property_name = string
+and class_property = class_property_name * typ
 
 and statement =
     | Return of expression
@@ -43,7 +45,8 @@ and statement =
     | Function_call of typ * identifier * expression list
 
 and lvalue =
-    | Identifier of identifier
+    | Variable of identifier
+    | Property_access of class_property_name
     | Object_access of identifier * lvalue
 
 and expression =
@@ -94,7 +97,7 @@ let string_of_param (p: param) : string = match p with
     | Param (id, t) -> string_of_typ t ^ " " ^ id
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
-    | Identifier id -> id
+    | Variable id -> id
 
 let rec string_of_expression = function
     | Num i -> Int.to_string i

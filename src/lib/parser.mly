@@ -80,7 +80,7 @@ declaration:
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
-  | "$" n=lvalue "=" e=expr ";"                                {Assignment (Infer_me, n, e)}
+  | v=lvalue "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 class_property: "public" t=typ "$" s=NAME ";"  {(s, t)}
@@ -92,13 +92,13 @@ typ:
   | s=NAME                  {failwith ("Unknown type: " ^ s)}
 
 lvalue:
-  | id=NAME                 {Identifier id}
-  | n=NAME "->" v=lvalue    {Object_access (n, v)}
+  | "$" n=NAME                  {Variable n}
+  | id=NAME                     {Property_access id}
+  | "$" n=NAME "->" v=lvalue    {Object_access (n, v)}
 
 expr:
   | i=INT                                                        {Num i}
   | s=STRING_LITERAL                                             {String s}
-  | n=NAME                                                       {Identifier n}
   | e=expr "+" f=expr                                            {Plus (e, f)} 
   | e=expr "-" f=expr                                            {Minus (e, f)} 
   | e=expr "*" f=expr                                            {Times (e, f)} 
@@ -106,7 +106,10 @@ expr:
   | e=expr "." f=expr                                            {Concat (e, f)} 
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
   | "$" n=NAME "[" e=expr "]"                                    {Array_access (n, e)}
+
   | "$" n=NAME "->" e=expr                                       {Object_access (n, e)}
+  | n=NAME                                                       {Property_access n}
+
   | "$" n=NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)

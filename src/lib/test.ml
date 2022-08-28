@@ -31,7 +31,7 @@ let%test_unit "trivial assignment" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "a", Num 0);
+            Assignment (Infer_me, Variable "a", Num 0);
             Return (Variable "a")
         ], Int)
     ])
@@ -47,7 +47,7 @@ let%test_unit "trivial arith" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "a", Num 0);
+            Assignment (Infer_me, Variable "a", Num 0);
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ])
@@ -83,7 +83,7 @@ function main()
 let%test_unit "trivial arith transpile" =
     let ast  = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "a", Num 0);
+            Assignment (Infer_me, Variable "a", Num 0);
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ] in
@@ -123,7 +123,7 @@ let%test_unit "trivial string" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "str", String "\"Hello\"");
+            Assignment (Infer_me, Variable "str", String "\"Hello\"");
             Return (Num 0)
         ], Int)
     ])
@@ -139,7 +139,7 @@ let%test_unit "trivial concat" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "str", Concat (String "\"Hello\"", String "\"world\""));
+            Assignment (Infer_me, Variable "str", Concat (String "\"Hello\"", String "\"world\""));
             Return (Num 0)
         ], Int)
     ])
@@ -171,7 +171,7 @@ let%test_unit "trivial array" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Return (Num 0)
         ], Int)
     ])
@@ -188,7 +188,7 @@ let%test_unit "trivial array infer" =
     let ast = Parser.program Lexer.token linebuf |> Infer.run in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array (Int, 3), Identifier "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -197,7 +197,7 @@ let%test_unit "trivial array infer" =
 let%test_unit "trivial array infer and print" =
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array (Int, 3), Identifier "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -276,7 +276,7 @@ let%test_unit "trivial escape" =
     (* TODO: Int is allowed to escape since it's copied *)
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "a", Num 0);
+            Assignment (Infer_me, Variable "a", Num 0);
             Return (Variable "a")
         ], Int)
     ] in
@@ -370,7 +370,7 @@ let%test_unit "class new" =
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
             Return (Num 0)
         ], Int)
     ])
@@ -395,8 +395,8 @@ let%test_unit "object lvalue assignment" =
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
-            Assignment (Infer_me, Object_access ("p", Identifier "x"), (Num 1));
+            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
             Return (Num 0)
         ], Int)
     ])
@@ -422,14 +422,38 @@ let%test_unit "object object access in expression" =
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
-            Assignment (Infer_me, Object_access ("p", Identifier "x"), (Num 1));
-            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Identifier "x")]);
+            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
+            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
             Return (Num 0)
         ], Int)
     ])
 
-
+let%test_unit "infer object access" =
+    let ast : Ast.program = Declaration_list [
+        Class ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
+            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
+            Return (Num 0)
+        ], Int)
+    ] |> Infer.run in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
+            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
+            Return (Num 0)
+        ], Int)
+    ])
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
@@ -450,7 +474,7 @@ let%test_unit "object object access in expression" =
 (* Nullable types *)
 (* instanceof to refine types, requires runtime type info *)
 (* $a = 0;  return $a; // $a escapes *)
-(* Lambda, or anonym function inside function scope $fn = fn (x) => "moo"; *)
+(* Lambda, or anonym function inside function scope $fn = fn (x) => "moo"; $fn(123); *)
 (* printf("%s %d %i") etc, format processing *)
 (* class Foo { public $moo; } *)
 (* class Foo { private $moo; } *)

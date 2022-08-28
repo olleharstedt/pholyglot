@@ -44,14 +44,14 @@ let get_basic_escapes_data (namespace : Namespace.t) (f : declaration) : escapes
         (* TODO: Return (New typ, exprs) *)
         | [] -> ()
         | Return (Variable id) :: ss -> begin
-            begin match Namespace.find namespace id with
+            begin match Namespace.find_identifier namespace id with
             | Some typ -> if  not (allowed_to_escape typ) then Hashtbl.add ed id Escapes
             | None -> failwith (sprintf "get_basic_escapes_data: Did not find the typ of variable %s in namespace" id)
             end;
             iter_stmts ss
         end
         | Return expr :: ss -> begin
-            let t = Infer.typ_of_expression expr in
+            let t = Infer.typ_of_expression namespace expr in
             if allowed_to_escape t then
                 iter_stmts ss
             else
@@ -73,7 +73,7 @@ let get_alias_graph (namespace : Namespace.t) (fun_decl : declaration) : alias_g
     let rec iter_stmts : (statement list -> unit) = function
         | [] -> ()
         (* TODO: All lvalues *)
-        | Assignment (typ, Identifier id, Variable id2 ) :: tail ->
+        | Assignment (typ, Variable id, Variable id2 ) :: tail ->
             Hashtbl.add aliases id id2;
             iter_stmts tail
         | Assignment (typ, id, expr) :: tail ->

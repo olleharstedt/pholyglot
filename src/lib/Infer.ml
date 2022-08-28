@@ -5,7 +5,20 @@ open Ast
 
 exception Type_error of string
 
-let rec typ_of_expression : (expression -> typ) = function
+let rec typ_of_lvalue ns lv : typ = match lv with
+    | Variable id -> 
+        begin match Namespace.find_identifier ns id with
+        | Some typ -> typ
+        | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find function type %s in namespace" id))
+        end
+    | Object_access (id, lvalue) ->
+        let obj_type = match Namespace.find_identifier ns id with
+        | Some typ -> ()
+        | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
+        in
+        Infer_me
+
+let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = match expr with
     | Num _ -> Int
     | String s -> String
     | Plus (e, f)
@@ -13,7 +26,7 @@ let rec typ_of_expression : (expression -> typ) = function
     | Times (e, f)
     | Div (e, f) -> 
         let check e = 
-            match typ_of_expression e with 
+            match typ_of_expression ns e with 
             | Int -> () 
             | _ -> raise (Type_error "typ_of_expression: Found non-int in arith")
         in
@@ -22,7 +35,7 @@ let rec typ_of_expression : (expression -> typ) = function
         Int
     | Concat (e, f) -> 
         let check e = 
-            match typ_of_expression e with 
+            match typ_of_expression ns e with 
             | String -> () 
             | _ -> raise (Type_error "typ_of_expression: Found non-string in concat")
         in
@@ -32,12 +45,18 @@ let rec typ_of_expression : (expression -> typ) = function
     | Array_init (exprs) ->
         if List.length exprs = 0 then raise (Type_error "array_init cannot be empty list");
         let first_elem = List.nth exprs 0 in
-        if List.for_all (fun x -> typ_of_expression x = typ_of_expression first_elem) exprs then
+        if List.for_all (fun x -> typ_of_expression ns x = typ_of_expression ns first_elem) exprs then
             (* TODO: Should be able to update this to Dynamic_array *)
-            Fixed_array (typ_of_expression first_elem, List.length exprs)
+            Fixed_array (typ_of_expression ns first_elem, List.length exprs)
         else
             (* TODO: Tuple here *)
             raise (Type_error "not all element in array_init have the same type")
+    | New (t, exprs) -> t
+    | Object_access (obj_id, Property_access prop_id) -> begin match Namespace.find_identifier ns obj_id with
+        | Some obj_type -> obj_type
+        | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" obj_id))
+    end
+    | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 let infer_expression : (expression -> typ) = function
     (* TODO: Namespace *)
@@ -61,8 +80,8 @@ let infer_printf (s : string) : Ast.typ list =
 (**
  * Infer types inside Ast.statement
  *)
-let infer_stmt (s : statement) (namespace : Namespace.t) : statement = match s with
-    | Assignment (Infer_me, id, expr) -> Assignment (typ_of_expression expr, id, expr)
+let infer_stmt (s : statement) (ns : Namespace.t) : statement = match s with
+    | Assignment (Infer_me, id, expr) -> Assignment (typ_of_expression ns expr, id, expr)
     (* printf is hard-coded *)
     (* Head of expressions is always a format string to printf *)
     | Function_call (Infer_me, "printf", String s :: xs) ->
@@ -75,9 +94,9 @@ let infer_stmt (s : statement) (namespace : Namespace.t) : statement = match s w
     | Function_call (Infer_me, "printf", _ :: xs) ->
         failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, exprs) ->
-        begin match Namespace.find namespace id with
+        begin match Namespace.find_identifier ns id with
         | Some fun_type -> Function_call (fun_type, id, exprs)
-        | None -> raise (Type_error (sprintf "Could not find function type %s in namespace" id))
+        | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
     | s -> s
 

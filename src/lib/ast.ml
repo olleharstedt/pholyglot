@@ -61,7 +61,9 @@ and class_init = (class_property * expression) list
 
 (* What's allowed on left side of assignment *)
 and lvalue =
-    | Identifier of identifier
+    (* TODO: Should be able to build Object_access id, Variable *)
+    | Variable of identifier
+    | Property_access of class_property_name
     | Object_access of identifier * lvalue
 
 and expression =
@@ -78,6 +80,6 @@ and expression =
     | Array_init of expression list
     | Array_access of identifier * expression
     | Object_access of identifier * expression
-    | Identifier of identifier (* Valid sub-expression of object access *)
+    | Property_access of identifier (* Valid sub-expression of object access *)
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
