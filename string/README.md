@@ -8,3 +8,7 @@ function main(): int {
     return 0;
 }
 ```
+
+strcat: https://www.programiz.com/c-programming/library-function/string.h/strcat
+
+    char *strcat(char *destination, const char *source)
