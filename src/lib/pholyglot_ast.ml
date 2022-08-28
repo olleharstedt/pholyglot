@@ -24,6 +24,7 @@ and typ =
     | Var_args
     | Fixed_array of typ * int
     | Function_type of typ * typ list
+    | Class_type of class_name
     | Infer_me
 
 and param =
@@ -31,8 +32,10 @@ and param =
 
 and declaration =
     | Function of function_name * param list * statement list * typ
+    | Class of class_name * class_property list
 
 and function_name = string
+and class_name = string
 and identifier = string
 and include_lib = string
 and php_stubs = string
@@ -60,6 +63,9 @@ and expression =
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
+    | Object_access of identifier * expression
+    | New of typ * expression list
+    | Property_access of identifier (* Valid sub-expression of object access *)
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
 

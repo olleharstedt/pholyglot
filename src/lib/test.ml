@@ -460,6 +460,24 @@ let%test_unit "infer object access" =
         ], Int)
     ])
 
+let%test_unit "output object access" =
+    let code = Declaration_list [
+        Class ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
+            Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
+            Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]);
+            Return (Num 0)
+        ], Int)
+    ]
+         |> Transpile.run
+         |> Pholyglot_ast.string_of_program
+    in
+    [%test_eq: string] code ""
+
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)

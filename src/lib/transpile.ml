@@ -10,10 +10,16 @@ let rec typ_to_pholyglot t = match t with
     | Ast.Function_type (t, ts) -> Pholyglot_ast.Function_type (typ_to_pholyglot t, List.map typ_to_pholyglot ts)
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Ast.Infer_me -> failwith "Infer before transpiling"
+    | Ast.Class_type n -> Pholyglot_ast.Class_type n
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | Param (id, typ) -> Pholyglot_ast.Param (id, typ_to_pholyglot typ)
+
+let rec lvalue_to_pholyglot lvalue = match lvalue with
+    | Ast.Variable identifier -> Pholyglot_ast.Variable identifier
+    | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
+    | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
 
 let rec expression_to_pholyglot exp = match exp with
     | Ast.String s -> Pholyglot_ast.String s
@@ -28,14 +34,22 @@ let rec expression_to_pholyglot exp = match exp with
     | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
     | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
+    | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
+    | Ast.New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
+    | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
 
-let lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l with
+let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l with
     | Ast.Variable id -> Pholyglot_ast.Variable id
+    | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
+    | Ast.Object_access (identifier,  lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
 
 let statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
+
+let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with
+    | (name, t) -> (name, typ_to_pholyglot t)
 
 let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration = match d with
     | Function (name, params, statements, typ) ->
@@ -45,7 +59,7 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
             List.map statement_to_pholyglot statements,
             typ_to_pholyglot typ
         )
-    | _ -> failwith "declaration_to_pholyglot"
+    | Class (name,  props) -> Pholyglot_ast.Class (name, List.map prop_to_pholyglot props)
 
 (** Transpile from Pholly AST to Pholyglot AST *)
 let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
