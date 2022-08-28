@@ -56,6 +56,7 @@ rule token = parse
   | ')'                           { RPAREN }
   | ','                           { COMMA }
   | '.'                           { DOT }
+  | "->"                          { ARROW }
   | "return"                      { RETURN }
   | "new"                         { NEW }
   | "function"                    { FUNCTION }

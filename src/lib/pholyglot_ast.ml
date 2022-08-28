@@ -39,8 +39,12 @@ and php_stubs = string
 
 and statement =
     | Return of expression
-    | Assignment of typ * identifier * expression
+    | Assignment of typ * lvalue * expression
     | Function_call of typ * identifier * expression list
+
+and lvalue =
+    | Identifier of identifier
+    | Object_access of identifier * lvalue
 
 and expression =
     | Num of int
@@ -89,6 +93,9 @@ let string_of_typ_post = function
 let string_of_param (p: param) : string = match p with
     | Param (id, t) -> string_of_typ t ^ " " ^ id
 
+let rec string_of_lvalue (l : lvalue) : string = match l with
+    | Identifier id -> id
+
 let rec string_of_expression = function
     | Num i -> Int.to_string i
 	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
@@ -132,12 +139,12 @@ let string_of_statement = function
             id
             (string_of_typ fun_type)
         )
-    | Assignment (typ, id, expr) -> sprintf {|#__C__ %s
+    | Assignment (typ, lvalue, expr) -> sprintf {|#__C__ %s
     $%s %s
     = %s;
     |}
     (string_of_typ typ)
-    id
+    (string_of_lvalue lvalue)
     (string_of_typ_post typ)
     (string_of_expression expr)
 

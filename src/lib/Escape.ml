@@ -72,7 +72,8 @@ let get_alias_graph (namespace : Namespace.t) (fun_decl : declaration) : alias_g
     let aliases : alias_graph = Hashtbl.create 10 in
     let rec iter_stmts : (statement list -> unit) = function
         | [] -> ()
-        | Assignment (typ, id, Variable id2 ) :: tail ->
+        (* TODO: All lvalues *)
+        | Assignment (typ, Identifier id, Variable id2 ) :: tail ->
             Hashtbl.add aliases id id2;
             iter_stmts tail
         | Assignment (typ, id, expr) :: tail ->

@@ -31,7 +31,7 @@ let%test_unit "trivial assignment" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "a", Num 0);
+            Assignment (Infer_me, Identifier "a", Num 0);
             Return (Variable "a")
         ], Int)
     ])
@@ -47,7 +47,7 @@ let%test_unit "trivial arith" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "a", Num 0);
+            Assignment (Infer_me, Identifier "a", Num 0);
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ])
@@ -83,7 +83,7 @@ function main()
 let%test_unit "trivial arith transpile" =
     let ast  = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "a", Num 0);
+            Assignment (Infer_me, Identifier "a", Num 0);
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
         ], Int)
     ] in
@@ -123,7 +123,7 @@ let%test_unit "trivial string" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "str", String "\"Hello\"");
+            Assignment (Infer_me, Identifier "str", String "\"Hello\"");
             Return (Num 0)
         ], Int)
     ])
@@ -139,7 +139,7 @@ let%test_unit "trivial concat" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "str", Concat (String "\"Hello\"", String "\"world\""));
+            Assignment (Infer_me, Identifier "str", Concat (String "\"Hello\"", String "\"world\""));
             Return (Num 0)
         ], Int)
     ])
@@ -171,7 +171,7 @@ let%test_unit "trivial array" =
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Infer_me, Identifier "arr", Array_init ([Num 1; Num 2; Num 3]));
             Return (Num 0)
         ], Int)
     ])
@@ -188,7 +188,7 @@ let%test_unit "trivial array infer" =
     let ast = Parser.program Lexer.token linebuf |> Infer.run in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array (Int, 3), "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, 3), Identifier "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -197,7 +197,7 @@ let%test_unit "trivial array infer" =
 let%test_unit "trivial array infer and print" =
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array (Int, 3), "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, 3), Identifier "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Int)
@@ -276,7 +276,7 @@ let%test_unit "trivial escape" =
     (* TODO: Int is allowed to escape since it's copied *)
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Infer_me, "a", Num 0);
+            Assignment (Infer_me, Identifier "a", Num 0);
             Return (Variable "a")
         ], Int)
     ] in
@@ -351,7 +351,7 @@ let%test_unit "trivial class declare" =
         ], Int)
     ])
 
-let%test_unit "class new and access" =
+let%test_unit "class new" =
     let source = {|<?php // @pholyglot
     class Point {
         public int $x;
@@ -370,7 +370,34 @@ let%test_unit "class new and access" =
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
+            Return (Num 0)
+        ], Int)
+    ])
+
+let%test_unit "object access" =
+    let source = {|<?php // @pholyglot
+    class Point {
+        public int $x;
+        public int $y;
+    }
+    function main(): int {
+        $p = new Point();
+        $p->x = 10;
+        $p->y= 10;
+        printf("%d %d", $p->x, $p->y);
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
             Return (Num 0)
         ], Int)
     ])

@@ -29,9 +29,12 @@ let rec expression_to_pholyglot exp = match exp with
     | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
 
+let lvalue_to_pholyglot l = match l with
+    | Ast.Identifier id -> Pholyglot_ast.Identifier id
+
 let statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
-    | Ast.Assignment (typ, id, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, id, expression_to_pholyglot expr)
+    | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
 
 let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration = match d with

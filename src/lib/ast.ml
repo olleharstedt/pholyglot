@@ -49,7 +49,8 @@ and statement =
     (* Internal statement used by region pass *)
     (*| Struct_pool_alloc of region_name * typ * identifier * struct_init*)
     (* let a = ...; *)
-    | Assignment of typ * identifier * expression
+    (* TODO: $a->b->c = ... *)
+    | Assignment of typ * lvalue * expression
     (* return ...; *)
     | Return of expression
     | Function_call of typ * identifier * expression list
@@ -57,6 +58,11 @@ and statement =
     (* While-loop *)
 
 and class_init = (class_property * expression) list
+
+(* What's allowed on left side of assignment *)
+and lvalue =
+    | Identifier of identifier
+    | Object_access of identifier * lvalue
 
 and expression =
     | Num of int

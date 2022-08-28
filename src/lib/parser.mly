@@ -42,6 +42,7 @@
 %token RBRACE "}"
 %token LBRACK "["
 %token RBRACK "]"
+%token ARROW "->"
 %token DOLLAR "$"
 %token INT_TYPE "int"
 %token STRING_TYPE "string"
@@ -79,7 +80,7 @@ declaration:
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
-  | "$" n=NAME "=" e=expr ";"                                {Assignment (Infer_me, n, e)}
+  | "$" n=lvalue "=" e=expr ";"                                {Assignment (Infer_me, n, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 class_property: "public" t=typ "$" s=NAME ";"  {(s, t)}
@@ -89,6 +90,9 @@ typ:
   | "string"                {String : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                  {failwith ("Unknown type: " ^ s)}
+
+lvalue:
+  | id=NAME     {Identifier id}
 
 expr:
   | i=INT                                                                   {Num i}

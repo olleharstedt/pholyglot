@@ -22,7 +22,7 @@ let add_assignments t func = match func with
     | Function (name, params, stmts, typ) ->
         List.iter (fun (Param (id, v)) -> add t id v) params;
         let iter_stmt = function
-            | Assignment (typ, identifier, expression) -> add t identifier typ
+            | Assignment (typ, Identifier id, expression) -> add t id typ
             | _ -> () (* TODO: Assignments inside if-statements etc *)
         in
         List.iter iter_stmt stmts
