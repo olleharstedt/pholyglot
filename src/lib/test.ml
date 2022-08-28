@@ -375,7 +375,7 @@ let%test_unit "class new" =
         ], Int)
     ])
 
-let%test_unit "object access" =
+let%test_unit "object lvalue assignment" =
     let source = {|<?php // @pholyglot
     class Point {
         public int $x;
@@ -397,6 +397,34 @@ let%test_unit "object access" =
         Function ("main", [], [
             Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
             Assignment (Infer_me, Object_access ("p", Identifier "x"), (Num 1));
+            Return (Num 0)
+        ], Int)
+    ])
+
+let%test_unit "object object access in expression" =
+    let source = {|<?php // @pholyglot
+    class Point {
+        public int $x;
+        public int $y;
+    }
+    function main(): int {
+        $p = new Point();
+        $p->x = 1;
+        printf("%d", $p->x);
+        return 0;
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class ("Point", [
+            ("x", Int);
+            ("y", Int)
+        ]);
+        Function ("main", [], [
+            Assignment (Infer_me, Identifier "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Object_access ("p", Identifier "x"), (Num 1));
+            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Identifier "x")]);
             Return (Num 0)
         ], Int)
     ])

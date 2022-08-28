@@ -29,7 +29,7 @@ let rec expression_to_pholyglot exp = match exp with
     | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
 
-let lvalue_to_pholyglot l = match l with
+let lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l with
     | Ast.Identifier id -> Pholyglot_ast.Identifier id
 
 let statement_to_pholyglot s = match s with
