@@ -11,12 +11,19 @@ let rec typ_of_lvalue ns lv : typ = match lv with
         | Some typ -> typ
         | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find function type %s in namespace" id))
         end
-    | Object_access (id, lvalue) ->
-        let obj_type = match Namespace.find_identifier ns id with
-        | Some typ -> ()
-        | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
+    (* TODO: Access chain like $a->b->c *)
+    | Object_access (id, Property_access prop_name) ->
+        let class_type_name = match Namespace.find_identifier ns id with
+            | Some (Class_type c) -> c
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
         in
-        Infer_me
+        let props = match Namespace.find_class ns class_type_name with
+            | Some p -> p
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Found no class declarion %s in namespace" class_type_name))
+        in
+        match List.find_opt (fun (name, t) -> prop_name = name) props with
+            | Some (n, t) -> t
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find propert with name %s in class %s" prop_name id))
 
 let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = match expr with
     | Num _ -> Int
@@ -52,9 +59,18 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = match e
             (* TODO: Tuple here *)
             raise (Type_error "not all element in array_init have the same type")
     | New (t, exprs) -> t
-    | Object_access (obj_id, Property_access prop_id) -> begin match Namespace.find_identifier ns obj_id with
-        | Some obj_type -> obj_type
-        | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" obj_id))
+    | Object_access (id, Property_access prop_name) -> begin
+        let class_type_name = match Namespace.find_identifier ns id with
+            | Some (Class_type c) -> c
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
+        in
+        let props = match Namespace.find_class ns class_type_name with
+            | Some p -> p
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Found no class declarion %s in namespace" class_type_name))
+        in
+        match List.find_opt (fun (name, t) -> prop_name = name) props with
+            | Some (n, t) -> t
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find propert with name %s in class %s" prop_name id))
     end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
@@ -81,7 +97,9 @@ let infer_printf (s : string) : Ast.typ list =
  * Infer types inside Ast.statement
  *)
 let infer_stmt (s : statement) (ns : Namespace.t) : statement = match s with
-    | Assignment (Infer_me, id, expr) -> Assignment (typ_of_expression ns expr, id, expr)
+    | Assignment (Infer_me, id, expr) ->
+        let t = typ_of_expression ns expr in
+        Assignment (typ_of_expression ns expr, id, expr)
     (* printf is hard-coded *)
     (* Head of expressions is always a format string to printf *)
     | Function_call (Infer_me, "printf", String s :: xs) ->
@@ -106,10 +124,12 @@ let infer_declaration decl ns : declaration = match decl with
     | Struct of struct_name * struct_field list
     *)
     | Function (name, params, stmts, typ) ->
-        let namespace = Namespace.create () |> Namespace.populate in
-        let inf = fun s -> infer_stmt s namespace in
+        let ns = Namespace.reset_identifiers ns in
+        let inf = fun s -> infer_stmt s ns in
         Function (name, params, List.map inf stmts, typ)
-    | d -> d
+    | Class (name,  props) as c -> 
+        Namespace.add_class_type ns c;
+        c
 
 let run (ns : Namespace.t) (p : program): program = match p with
     | Declaration_list decls -> Declaration_list (List.map (fun d -> infer_declaration d ns) decls)

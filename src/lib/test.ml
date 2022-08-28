@@ -454,8 +454,8 @@ let%test_unit "infer object access" =
         ]);
         Function ("main", [], [
             Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
-            Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
-            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
+            Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
+            Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]);
             Return (Num 0)
         ], Int)
     ])
