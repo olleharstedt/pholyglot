@@ -4,3 +4,4 @@ module Lexer = Lexer
 module Parser = Parser
 module Transpile = Transpile
 module Infer = Infer
+module Namespace = Namespace

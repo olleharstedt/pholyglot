@@ -8,8 +8,6 @@ exception Internal_error of string
 let string_of_token (token : Parser.token) : string =
     let open Parser in
     match token with
-        | WITH -> "WITH"
-        | STRUCT -> "STRUCT"
         | STRING_LITERAL s -> "STRING_LITERAL " ^ s
         | SEMICOLON -> "SEMICOLON"
         | RPAREN -> "RPAREN"
@@ -22,7 +20,6 @@ let string_of_token (token : Parser.token) : string =
         | MINUS -> "MINUS"
         | LT -> "LT"
         | LPAREN -> "LPAREN"
-        | LET -> "LET"
         | LBRACK -> "LBRACK"
         | LBRACE -> "LBRACE"
         | INT i -> "INT" ^ string_of_int i
@@ -83,6 +80,7 @@ let _ =
           print_endline msg;
           raise (Internal_error (sprintf "line = %d; col = %d" linebuf.lex_curr_p.pos_lnum linebuf.lex_curr_p.pos_cnum))
     in
-    let ast = Pholyglot.Infer.run ast in
+    let ns = Namespace.create () in
+    let ast = Pholyglot.Infer.run ns ast in
     let phast = Pholyglot.Transpile.run ast in
     print_endline (Pholyglot.Pholyglot_ast.string_of_program phast)

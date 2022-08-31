@@ -169,7 +169,7 @@ let string_of_statement = function
 
 let string_of_prop (p : class_property) : string = match p with
     | (n, t) -> sprintf {|#define public %s
-    public %s;
+    public $%s;
 |}
     (string_of_typ t)
     n

@@ -5,7 +5,7 @@ exception Parser_error of string
 exception Lexer_error of string
 exception Internal_error of string
 let _ =
-    (** TODO: Read from file *)
+    (* TODO: Read from file *)
     let source = {|<?php // @pholyglot
     function main(): int {
         $str = "Hello" . " world" . "!";
@@ -28,6 +28,7 @@ let _ =
           print_endline msg;
           raise (Internal_error (sprintf "line = %d; col = %d" linebuf.lex_curr_p.pos_lnum linebuf.lex_curr_p.pos_cnum))
     in
-    let ast = Pholyglot.Infer.run ast in
+    let ns = Namespace.create () in
+    let ast = Pholyglot.Infer.run ns ast in
     let phast = Pholyglot.Transpile.run ast in
     print_endline (Pholyglot.Pholyglot_ast.string_of_program phast)

@@ -69,7 +69,7 @@
 %%
 
 program:
-    | s=START_SCRIPT d=list(declaration); EOF {Declaration_list d}
+    | START_SCRIPT d=list(declaration); EOF {Declaration_list d}
 
 (*NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE*)
 (*int main() { return 0; }*)
@@ -83,17 +83,18 @@ statement:
   | v=lvalue "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
-class_property: "public" t=typ "$" s=NAME ";"  {(s, t)}
+class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
+
 
 typ:
-  | t=INT_TYPE              {Int : Ast.typ}
+  | INT_TYPE              {Int : Ast.typ}
   | "string"                {String : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                  {failwith ("Unknown type: " ^ s)}
 
 lvalue:
   | "$" n=NAME                  {Variable n}
-  | id=NAME                     {Property_access id}
+  | id=NAME                     {Property_access ("__object_property_" ^ id)}
   | "$" n=NAME "->" v=lvalue    {Object_access (n, v)}
 
 expr:
@@ -108,7 +109,7 @@ expr:
   | "$" n=NAME "[" e=expr "]"                                    {Array_access (n, e)}
 
   | "$" n=NAME "->" e=expr                                       {Object_access (n, e)}
-  | n=NAME                                                       {Property_access n}
+  | n=NAME                                                       {Property_access ("__object_property_" ^ n)}
 
   | "$" n=NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
