@@ -91,7 +91,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
-    | Class_type n -> n
+    | Class_type n -> sprintf "struct %s*" n
     | Infer_me -> failwith "Cannot convert Infer_me to a C type"
 
 (** Type notation that goes AFTER the variable name, as in array init *)
@@ -158,20 +158,31 @@ let string_of_statement = function
             id
             (string_of_typ fun_type)
         )
-    | Assignment (typ, lvalue, expr) -> sprintf {|#__C__ %s
+    | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
     $%s %s
     = %s;
     |}
     (string_of_typ typ)
+    v
+    (string_of_typ_post typ)
+    (string_of_expression expr)
+    | Assignment (typ, lvalue, expr) -> sprintf {|$%s %s
+    = %s;
+    |}
     (string_of_lvalue lvalue)
     (string_of_typ_post typ)
     (string_of_expression expr)
 
+
 let string_of_prop (p : class_property) : string = match p with
     | (n, t) -> sprintf {|#define public %s
+#define %s $%s
     public $%s;
+#undef public
 |}
     (string_of_typ t)
+    n
+    n
     n
 
 let string_of_declare (d : declaration) : string = match d with
@@ -189,7 +200,7 @@ function %s(%s)
         sprintf {|
 class %s {
     %s
-}
+};
 |}
         name
         (concat (List.map ~f:string_of_prop props))

@@ -85,7 +85,6 @@ statement:
 
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
 
-
 typ:
   | INT_TYPE              {Int : Ast.typ}
   | "string"                {String : Ast.typ}
