@@ -121,9 +121,10 @@ let rec string_of_expression = function
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
     | Function_call _ -> failwith "string_of_expression: Not implemented: Function_call"
+    (* TODO: Alloc type *)
     | New (Class_type ct, exprs) -> 
         (*let t_text = show_typ t in*)
-        sprintf {|new_%s()|}
+        sprintf {|new_(%s)|}
         ct
     | Array_init exprs -> sprintf {|
 #__C__ {
@@ -201,9 +202,14 @@ function %s(%s)
 class %s {
     %s
 };
+#if __PHP__
+define("%s", "%s");  // Needed to make new_() work with C macro
+#endif
 |}
         name
         (concat (List.map ~f:string_of_prop props))
+        name
+        name
 
 let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
