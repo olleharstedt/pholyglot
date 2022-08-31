@@ -6,11 +6,22 @@ exception Lexer_error of string
 exception Internal_error of string
 let _ =
     (* TODO: Read from file *)
+    (*
     let source = {|<?php // @pholyglot
     function main(): int {
         $str = "Hello" . " world" . "!";
         return 0;
     } |} in
+    *)
+
+	let read_whole_file filename =
+		let ch = open_in filename in
+		let s = really_input_string ch (in_channel_length ch) in
+		close_in ch;
+		s
+    in
+
+    let source = read_whole_file (Sys.argv.(1)) in
 
     (* NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE *)
     let linebuf = Lexing.from_string source in
