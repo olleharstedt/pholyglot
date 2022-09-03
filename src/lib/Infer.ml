@@ -84,7 +84,6 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         in
         Int
     end
-
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 let infer_expression expr = 
@@ -159,6 +158,7 @@ let infer_declaration decl ns : declaration =
     *)
     | Function (name, params, stmts, typ) ->
         let ns = Namespace.reset_identifiers ns in
+        Namespace.add_params ns params;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         let _ = List.map (fun s -> check_return_type ns s typ) new_stmts in

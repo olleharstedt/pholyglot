@@ -87,9 +87,9 @@ function main()
 
 let%test_unit "trivial arith transpile" =
     Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/debug.txt *)
     Log.set_output (open_out "debug.txt");
     Log.debug "trivial arith transpile";
-    Log.set_prefix " DAFT";
     let ast  = Ast.Declaration_list [
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
@@ -313,6 +313,11 @@ let%test_unit "trivial escape" =
 let%test_unit "two functions" =
     let source = {|<?php // @pholyglot
 function foo(int $c): int {
+    return $c + 20;
+}
+function main(): int {
+    $b = foo(10 + 20);
+    return $b + 30;
 }
 |} in
     let linebuf = Lexing.from_string source in

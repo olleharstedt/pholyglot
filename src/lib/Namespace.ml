@@ -5,6 +5,7 @@ type t = {
     (* Variables and functions go in identifiers bucket *)
     identifiers : (string, typ) Hashtbl.t;
     classes : (string, class_property list) Hashtbl.t;
+    functions: (string, typ) Hashtbl.t;
 }
 
 exception Namespace_error of string
@@ -20,6 +21,12 @@ let add_identifier t key value : unit =
         raise (Namespace_error (sprintf "add_identifier: Key '%s' already exists in identifiers namespace" key))
     else
         Hashtbl.add t.identifiers key value
+
+let add_param t param : unit = 
+    match param with
+    | Param (id, typ) -> add_identifier t id typ
+
+let add_params t params : unit = List.iter (fun p -> add_param t p) params
 
 let add_class_type t (c : Ast.declaration) = match c with
     | Class (name,  props) ->
