@@ -75,7 +75,7 @@ program:
 (*int main() { return 0; }*)
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
-    | "function" f=NAME "(" ")" ":" t=typ "{" s=list(statement) "}" {Function (f, [], s, t)}
+    | "function" f=NAME "(" args=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" s=list(statement) "}" {Function (f, args, s, t)}
     | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, f)}
 
 statement: 
@@ -84,6 +84,9 @@ statement:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
+
+arg_decl:
+  | t=typ "$" n=NAME          {Param (n, t)}
 
 typ:
   | INT_TYPE              {Int : Ast.typ}

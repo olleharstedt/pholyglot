@@ -85,6 +85,10 @@ function main()
 // <?php ob_end_clean(); main();|}
 
 let%test_unit "trivial arith transpile" =
+    Logs.set_level (Some Logs.Debug);
+    Log.set_output (open_out "debug.txt");
+    Log.debug (fun m -> m "trivial arith transpile");
+    Log.set_prefix " DAFT";
     let ast  = Ast.Declaration_list [
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
@@ -94,6 +98,9 @@ let%test_unit "trivial arith transpile" =
     let ast = Infer.run (Namespace.create ()) ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
+    Log.debug "should not be visible";
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
@@ -302,6 +309,16 @@ let%test_unit "trivial escape" =
     let escape_status = Escape.run ast in
     ()
 
+let%test_unit "two functions" =
+    let source = {|<?php // @pholyglot
+function foo(int $c): int {
+}
+|} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    ()
+
 let%test_unit "infer_printf 1" =
     let t = Infer.infer_printf "%d" in
     [%test_eq: Ast.typ list] t [Ast.Int]
@@ -328,12 +345,6 @@ let%test_unit "double printf" =
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    (*
-    let phast = Transpile.run ast in
-    let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code ""
-    *)
-
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Function_call (
@@ -549,6 +560,8 @@ function main()
 (* $b = [1, "Moo"];  Tuple *)
 (* return [1, 2, 3]; *)
 (* Array value semantics - must use '&'? *)
+(* When type-infer array, refine it as much as possible: Start conservative with C array, the degrade when needed during inference *)
+(*   Degrade order: C array, dynamic array (glib), linked list?, tuple OR hash table with string keys, or exception *)
 (* $arr["moo"] = 4 Hash table *)
 (* foreach ([1, 2, 3] as $i) *)
 (* function foo(mixed $a): array *)

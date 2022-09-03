@@ -5,7 +5,9 @@ open Ast
 
 exception Type_error of string
 
-let rec typ_of_lvalue ns lv : typ = match lv with
+let rec typ_of_lvalue ns lv : typ = 
+    Logs.app (fun m -> m "typ_of_lvalue");
+    match lv with
     | Variable id -> 
         begin match Namespace.find_identifier ns id with
         | Some typ -> typ
@@ -25,7 +27,9 @@ let rec typ_of_lvalue ns lv : typ = match lv with
             | Some (n, t) -> t
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find propert with name %s in class %s" prop_name id))
 
-let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = match expr with
+let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = 
+    Logs.debug (fun m -> m "typ_of_expression");
+    match expr with
     | Num _ -> Int
     | String s -> String
     | Plus (e, f)
@@ -62,24 +66,35 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = match e
     | Object_access (id, Property_access prop_name) -> begin
         let class_type_name = match Namespace.find_identifier ns id with
             | Some (Class_type c) -> c
-            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
+            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" id))
         in
         let props = match Namespace.find_class ns class_type_name with
             | Some p -> p
-            | None -> raise (Type_error (sprintf "typ_of_lvalue: Found no class declarion %s in namespace" class_type_name))
+            | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
         in
         match List.find_opt (fun (name, t) -> prop_name = name) props with
             | Some (n, t) -> t
-            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find propert with name %s in class %s" prop_name id))
+            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
     end
+    | Variable id -> begin
+        let var_typ_name = match Namespace.find_identifier ns id with 
+            | Some p -> p
+            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find variable with name %s" id))
+        in
+        Int
+    end
+
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
-let infer_expression : (expression -> typ) = function
+let infer_expression expr = 
+    Logs.debug (fun m -> m "infer_expression");
+    match expr with
     (* TODO: Namespace *)
     | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
 
 (** Parse format string from printf etc *)
 let infer_printf (s : string) : Ast.typ list =
+    Logs.debug (fun m -> m "infer_printf");
     let s = Str.global_replace (Str.regexp "%%") "" s in
     let regexp = Str.regexp "%[sd]" in
     let rec get_all_matches i = match Str.search_forward regexp s i with
@@ -96,7 +111,14 @@ let infer_printf (s : string) : Ast.typ list =
 (**
  * Infer types inside Ast.statement
  *)
-let infer_stmt (s : statement) (ns : Namespace.t) : statement = match s with
+let infer_stmt (s : statement) (ns : Namespace.t) : statement = 
+    Logs.debug (fun m -> m "infer_stmt");
+    match s with
+    | Assignment (Infer_me, Variable id, expr) ->
+            print_endline id;
+        let t = typ_of_expression ns expr in
+        Namespace.add_identifier ns id t;
+        Assignment (typ_of_expression ns expr, Variable id, expr)
     | Assignment (Infer_me, id, expr) ->
         let t = typ_of_expression ns expr in
         Assignment (typ_of_expression ns expr, id, expr)
@@ -118,7 +140,17 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement = match s with
         end
     | s -> s
 
-let infer_declaration decl ns : declaration = match decl with
+(** Check if return type is correct, in relation to declared function type *)
+let check_return_type ns stmt typ = 
+    Logs.debug (fun m -> m "check_return_type");
+    match stmt with
+    | Return exp -> if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith "mo"
+    | _ -> ()
+    (* TODO: If, foreach, etc *)
+
+let infer_declaration decl ns : declaration = 
+    Logs.debug (fun m -> m "infer_declaration");
+    match decl with
     (*
     | Function of function_name * param list * statement list * typ
     | Struct of struct_name * struct_field list
@@ -126,10 +158,13 @@ let infer_declaration decl ns : declaration = match decl with
     | Function (name, params, stmts, typ) ->
         let ns = Namespace.reset_identifiers ns in
         let inf = fun s -> infer_stmt s ns in
+        let _ = List.map (fun s -> check_return_type ns s typ) stmts in
         Function (name, params, List.map inf stmts, typ)
     | Class (name,  props) as c -> 
         Namespace.add_class_type ns c;
         c
 
-let run (ns : Namespace.t) (p : program): program = match p with
+let run (ns : Namespace.t) (p : program): program = 
+    Logs.debug (fun m -> m "Infer.run");
+    match p with
     | Declaration_list decls -> Declaration_list (List.map (fun d -> infer_declaration d ns) decls)
