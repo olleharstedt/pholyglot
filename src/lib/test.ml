@@ -64,7 +64,6 @@ let%test_unit "trivial transpile" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define function 
 #define $ 
 #define class struct
 #define __PHP__ 0
@@ -76,11 +75,12 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function new_($class) { return new $class; }
 #endif//?>
 //<?php
-#__C__ int
+#define function int
 function main()
 {
     return 0;
 }
+#undef function
 // ?>
 // <?php ob_end_clean(); main();|}
 
@@ -97,7 +97,6 @@ let%test_unit "trivial arith transpile" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define function 
 #define $ 
 #define class struct
 #define __PHP__ 0
@@ -109,7 +108,7 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function new_($class) { return new $class; }
 #endif//?>
 //<?php
-#__C__ int
+#define function int
 function main()
 {
     #__C__ int
@@ -117,6 +116,7 @@ function main()
     = 0;
     return $a + 1 - 1 * 1 / 1;
 }
+#undef function
 // ?>
 // <?php ob_end_clean(); main();|}
 
@@ -217,7 +217,6 @@ let%test_unit "trivial array infer and print" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define function 
 #define $ 
 #define class struct
 #define __PHP__ 0
@@ -229,7 +228,7 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function new_($class) { return new $class; }
 #endif//?>
 //<?php
-#__C__ int
+#define function int
 function main()
 {
     #__C__ int
@@ -249,6 +248,7 @@ function main()
      printf("%d", $arr[0]);
     return 0;
 }
+#undef function
 // ?>
 // <?php ob_end_clean(); main();|}
 
@@ -268,7 +268,6 @@ let%test_unit "transpile concat" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define function 
 #define $ 
 #define class struct
 #define __PHP__ 0
@@ -280,7 +279,7 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 function new_($class) { return new $class; }
 #endif//?>
 //<?php
-#__C__ int
+#define function int
 function main()
 {
     #__C__ GString*
@@ -288,6 +287,7 @@ function main()
     = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
 }
+#undef function
 // ?>
 // <?php ob_end_clean(); main();|}
 
@@ -502,7 +502,6 @@ let%test_unit "output object access" =
     [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define function 
 #define $ 
 #define class struct
 #define __PHP__ 0
@@ -529,7 +528,7 @@ class Point {
 #if __PHP__
 define("Point", "Point");  // Needed to make new_() work with C macro
 #endif
-#__C__ int
+#define function int
 function main()
 {
     #__C__ struct Point*
@@ -540,6 +539,7 @@ function main()
      printf("%d", $p->__object_property_x);
     return 0;
 }
+#undef function
 // ?>
 // <?php ob_end_clean(); main();|}
 

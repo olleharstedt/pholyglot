@@ -188,10 +188,11 @@ let string_of_prop (p : class_property) : string = match p with
 
 let string_of_declare (d : declaration) : string = match d with
     | Function (name, params, stmts, typ) ->
-        sprintf {|#__C__ %s
+        sprintf {|#define function %s
 function %s(%s)
 {
     %s}
+#undef function
 |}
         (string_of_typ typ)
         name

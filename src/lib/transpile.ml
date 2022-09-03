@@ -75,7 +75,6 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
         ],
         (* Define list *)
         [
-            Define ("function", None);
             Define ("$", None);
             Define ("class", Some "struct");
             Define ("__PHP__", Some "0");
