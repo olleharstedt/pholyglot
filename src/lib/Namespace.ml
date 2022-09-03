@@ -13,6 +13,7 @@ exception Namespace_error of string
 let create () : t = {
     identifiers = Hashtbl.create 10;
     classes = Hashtbl.create 10;
+    functions = Hashtbl.create 10;
 }
 
 (** Add value to namespace with key *)
@@ -34,6 +35,14 @@ let add_class_type t (c : Ast.declaration) = match c with
             raise (Namespace_error (sprintf "add_class_type: Class name '%s' already exists in classes namespace" name))
         else
         Hashtbl.add t.classes name props
+
+let add_function_type t (fn : Ast.declaration) =
+    match fn with
+    | Function (name, params, stmts, typ) ->
+        if Hashtbl.mem t.functions name then
+            raise (Namespace_error (sprintf "add_function_type: Function name '%s' already exists in functions namespace" name))
+        else
+        Hashtbl.add t.functions name typ
 
 let find_identifier t key : typ option =
     Hashtbl.find_opt t.identifiers key
@@ -59,6 +68,6 @@ let populate (t : t) : t=
     add_identifier t "printf" (Function_type (Void, [String_literal]));
     t
 
-(* Call this before passing namespace to another function *)
+(* Call this before passing namespace to another function to resetthe local namespace while keeping classes and functions types *)
 let reset_identifiers t =
     {t with identifiers = (Hashtbl.create 10)} |> populate

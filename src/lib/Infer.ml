@@ -115,7 +115,6 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
-            print_endline id;
         let t = typ_of_expression ns expr in
         Namespace.add_identifier ns id t;
         Assignment (typ_of_expression ns expr, Variable id, expr)
@@ -156,7 +155,8 @@ let infer_declaration decl ns : declaration =
     | Function of function_name * param list * statement list * typ
     | Struct of struct_name * struct_field list
     *)
-    | Function (name, params, stmts, typ) ->
+    | Function (name, params, stmts, typ) as fn ->
+        Namespace.add_function_type ns fn;
         let ns = Namespace.reset_identifiers ns in
         Namespace.add_params ns params;
         let inf = fun s -> infer_stmt s ns in
