@@ -1,6 +1,11 @@
 Main folder for the Pholyglot compiler code.
 
-> Run eval $(opam env --switch=default) to update the current shell environment
+> Run `eval $(opam env --switch=default)` to update the current shell environment
 
     # pacman -S ocaml dune opam
     $ opam install ppx_deriving
+
+Debugging:
+
+    dune runtest
+    less ./_build/default/lib/debug.txt

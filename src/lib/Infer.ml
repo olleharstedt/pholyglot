@@ -143,9 +143,10 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
 
 (** Check if return type is correct, in relation to declared function type *)
 let check_return_type ns stmt typ = 
-    Log.debug "check_return_type";
     match stmt with
-    | Return exp -> if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith "mo"
+    | Return exp ->
+        Log.debug "%s %s" "check_return_type" (show_statement stmt);
+        if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith "mo"
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
@@ -159,8 +160,9 @@ let infer_declaration decl ns : declaration =
     | Function (name, params, stmts, typ) ->
         let ns = Namespace.reset_identifiers ns in
         let inf = fun s -> infer_stmt s ns in
-        let _ = List.map (fun s -> check_return_type ns s typ) stmts in
-        Function (name, params, List.map inf stmts, typ)
+        let new_stmts = List.map inf stmts in
+        let _ = List.map (fun s -> check_return_type ns s typ) new_stmts in
+        Function (name, params, new_stmts, typ)
     | Class (name,  props) as c -> 
         Namespace.add_class_type ns c;
         c
