@@ -2,11 +2,12 @@
 
 open Printf
 open Ast
+module Log = Dolog.Log
 
 exception Type_error of string
 
 let rec typ_of_lvalue ns lv : typ = 
-    Logs.app (fun m -> m "typ_of_lvalue");
+    Log.debug "%s %s" "typ_of_lvalue" (show_lvalue lv);
     match lv with
     | Variable id -> 
         begin match Namespace.find_identifier ns id with
@@ -28,7 +29,7 @@ let rec typ_of_lvalue ns lv : typ =
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find propert with name %s in class %s" prop_name id))
 
 let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = 
-    Logs.debug (fun m -> m "typ_of_expression");
+    Log.debug "%s %s" "typ_of_expression" (show_expression expr);
     match expr with
     | Num _ -> Int
     | String s -> String
@@ -87,14 +88,14 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 let infer_expression expr = 
-    Logs.debug (fun m -> m "infer_expression");
+    Log.debug "%s %s" "infer_expression" (show_expression expr);
     match expr with
     (* TODO: Namespace *)
     | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
 
 (** Parse format string from printf etc *)
 let infer_printf (s : string) : Ast.typ list =
-    Logs.debug (fun m -> m "infer_printf");
+    Log.debug "infer_printf";
     let s = Str.global_replace (Str.regexp "%%") "" s in
     let regexp = Str.regexp "%[sd]" in
     let rec get_all_matches i = match Str.search_forward regexp s i with
@@ -112,7 +113,7 @@ let infer_printf (s : string) : Ast.typ list =
  * Infer types inside Ast.statement
  *)
 let infer_stmt (s : statement) (ns : Namespace.t) : statement = 
-    Logs.debug (fun m -> m "infer_stmt");
+    Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
             print_endline id;
@@ -142,14 +143,14 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
 
 (** Check if return type is correct, in relation to declared function type *)
 let check_return_type ns stmt typ = 
-    Logs.debug (fun m -> m "check_return_type");
+    Log.debug "check_return_type";
     match stmt with
     | Return exp -> if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith "mo"
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
 let infer_declaration decl ns : declaration = 
-    Logs.debug (fun m -> m "infer_declaration");
+    Log.debug "%s %s" "infer_declaration" (show_declaration decl);
     match decl with
     (*
     | Function of function_name * param list * statement list * typ
@@ -165,6 +166,6 @@ let infer_declaration decl ns : declaration =
         c
 
 let run (ns : Namespace.t) (p : program): program = 
-    Logs.debug (fun m -> m "Infer.run");
+    Log.debug "Infer.run";
     match p with
     | Declaration_list decls -> Declaration_list (List.map (fun d -> infer_declaration d ns) decls)

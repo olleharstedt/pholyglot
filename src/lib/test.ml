@@ -1,4 +1,5 @@
 open Base
+module Log = Dolog.Log
 
 let%test_unit "trivial" =
     let source = "<?php // @pholyglot" in
@@ -85,9 +86,9 @@ function main()
 // <?php ob_end_clean(); main();|}
 
 let%test_unit "trivial arith transpile" =
-    Logs.set_level (Some Logs.Debug);
+    Log.set_log_level Log.DEBUG;
     Log.set_output (open_out "debug.txt");
-    Log.debug (fun m -> m "trivial arith transpile");
+    Log.debug "trivial arith transpile";
     Log.set_prefix " DAFT";
     let ast  = Ast.Declaration_list [
         Function ("main", [], [
