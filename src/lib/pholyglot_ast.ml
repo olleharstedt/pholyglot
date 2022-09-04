@@ -23,7 +23,7 @@ and typ =
     | Void
     | Var_args
     | Fixed_array of typ * int
-    | Function_type of typ * typ list
+    | Function_type of {return_type: typ; arguments: typ list}
     | Class_type of class_name
     | Infer_me
 
@@ -92,6 +92,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
     | Class_type n -> sprintf "struct %s*" n
+    | Function_type {return_type; arguments} -> string_of_typ return_type
     | Infer_me -> failwith "Cannot convert Infer_me to a C type"
 
 (** Type notation that goes AFTER the variable name, as in array init *)
@@ -147,7 +148,7 @@ let rec string_of_expression = function
 
 let string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
-    | Function_call (Function_type (Void, arg_types), id, exprs) ->
+    | Function_call (Function_type {return_type = Void; arguments}, id, exprs) ->
         sprintf {| %s(%s);
     |}
         id
