@@ -18,7 +18,7 @@ let%test_unit "trivial main" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "trivial assignment" =
@@ -34,7 +34,7 @@ let%test_unit "trivial assignment" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
             Return (Variable "a")
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "trivial arith" =
@@ -50,7 +50,7 @@ let%test_unit "trivial arith" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 (* Transpile from Pholly AST to polyglot AST *)
@@ -58,7 +58,7 @@ let%test_unit "trivial transpile" =
     let ast = Ast.Declaration_list [
         Function ("main", [], [
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ] in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
@@ -141,7 +141,7 @@ let%test_unit "trivial string" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "str", String "\"Hello\"");
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "trivial concat" =
@@ -157,7 +157,7 @@ let%test_unit "trivial concat" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "str", Concat (String "\"Hello\"", String "\"world\""));
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test "trivial concat type error" =
@@ -189,7 +189,7 @@ let%test_unit "trivial array" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "trivial array infer" =
@@ -206,9 +206,13 @@ let%test_unit "trivial array infer" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]);
+            Function_call (
+                Function_type {return_type = Void; arguments = [String_literal; Int]},
+                "printf",
+                [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]
+            );
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "trivial array infer and print" =
@@ -218,7 +222,7 @@ let%test_unit "trivial array infer and print" =
             Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ] |> Infer.run ns in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
@@ -305,7 +309,7 @@ let%test_unit "trivial escape" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
             Return (Variable "a")
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ] in
     let escape_status = Escape.run ast in
     ()
@@ -354,7 +358,7 @@ let%test_unit "double printf" =
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
             Function_call (
-                Function_type (Void, [String_literal; String_literal; Int]),
+                Function_type {return_type = Void; arguments = [String_literal; String_literal; Int]},
                 "printf",
                 [
                     Coerce (String_literal, String "\"%s %d\"");
@@ -363,7 +367,7 @@ let%test_unit "double printf" =
                 ]
             );
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "trivial class declare" =
@@ -385,7 +389,7 @@ let%test_unit "trivial class declare" =
         ]);
         Function ("main", [], [
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "class new" =
@@ -409,7 +413,7 @@ let%test_unit "class new" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "object lvalue assignment" =
@@ -435,7 +439,7 @@ let%test_unit "object lvalue assignment" =
             Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
             Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "object object access in expression" =
@@ -463,7 +467,7 @@ let%test_unit "object object access in expression" =
             Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
             Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "__object_property_x")]);
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "infer object access" =
@@ -478,7 +482,7 @@ let%test_unit "infer object access" =
             Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
             Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ] |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class ("Point", [
@@ -488,9 +492,9 @@ let%test_unit "infer object access" =
         Function ("main", [], [
             Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
             Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
-            Function_call (Function_type (Void, [String_literal; Int]), "printf", [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]);
+            Function_call (Function_type {return_type = Void; arguments = [String_literal; Int]}, "printf", [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]);
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ])
 
 let%test_unit "output object access" =
@@ -503,7 +507,7 @@ let%test_unit "output object access" =
             Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
             Assignment (Int, Object_access ("p", Property_access "__object_property_x"), (Num 1));
             Function_call (
-                Function_type (Void, [String_literal; Int]),
+                Function_type {return_type = Void; arguments = [String_literal; Int]},
                 "printf",
                 [
                     Coerce (String_literal, String "\"%d\"");
@@ -511,7 +515,7 @@ let%test_unit "output object access" =
                 ]
             );
             Return (Num 0)
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ]
          |> Transpile.run
          |> Pholyglot_ast.string_of_program

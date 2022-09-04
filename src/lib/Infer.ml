@@ -84,6 +84,12 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         in
         Int
     end
+    | Function_call (_, id, _) -> begin
+        match Namespace.find_function ns id with
+        | Some (Function_type {return_type; arguments}) -> return_type
+        | Some t -> failwith ("Not a function: " ^ show_typ t)
+        | _ -> failwith ("Found no function declared with name " ^ id)
+    end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 let infer_expression expr = 
@@ -129,7 +135,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
             | String s, String_literal -> Coerce (String_literal, e)
             | e, t -> e
         ) xs expected_types in
-        Function_call (Function_type (Void, String_literal :: expected_types), "printf", exprs)
+        Function_call (Function_type {return_type = Void; arguments = String_literal :: expected_types}, "printf", exprs)
     | Function_call (Infer_me, "printf", _ :: xs) ->
         failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, exprs) ->
@@ -144,7 +150,7 @@ let check_return_type ns stmt typ =
     match stmt with
     | Return exp ->
         Log.debug "%s %s" "check_return_type" (show_statement stmt);
-        if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith "mo"
+        if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith (show_typ typ)
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
@@ -155,14 +161,16 @@ let infer_declaration decl ns : declaration =
     | Function of function_name * param list * statement list * typ
     | Struct of struct_name * struct_field list
     *)
-    | Function (name, params, stmts, typ) as fn ->
-        Namespace.add_function_type ns fn;
+    | Function (name, params, stmts, Function_type {return_type; arguments}) ->
+        let typ = Function_type {return_type; arguments} in
+        Namespace.add_function_type ns name typ;
         let ns = Namespace.reset_identifiers ns in
         Namespace.add_params ns params;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         let _ = List.map (fun s -> check_return_type ns s typ) new_stmts in
         Function (name, params, new_stmts, typ)
+    | Function (_, _, _, typ) -> failwith ("infer_declaration " ^ show_typ typ)
     | Class (name,  props) as c -> 
         Namespace.add_class_type ns c;
         c

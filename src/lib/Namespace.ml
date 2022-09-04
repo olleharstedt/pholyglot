@@ -36,12 +36,10 @@ let add_class_type t (c : Ast.declaration) = match c with
         else
         Hashtbl.add t.classes name props
 
-let add_function_type t (fn : Ast.declaration) =
-    match fn with
-    | Function (name, params, stmts, typ) ->
-        if Hashtbl.mem t.functions name then
-            raise (Namespace_error (sprintf "add_function_type: Function name '%s' already exists in functions namespace" name))
-        else
+let add_function_type t name (typ : Ast.typ) =
+    if Hashtbl.mem t.functions name then
+        raise (Namespace_error (sprintf "add_function_type: Function name '%s' already exists in functions namespace" name))
+    else
         Hashtbl.add t.functions name typ
 
 let find_identifier t key : typ option =
@@ -49,6 +47,9 @@ let find_identifier t key : typ option =
 
 let find_class t id : class_property list option = 
     Hashtbl.find_opt t.classes id
+
+let find_function t id : typ option =
+    Hashtbl.find_opt t.functions id
 
 (** Add variable assignments info namespace *)
 let add_assignments t func = match func with
@@ -65,7 +66,7 @@ let add_assignments t func = match func with
  * Return namespace to do a pipe
  *)
 let populate (t : t) : t=
-    add_identifier t "printf" (Function_type (Void, [String_literal]));
+    add_identifier t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
     t
 
 (* Call this before passing namespace to another function to resetthe local namespace while keeping classes and functions types *)

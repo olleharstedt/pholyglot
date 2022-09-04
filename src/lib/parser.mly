@@ -75,12 +75,12 @@ program:
 (*int main() { return 0; }*)
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
-    | "function" f=NAME "(" args=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" s=list(statement) "}" {Function (f, args, s, t)}
+    | "function" f=NAME "(" args=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" s=list(statement) "}" {Function (f, args, s, Function_type {return_type = t; arguments = get_arg_types_from_args args})}
     | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, f)}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
-  | v=lvalue "=" e=expr ";"                                {Assignment (Infer_me, v, e)}
+  | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
@@ -89,10 +89,10 @@ arg_decl:
   | t=typ "$" n=NAME          {Param (n, t)}
 
 typ:
-  | INT_TYPE              {Int : Ast.typ}
-  | "string"                {String : Ast.typ}
+  | INT_TYPE                    {Int : Ast.typ}
+  | "string"                    {String : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
-  | s=NAME                  {failwith ("Unknown type: " ^ s)}
+  | s=NAME                      {failwith ("Unknown type: " ^ s)}
 
 lvalue:
   | "$" n=NAME                  {Variable n}
@@ -116,4 +116,4 @@ expr:
   | "$" n=NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
-  | "[" array_init=separated_list(COMMA, expr) "]"                {Array_init array_init}
+  | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init array_init}

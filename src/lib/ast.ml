@@ -24,7 +24,7 @@ and typ =
     (*| Linked_list*)
     (*| Hash_table*)
     | Infer_me
-    | Function_type of typ * typ list
+    | Function_type of {return_type: typ; arguments: typ list}
     | Void
 
 and param =
@@ -83,3 +83,6 @@ and expression =
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
+
+let get_arg_types_from_args args =
+    List.map ~f:(fun (Param (n, t)) -> t) args
