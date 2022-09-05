@@ -150,7 +150,7 @@ let check_return_type ns stmt typ =
     match stmt with
     | Return exp ->
         Log.debug "%s %s" "check_return_type" (show_statement stmt);
-        if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith (show_typ typ)
+        if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith ("check_return_type " ^ show_typ typ)
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
@@ -168,9 +168,9 @@ let infer_declaration decl ns : declaration =
         Namespace.add_params ns params;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
-        let _ = List.map (fun s -> check_return_type ns s typ) new_stmts in
+        let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
         Function (name, params, new_stmts, typ)
-    | Function (_, _, _, typ) -> failwith ("infer_declaration " ^ show_typ typ)
+    | Function (_, _, _, typ) -> failwith ("infer_declaration function typ " ^ show_typ typ)
     | Class (name,  props) as c -> 
         Namespace.add_class_type ns c;
         c

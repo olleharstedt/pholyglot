@@ -94,7 +94,7 @@ let%test_unit "trivial arith transpile" =
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
             Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
-        ], Int)
+        ], Function_type {return_type = Int; arguments = []})
     ] in
     let ast = Infer.run (Namespace.create ()) ast in
     let phast = Transpile.run ast in
