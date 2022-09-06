@@ -314,7 +314,7 @@ let%test_unit "trivial escape" =
     let escape_status = Escape.run ast in
     ()
 
-let%test_unit "two functions" =
+let%test_unit "two functions ast" =
     let source = {|<?php // @pholyglot
 function foo(int $c): int {
     return $c + 20;
@@ -344,6 +344,26 @@ function main(): int {
             Function_type {return_type = Int; arguments = []}
         )
     ])
+
+let%test_unit "two functions to pholyglot" =
+    let source = {|<?php // @pholyglot
+function foo(int $c): int {
+    return $c + 20;
+}
+function main(): int {
+    $b = foo(10 + 20);
+    return $b + 30;
+}
+|} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let code = Parser.program Lexer.token linebuf
+         |> Infer.run ns
+         |> Transpile.run
+         |> Pholyglot_ast.string_of_program
+    in
+    [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
+|}
 
 let%test_unit "infer_printf 1" =
     let t = Infer.infer_printf "%d" in

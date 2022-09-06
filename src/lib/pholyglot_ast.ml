@@ -102,7 +102,7 @@ let string_of_typ_post = function
     | _ -> ""
 
 let string_of_param (p: param) : string = match p with
-    | Param (id, t) -> string_of_typ t ^ " " ^ id
+    | Param (id, t) -> string_of_typ t ^ " $" ^ id
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
@@ -121,7 +121,6 @@ let rec string_of_expression = function
     | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
-    | Function_call _ -> failwith "string_of_expression: Not implemented: Function_call"
     (* TODO: Alloc type *)
     | New (Class_type ct, exprs) -> 
         (*let t_text = show_typ t in*)
@@ -144,6 +143,12 @@ let rec string_of_expression = function
         sprintf {|$%s[%s]|} id (string_of_expression expr)
     | Object_access (id, Property_access prop_name) -> sprintf {|$%s->%s|} id prop_name
     | Property_access n -> n
+    | Function_call (Function_type {return_type; arguments}, name, param_exprs) ->
+        sprintf
+        {|%s(%s)
+|}
+        name
+        (concat ~sep:", " (List.map param_exprs ~f:string_of_expression))
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 
 let string_of_statement = function
