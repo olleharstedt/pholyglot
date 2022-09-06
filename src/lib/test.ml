@@ -327,7 +327,23 @@ function main(): int {
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    ()
+    [%test_eq: Ast.program] ast (Ast.Declaration_list [
+        Function (
+            "foo",
+            [Param ("c", Int)],
+            [Return (Plus ((Variable "c"), (Num 20)))],
+            Function_type {return_type = Int; arguments = [Int]}
+        );
+        Function (
+            "main",
+            [],
+            [
+                Assignment (Int, Variable "b", Function_call (Infer_me, "foo", [Plus ((Num 10), (Num 20))]));
+                Return (Plus (Variable "b", Num 30))
+            ],
+            Function_type {return_type = Int; arguments = []}
+        )
+    ])
 
 let%test_unit "infer_printf 1" =
     let t = Infer.infer_printf "%d" in
@@ -596,3 +612,4 @@ function main()
 (* Use escape analysis to free strings that do not escape, by injecting free() before return. *)
 (* function foo(): int { return "moo"; } Invalid return type *)
 (* Different alloc types: heap, stack, pool, depending on escape status *)
+(* Only one return statement per function allowed? Must be last statement? Unless void type *)
