@@ -338,7 +338,7 @@ function main(): int {
             "main",
             [],
             [
-                Assignment (Int, Variable "b", Function_call (Infer_me, "foo", [Plus ((Num 10), (Num 20))]));
+                Assignment (Int, Variable "b", Function_call (Function_type {return_type = Int; arguments = [Int]}, "foo", [Plus ((Num 10), (Num 20))]));
                 Return (Plus (Variable "b", Num 30))
             ],
             Function_type {return_type = Int; arguments = []}

@@ -87,16 +87,24 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     | Function_call (_, id, _) -> begin
         match Namespace.find_function ns id with
         | Some (Function_type {return_type; arguments}) -> return_type
-        | Some t -> failwith ("Not a function: " ^ show_typ t)
-        | _ -> failwith ("Found no function declared with name " ^ id)
+        | Some t -> failwith ("not a function: " ^ show_typ t)
+        | _ -> failwith ("found no function declared with name " ^ id)
     end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
-let infer_expression expr = 
+let infer_expression ns expr = 
     Log.debug "%s %s" "infer_expression" (show_expression expr);
     match expr with
     (* TODO: Namespace *)
     | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
+    | Function_call (Infer_me, name, params) -> begin
+        match Namespace.find_function ns name with
+        | Some (Function_type {return_type; arguments}) -> Function_call (Function_type {return_type; arguments}, name, params)
+        | Some t -> failwith ("not a function: " ^ show_typ t)
+        | _ -> failwith ("infer_expression: found no function declared with name " ^ name)
+    end
+    | e -> e
+    (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 
 (** Parse format string from printf etc *)
 let infer_printf (s : string) : Ast.typ list =
@@ -123,7 +131,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
     | Assignment (Infer_me, Variable id, expr) ->
         let t = typ_of_expression ns expr in
         Namespace.add_identifier ns id t;
-        Assignment (typ_of_expression ns expr, Variable id, expr)
+        Assignment (typ_of_expression ns expr, Variable id, infer_expression ns expr)
     | Assignment (Infer_me, id, expr) ->
         let t = typ_of_expression ns expr in
         Assignment (typ_of_expression ns expr, id, expr)
