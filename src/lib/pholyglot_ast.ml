@@ -145,8 +145,7 @@ let rec string_of_expression = function
     | Property_access n -> n
     | Function_call (Function_type {return_type; arguments}, name, param_exprs) ->
         sprintf
-        {|%s(%s)
-|}
+        {|%s(%s)|}
         name
         (concat ~sep:", " (List.map param_exprs ~f:string_of_expression))
     | e -> failwith ("string_of_expression: " ^ show_expression e)
