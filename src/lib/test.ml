@@ -346,37 +346,25 @@ function main(): int {
     ])
 
 let%test_unit "two functions to pholyglot" =
-    let source = {|<?php // @pholyglot
-function foo(int $c): int {
-    return $c + 20;
-}
-function main(): int {
-    $b = foo(10 + 20);
-    return $b + 30;
-}
-|} in
-    let linebuf = Lexing.from_string source in
-    let ns = Namespace.create () in
-    let code = Parser.program Lexer.token linebuf
-         |> Infer.run ns
-         |> Transpile.run
-         |> Pholyglot_ast.string_of_program
+    let code = [
+        Pholyglot_ast.Function (
+            "foo",
+            [Param ("c", Int)],
+            [Return (Plus ((Variable "c"), (Num 20)))],
+            Function_type {return_type = Int; arguments = [Int]}
+        );
+        Pholyglot_ast.Function (
+            "main",
+            [],
+            [
+                Assignment (Int, Variable "b", Function_call (Function_type {return_type = Int; arguments = [Int]}, "foo", [Plus ((Num 10), (Num 20))]));
+                Return (Plus (Variable "b", Num 30))
+            ],
+            Function_type {return_type = Int; arguments = []}
+        )
+    ] |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
-#include <stdio.h>
-#include <glib.h>
-#define $ 
-#define class struct
-#define __PHP__ 0
-#define new_(x) alloca(sizeof(struct x))
-#if __PHP__//<?php
-class GString { public $str; public function __construct($str) { $this->str = $str; } }
-function g_string_new(string $str) { return new GString($str); }
-function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
-function new_($class) { return new $class; }
-#endif//?>
-//<?php
-#define function int
+    [%test_eq: string] code {|#define function int
 function foo(int $c)
 {
     return $c + 20;
@@ -391,8 +379,7 @@ function main()
     return $b + 30;
 }
 #undef function
-// ?>
-// <?php ob_end_clean(); main();|}
+|}
 
 let%test_unit "infer_printf 1" =
     let t = Infer.infer_printf "%d" in

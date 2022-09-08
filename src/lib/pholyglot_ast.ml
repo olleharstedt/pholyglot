@@ -217,6 +217,9 @@ define("%s", "%s");  // Needed to make new_() work with C macro
         name
         name
 
+(** Probably only to be used in tests *)
+let string_of_declares ds : string = concat (List.map ds ~f:string_of_declare)
+
 let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
 
