@@ -24,6 +24,8 @@ and typ =
     (*| Linked_list*)
     (*| Hash_table*)
     | Infer_me
+    (* TODO: Infer_me of string option ? *)
+    | Infer_class_name of string
     | Function_type of {return_type: typ; arguments: typ list}
     | Void
 

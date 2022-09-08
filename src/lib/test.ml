@@ -616,6 +616,24 @@ function main()
 // ?>
 // <?php ob_end_clean(); main();|}
 
+let%test_unit "string class property" =
+    let source = {|<?php // @pholyglot
+class Thing {
+    public string $name;
+}
+
+function foo(Thing $t): string {
+}
+
+function main(): int {
+    return 0;
+}
+|} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    [%test_eq: Ast.program] ast (Ast.Declaration_list [])
+
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
@@ -649,3 +667,4 @@ function main()
 (* function foo(): int { return "moo"; } Invalid return type *)
 (* Different alloc types: heap, stack, pool, depending on escape status *)
 (* Only one return statement per function allowed? Must be last statement? Unless void type *)
+(* Class with string property *)

@@ -91,6 +91,7 @@ arg_decl:
 typ:
   | INT_TYPE                    {Int : Ast.typ}
   | "string"                    {String : Ast.typ}
+  | s=CLASS_NAME                {Class_type s : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                      {failwith ("Unknown type: " ^ s)}
 
