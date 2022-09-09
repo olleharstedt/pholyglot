@@ -303,17 +303,6 @@ function main()
 // ?>
 // <?php ob_end_clean(); main();|}
 
-let%test_unit "trivial escape" =
-    (* TODO: Int is allowed to escape since it's copied *)
-    let ast = Ast.Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "a", Num 0);
-            Return (Variable "a")
-        ], Function_type {return_type = Int; arguments = []})
-    ] in
-    let escape_status = Escape.run ast in
-    ()
-
 let%test_unit "two functions ast" =
     let source = {|<?php // @pholyglot
 function foo(int $c): int {
@@ -663,7 +652,6 @@ function foo(Thing $t): string {
 (* array_map([1, 2, 3], fn (x) => x + 1); *)
 (* Nullable types *)
 (* instanceof to refine types, requires runtime type info *)
-(* $a = 0;  return $a; // $a escapes *)
 (* Lambda, or anonym function inside function scope $fn = fn (x) => "moo"; $fn(123); *)
 (* printf("%s %d %i") etc, format processing *)
 (* class Foo { public $moo; } *)
@@ -671,9 +659,7 @@ function foo(Thing $t): string {
 (* class Foo { private $moo; public function hey() {} } *)
 (* class Foo extends Bar; *)
 (* Class name must start with capital letter *)
-(* Escape analysis of returning linked list *)
-(* Use escape analysis to free strings that do not escape, by injecting free() before return. *)
 (* function foo(): int { return "moo"; } Invalid return type *)
-(* Different alloc types: heap, stack, pool, depending on escape status *)
 (* Only one return statement per function allowed? Must be last statement? Unless void type *)
-(* Class with string property *)
+(* Dynamic string on heap vs fixed string on stack *)
+(* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)

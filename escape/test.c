@@ -1,39 +1,31 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
+#include <glib.h>
 
-struct Point {
-    int $x;
-    char* $class_name;
+struct Thing {
+    GString* name;
 };
 
-// Dynamic structure - region or never free
-struct List {
-    int $x;
-    struct List* next;
-};
+//function g_string_new(string $str) { return new GString($str); }
+//function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
 
-struct Point foo()
+GString* get_name(struct Thing* t)
 {
-    struct Point* p = alloca(sizeof(struct Point));
-    p->$class_name = "Point";
-    p->$x = 10;
-    return *p;
+    return t->name;
 }
 
-struct Point* bar()
+void foo()
 {
-    struct Point* p = alloca(sizeof(struct Point));
-    p->$class_name = "Point";
-    p->$x = 10;
-    return p;
+    struct Thing* t = alloca(sizeof(struct Thing));
+    t->name = g_string_new("Hello");
+    GString* name = get_name(t);
+    printf("%s\n", name->str);
+    // return t;
 }
 
 int main()
 {
-    //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly
-    struct Point* p = bar();
-    printf("%d\n", p->$x);
-    printf("%s\n", p->$class_name);
+    foo();
     return 0;
 }
