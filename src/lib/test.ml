@@ -623,16 +623,25 @@ class Thing {
 }
 
 function foo(Thing $t): string {
-}
-
-function main(): int {
-    return 0;
+    return $t->name;
 }
 |} in
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    [%test_eq: Ast.program] ast (Ast.Declaration_list [])
+    [%test_eq: Ast.program] ast (Ast.Declaration_list [
+        Class ("Thing", [
+            ("__object_property_name", String);
+        ]);
+        Function (
+            "foo",
+            [Param ("t", Class_type "Thing")],
+            [
+                Return (Object_access ("t", Property_access "__object_property_name"));
+            ],
+            Function_type {return_type = String; arguments = [Class_type "Thing"]}
+        );
+    ]);
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)

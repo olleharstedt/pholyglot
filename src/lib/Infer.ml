@@ -158,7 +158,11 @@ let check_return_type ns stmt typ =
     match stmt with
     | Return exp ->
         Log.debug "%s %s" "check_return_type" (show_statement stmt);
-        if compare_typ typ (typ_of_expression ns exp) = 0 then () else failwith ("check_return_type " ^ show_typ typ)
+        let return_type = typ_of_expression ns exp in
+        if compare_typ typ return_type = 0 then
+            ()
+        else
+            failwith (sprintf "Return type %s is not expected type %s" (show_typ return_type) (show_typ typ))
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
