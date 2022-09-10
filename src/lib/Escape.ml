@@ -148,6 +148,7 @@ let%test_unit "trivial escape 2" =
     let source = {|<?php // @pholyglot
 class Thing {
     public string $name;
+    //public StringBuffer $name;
 }
 
 function getName(Thing $t): string {

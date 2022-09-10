@@ -8,6 +8,7 @@ namespace Pholly {
     {
     }
 
+    // Polyfill over GString
     class StringBuffer {
         private $s;
         public function __construct($s) { $this->s = $s }
