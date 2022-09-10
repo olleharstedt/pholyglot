@@ -12,7 +12,7 @@ struct Thing {
 
 GString* get_name(struct Thing* t)
 {
-    return t->name;
+    return g_string_new(t->name->str);
 }
 
 void foo()
