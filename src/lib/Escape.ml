@@ -144,4 +144,23 @@ let%test_unit "trivial alias graph" =
     let open Base in
     [%test_eq: (string * string) list] [("b", "a"); ("c", "a")] l
 
+let%test_unit "trivial escape 2" =
+    let source = {|<?php // @pholyglot
+class Thing {
+    public string $name;
+}
+
+function getName(Thing $t): string {
+    // Not allowed to escape
+    return $t->name;
+}|} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    let fn_ast = match ast with 
+        | Ast.Declaration_list (c :: f) -> f
+    in
+    [%test_eq: Ast.program] ast (Ast.Declaration_list [])
+
+
 (* $a = moo; return $a . "foo"; *)

@@ -12,6 +12,7 @@
 (*                                                                        *)
 (**************************************************************************)
 
+
 {
 open Lexing
 open Parser
@@ -20,6 +21,7 @@ exception Error of string
 }
 
 (** Copied from Jacques-Henri Jourdan, Inria Paris *)
+(** https://github.com/jhjourdan/C11parser *)
 let digit = ['0'-'9']
 let nondigit = ['_' 'a'-'z' 'A'-'Z']
 let uppercase = ['A'-'Z']
@@ -33,6 +35,7 @@ let integer_constant = decimal_constant
 
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
+  | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
   | "<?php // @pholyglot"         { START_SCRIPT }
@@ -75,3 +78,9 @@ and initial_linebegin = parse
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | whitespace_char_no_newline    { initial_linebegin lexbuf }
   | ""                            { token lexbuf }
+
+  (* Single-line comment terminated by a newline *)
+  and singleline_comment = parse
+  | '\n'   { new_line lexbuf }
+  | eof    { () }
+  | _      { singleline_comment lexbuf }
