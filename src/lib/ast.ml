@@ -9,6 +9,12 @@ type program =
 [@@deriving show, compare, sexp]
 
 (* TODO: Differ between value type and reference type? Always pass by reference except primitive types (int, string) *)
+(*
+type kind =
+    | Ref
+    | Val
+*)
+
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)
 and typ =
     | Int
@@ -88,3 +94,8 @@ and expression =
 
 let get_arg_types_from_args args =
     List.map ~f:(fun (Param (n, t)) -> t) args
+
+(* Returns true if typ is "value type" and allowed to escape/be copied automatically by C *)
+let typ_is_val = function
+    | Int -> true
+    | _ -> false

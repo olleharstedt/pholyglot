@@ -661,5 +661,7 @@ function foo(Thing $t): string {
 (* Class name must start with capital letter *)
 (* function foo(): int { return "moo"; } Invalid return type *)
 (* Only one return statement per function allowed? Must be last statement? Unless void type *)
-(* Dynamic string on heap vs fixed string on stack *)
+(* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
+(* Objects have their own memory pool UNLESS they're value objects *)
+(* Infer simple alias *)

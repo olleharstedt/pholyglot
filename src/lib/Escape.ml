@@ -1,20 +1,18 @@
 open Ast
 open Printf
 
-type escape_status = Escapes | Safe
+type escape_status = Escapes | Allowed_to_escape | Stays_in_scope
 [@@deriving show, compare, sexp]
 
 (* Simple assoc list as graph *)
 (* var points to var1, var2, ... *)
 type alias_graph = (identifier, identifier) Hashtbl.t
-
 type escapes_data = (identifier, escape_status) Hashtbl.t
 
 (* TODO: Replace with alloc type: heap, stack, pool *)
 let allowed_to_escape : (typ -> bool) = function
     | Int -> true
     | _ -> false
-
 
 let run : (program -> escape_status list) = function
     | Declaration_list decls ->
@@ -87,6 +85,32 @@ let get_alias_graph (namespace : Namespace.t) (fun_decl : declaration) : alias_g
         iter_stmts stmts;
         aliases
 
+let iter_alias_graph ns graph escapes_data =
+    (*
+        $a = "moo";
+        $b = $a;
+        return $b;
+    *)
+    (* Is "a" allowed to escape? Yes, if typ_is_val returns true *)
+    (*[%test_eq: (string * escape_status) list] [("b", Escapes)] l*)
+    (*[%test_eq: (string * string) list] l [("b", "a")]*)
+    List.iter (fun g -> ()) graph
+
+let rec get_typ_of_alias ns alias graph = match graph with
+    | [] -> None
+    | (a, b)::gs when a = alias -> begin
+        match Namespace.find_identifier ns a with
+        | Some t -> Some t
+        | None -> get_typ_of_alias ns alias gs
+    end
+    | g::gs -> get_typ_of_alias ns alias gs
+
+let alias_escapes a escapes_data = ()
+
+let iter_alias graph ns graph escapes_data = match graph with
+    | [] -> ()
+    | (a, b)::gs -> ()
+
 (* TODO: Combine basic escape data with connection graph to figure out what escapes *)
 
 let%test_unit "trivial string escape" =
@@ -106,6 +130,32 @@ let%test_unit "trivial string escape" =
     let open Base in
     [%test_eq: (string * escape_status) list] [("a", Escapes)] l
 
+let%test_unit "alias string escape" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $a = "moo";
+        $b = $a;
+        return $b;
+    }
+    |} in
+    let Declaration_list [fn] =
+        Lexing.from_string source |>
+        Parser.program Lexer.token
+    in
+    let ns = Namespace.create () in
+    let ed = get_basic_escapes_data ns fn in
+    let l = Hashtbl.to_seq ed |> List.of_seq in
+    let aliases = get_alias_graph (Namespace.create ()) fn |> Hashtbl.to_seq |> List.of_seq in
+    (*ignore(Infer.run ns (Declaration_list [fn]));*)
+    let t = match get_typ_of_alias ns "b" aliases with
+        | Some t ->
+            (*print_endline (show_typ t);*)
+            Some t
+        | None -> None
+    in
+    let open Base in
+    [%test_eq: (string * escape_status) list] [("b", Escapes)] l
+
 let%test_unit "trivial no string escape" =
     let source = {|<?php // @pholyglot
     function main(): int {
@@ -124,13 +174,11 @@ let%test_unit "trivial no string escape" =
     let open Base in
     [%test_eq: (string * escape_status) list] [] l
 
-
 let%test_unit "trivial alias graph" =
     let source = {|<?php // @pholyglot
     function main(): int {
         $a = "moo";
         $b = $a;
-        $c = $a;
         return $b;
     }
     |} in
@@ -138,12 +186,17 @@ let%test_unit "trivial alias graph" =
         Lexing.from_string source |>
         Parser.program Lexer.token
     in
-    let namespace = Namespace.create () in
-    let aliases = get_alias_graph namespace fn in
+    let ed = get_basic_escapes_data (Namespace.create ()) fn in
+    let aliases = get_alias_graph (Namespace.create ()) fn in
     let l = Hashtbl.to_seq aliases |> List.of_seq in
     let open Base in
-    [%test_eq: (string * string) list] [("b", "a"); ("c", "a")] l
+    [%test_eq: (string * string) list] l [("b", "a")]
 
+let%test_unit "trivial graph combination" =
+    (* Combine escape data, ref/val kind, with graph *)
+    ()
+
+    (*
 let%test_unit "trivial escape 2" =
     let source = {|<?php // @pholyglot
 class Thing {
@@ -162,6 +215,7 @@ function getName(Thing $t): string {
         | Ast.Declaration_list (c :: f) -> f
     in
     [%test_eq: Ast.program] ast (Ast.Declaration_list [])
+*)
 
 
 (* $a = moo; return $a . "foo"; *)
