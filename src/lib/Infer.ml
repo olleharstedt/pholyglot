@@ -95,8 +95,8 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
 let infer_expression ns expr = 
     Log.debug "%s %s" "infer_expression" (show_expression expr);
     match expr with
-    (* TODO: Namespace *)
-    | Variable id -> raise (Type_error ("Can't infer type of variable " ^ id))
+    (* This is allowed to enable infering aliasing, like $b = $a *)
+    | Variable id -> Variable id
     | Function_call (Infer_me, name, params) -> begin
         match Namespace.find_function ns name with
         | Some (Function_type {return_type; arguments}) -> Function_call (Function_type {return_type; arguments}, name, params)

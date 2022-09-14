@@ -630,7 +630,23 @@ function foo(Thing $t): string {
             ],
             Function_type {return_type = String; arguments = [Class_type "Thing"]}
         );
-    ]);
+    ])
+
+let%test_unit "string class property asd" =
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        $a = "moo";
+        $b = $a;
+        return $b;
+    }
+    |} in
+    let ns = Namespace.create () in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run ns
+    in
+    [%test_eq: Ast.program] (Declaration_list []) ast
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
