@@ -78,11 +78,9 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
     end
     | Variable id -> begin
-        let var_typ_name = match Namespace.find_identifier ns id with 
+        match Namespace.find_identifier ns id with 
             | Some p -> p
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find variable with name %s" id))
-        in
-        Int
     end
     | Function_call (_, id, _) -> begin
         match Namespace.find_function ns id with

@@ -634,7 +634,7 @@ function foo(Thing $t): string {
 
 let%test_unit "string class property asd" =
     let source = {|<?php // @pholyglot
-    function main(): int {
+    function foo(): string {
         $a = "moo";
         $b = $a;
         return $b;
@@ -646,7 +646,13 @@ let%test_unit "string class property asd" =
         Parser.program Lexer.token |>
         Infer.run ns
     in
-    [%test_eq: Ast.program] (Declaration_list []) ast
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("foo", [], [
+            Assignment (String, Variable "a", String "\"moo\"");
+            Assignment (String, Variable "b", Variable "a");
+            Return (Variable "b");
+        ], Function_type {return_type = String; arguments = []})
+    ])
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
@@ -680,4 +686,3 @@ let%test_unit "string class property asd" =
 (* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
 (* Objects have their own memory pool UNLESS they're value objects *)
-(* Infer simple alias *)
