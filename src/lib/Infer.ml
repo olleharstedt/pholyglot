@@ -164,6 +164,16 @@ let check_return_type ns stmt typ =
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
+let rec infer_kind k (props : (string * typ) list) =
+    let all_props_are_val props = 
+        true
+    in
+    match k with
+    | Infer_kind -> begin
+        if all_props_are_val props then Val else Ref
+    end
+    | k -> k
+
 let infer_declaration decl ns : declaration = 
     Log.debug "%s %s" "infer_declaration" (show_declaration decl);
     match decl with
@@ -181,8 +191,9 @@ let infer_declaration decl ns : declaration =
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
         Function (name, params, new_stmts, typ)
     | Function (_, _, _, typ) -> failwith ("infer_declaration function typ " ^ show_typ typ)
-    | Class (name, k, props) as c -> 
-        Namespace.add_class_type ns c;
+    | Class (name, Infer_kind, props) -> 
+        let k = infer_kind props in
+        Namespace.add_class_type ns (Class (Name, k, props))
         c
 
 let run (ns : Namespace.t) (p : program): program = 
