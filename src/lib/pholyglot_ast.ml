@@ -16,6 +16,10 @@ type program =
 and start_line = Start_line
 and end_line = End_line
 
+and kind =
+    | Ref
+    | Val
+
 and typ =
     | Int
     | String                (* Actually GString pointer *)
@@ -25,14 +29,13 @@ and typ =
     | Fixed_array of typ * int
     | Function_type of {return_type: typ; arguments: typ list}
     | Class_type of class_name
-    | Infer_me
 
 and param =
     | Param of identifier * typ
 
 and declaration =
     | Function of function_name * param list * statement list * typ
-    | Class of class_name * class_property list
+    | Class of class_name * kind * class_property list
 
 and function_name = string
 and class_name = string
@@ -91,9 +94,8 @@ let rec string_of_typ (t : typ) : string = match t with
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
-    | Class_type n -> sprintf "struct %s*" n
+    | Class_type (n) -> sprintf "struct %s*" n
     | Function_type {return_type; arguments} -> string_of_typ return_type
-    | Infer_me -> failwith "Cannot convert Infer_me to a C type"
 
 (** Type notation that goes AFTER the variable name, as in array init *)
 let string_of_typ_post = function
@@ -122,7 +124,7 @@ let rec string_of_expression = function
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
     (* TODO: Alloc type *)
-    | New (Class_type ct, exprs) -> 
+    | New (Class_type (ct), exprs) -> 
         (*let t_text = show_typ t in*)
         sprintf {|new_(%s)|}
         ct
@@ -203,7 +205,7 @@ function %s(%s)
         name
         (concat ~sep:", " (List.map params ~f:string_of_param))
         (concat (List.map stmts ~f:string_of_statement))
-    | Class (name,  props) ->
+    | Class (name, kind, props) ->
         sprintf {|
 class %s {
     %s

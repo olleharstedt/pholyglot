@@ -424,7 +424,7 @@ let%test_unit "trivial class declare" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
@@ -447,12 +447,12 @@ let%test_unit "class new" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
             Return (Num 0)
         ], Function_type {return_type = Int; arguments = []})
     ])
@@ -472,12 +472,12 @@ let%test_unit "object lvalue assignment" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
             Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
             Return (Num 0)
         ], Function_type {return_type = Int; arguments = []})
@@ -499,12 +499,12 @@ let%test_unit "object object access in expression" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
             Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
             Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "__object_property_x")]);
             Return (Num 0)
@@ -514,24 +514,24 @@ let%test_unit "object object access in expression" =
 let%test_unit "infer object access" =
     let ns = Namespace.create () in
     let ast : Ast.program = Ast.Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("x", Int);
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type "Point", [])));
+            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
             Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
             Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
             Return (Num 0)
         ], Function_type {return_type = Int; arguments = []})
     ] |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("x", Int);
             ("y", Int)
         ]);
         Function ("main", [], [
-            Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
+            Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
             Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
             Function_call (Function_type {return_type = Void; arguments = [String_literal; Int]}, "printf", [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]);
             Return (Num 0)
@@ -540,7 +540,7 @@ let%test_unit "infer object access" =
 
 let%test_unit "output object access" =
     let code = Ast.Declaration_list [
-        Class ("Point", [
+        Class ("Point", Val, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
@@ -619,7 +619,7 @@ function foo(Thing $t): string {
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
-        Class ("Thing", [
+        Class ("Thing", Ref, [
             ("__object_property_name", String);
         ]);
         Function (

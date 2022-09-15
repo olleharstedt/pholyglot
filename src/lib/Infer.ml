@@ -17,10 +17,10 @@ let rec typ_of_lvalue ns lv : typ =
     (* TODO: Access chain like $a->b->c *)
     | Object_access (id, Property_access prop_name) ->
         let class_type_name = match Namespace.find_identifier ns id with
-            | Some (Class_type c) -> c
+            | Some (Class_type (c)) -> c
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
         in
-        let props = match Namespace.find_class ns class_type_name with
+        let (k, props) = match Namespace.find_class ns class_type_name with
             | Some p -> p
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Found no class declarion %s in namespace" class_type_name))
         in
@@ -66,10 +66,10 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     | New (t, exprs) -> t
     | Object_access (id, Property_access prop_name) -> begin
         let class_type_name = match Namespace.find_identifier ns id with
-            | Some (Class_type c) -> c
+            | Some (Class_type (c)) -> c
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" id))
         in
-        let props = match Namespace.find_class ns class_type_name with
+        let (k, props) = match Namespace.find_class ns class_type_name with
             | Some p -> p
             | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
         in
@@ -181,7 +181,7 @@ let infer_declaration decl ns : declaration =
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
         Function (name, params, new_stmts, typ)
     | Function (_, _, _, typ) -> failwith ("infer_declaration function typ " ^ show_typ typ)
-    | Class (name,  props) as c -> 
+    | Class (name, k, props) as c -> 
         Namespace.add_class_type ns c;
         c
 

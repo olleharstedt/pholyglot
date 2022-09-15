@@ -9,11 +9,10 @@ type program =
 [@@deriving show, compare, sexp]
 
 (* TODO: Differ between value type and reference type? Always pass by reference except primitive types (int, string) *)
-(*
-type kind =
+and kind =
     | Ref
     | Val
-*)
+    | Infer_kind
 
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)
 and typ =
@@ -40,8 +39,9 @@ and param =
 
 (** Top-level constructs *)
 and declaration =
+    (* TODO: Replace tuples with inline records *)
     | Function of function_name * param list * statement list * typ
-    | Class of class_name * class_property list
+    | Class of class_name * kind * class_property list
 
 and function_name = string
 and class_name = string

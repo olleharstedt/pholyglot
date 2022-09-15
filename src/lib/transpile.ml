@@ -1,5 +1,9 @@
 exception Transpile_error of string
 
+let kind_to_pholyglot k = match k with
+    | Ast.Ref -> Pholyglot_ast.Ref
+    | Ast.Ref -> Pholyglot_ast.Ref
+
 (** Transpile from Pholly AST to Pholyglot AST *)
 let rec typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
@@ -10,7 +14,7 @@ let rec typ_to_pholyglot t = match t with
     | Ast.Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Ast.Infer_me -> failwith "Infer before transpiling"
-    | Ast.Class_type n -> Pholyglot_ast.Class_type n
+    | Ast.Class_type (n) -> Pholyglot_ast.Class_type (n)
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
@@ -59,7 +63,7 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
             List.map statement_to_pholyglot statements,
             typ_to_pholyglot typ
         )
-    | Class (name,  props) -> Pholyglot_ast.Class (name, List.map prop_to_pholyglot props)
+    | Class (name, k, props) -> Pholyglot_ast.Class (name, kind_to_pholyglot k, List.map prop_to_pholyglot props)
 
 (** Transpile from Pholly AST to Pholyglot AST *)
 let run (ast : Ast.program) : Pholyglot_ast.program = match ast with

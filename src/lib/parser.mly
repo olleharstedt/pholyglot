@@ -76,7 +76,7 @@ program:
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
     | "function" f=NAME "(" args=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" s=list(statement) "}" {Function (f, args, s, Function_type {return_type = t; arguments = get_arg_types_from_args args})}
-    | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, f)}
+    | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, Infer_kind, f)}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
