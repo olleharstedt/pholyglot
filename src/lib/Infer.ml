@@ -164,9 +164,27 @@ let check_return_type ns stmt typ =
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
-let rec infer_kind k (props : (string * typ) list) =
+let rec kind_of_typ ns t : kind = match t with
+    | Int -> Val
+    | String -> Ref
+    | Class_type s -> begin
+        match Namespace.find_class ns s with
+        | Some (Infer_kind, props) -> infer_kind ns Infer_kind props
+        | Some (k, _) -> k
+        | None -> failwith ("kind_of_typ: Cannot find class " ^ s)
+    end
+    | t -> failwith ("kind_of_typ: " ^ show_typ t)
+
+(**
+ * @param namespace
+ * @param kind
+ * @param prop list
+ * @return kind
+ *)
+and infer_kind ns k (props : (string * typ) list) : kind =
     let all_props_are_val props = 
-        true
+        let l = List.filter (fun (_, t) -> kind_of_typ ns t = Val) props in
+        List.length l = List.length props
     in
     match k with
     | Infer_kind -> begin
@@ -192,9 +210,11 @@ let infer_declaration decl ns : declaration =
         Function (name, params, new_stmts, typ)
     | Function (_, _, _, typ) -> failwith ("infer_declaration function typ " ^ show_typ typ)
     | Class (name, Infer_kind, props) -> 
-        let k = infer_kind props in
-        Namespace.add_class_type ns (Class (Name, k, props))
+        let k = infer_kind ns Infer_kind props in
+        let c = Class (name, k, props) in
+        Namespace.add_class_type ns c;
         c
+    | Class (name, k, props) -> failwith ("infer_declaration: Class with kind " ^ show_kind k ^ " " ^ name)
 
 let run (ns : Namespace.t) (p : program): program = 
     Log.debug "Infer.run";

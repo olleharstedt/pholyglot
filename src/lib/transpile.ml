@@ -2,7 +2,7 @@ exception Transpile_error of string
 
 let kind_to_pholyglot k = match k with
     | Ast.Ref -> Pholyglot_ast.Ref
-    | Ast.Ref -> Pholyglot_ast.Ref
+    | Ast.Val -> Pholyglot_ast.Val
 
 (** Transpile from Pholly AST to Pholyglot AST *)
 let rec typ_to_pholyglot t = match t with

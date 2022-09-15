@@ -424,7 +424,7 @@ let%test_unit "trivial class declare" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Val, [
+        Class ("Point", Infer_kind, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
@@ -447,7 +447,7 @@ let%test_unit "class new" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Val, [
+        Class ("Point", Infer_kind, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
@@ -472,7 +472,7 @@ let%test_unit "object lvalue assignment" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Val, [
+        Class ("Point", Infer_kind, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
@@ -499,7 +499,7 @@ let%test_unit "object object access in expression" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Val, [
+        Class ("Point", Infer_kind, [
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
@@ -514,7 +514,7 @@ let%test_unit "object object access in expression" =
 let%test_unit "infer object access" =
     let ns = Namespace.create () in
     let ast : Ast.program = Ast.Declaration_list [
-        Class ("Point", Val, [
+        Class ("Point", Infer_kind, [
             ("x", Int);
             ("y", Int)
         ]);
