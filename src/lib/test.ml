@@ -665,12 +665,12 @@ let%test_unit "alias check" =
 
 let%test "return ref type is invalid" =
     let source = {|<?php // @pholyglot
-class Point {
-    public string $className;
+class User {
+    public string $name;
 }
-function foo(): Point
+function foo(): User
 {
-    $p = new Point();
+    $p = new User();
     return $p;
 }
 |} in
@@ -687,6 +687,29 @@ function foo(): Point
     in ast
 
         (*[%test_eq: Ast.program] ast (Declaration_list [])*)
+
+let%test "return val type is valid" =
+    let source = {|<?php // @pholyglot
+class Point {
+    public int $x;
+}
+function foo(): Point
+{
+    $p = new Point();
+    return $p;
+}
+|} in
+    let ns = Namespace.create () in
+    (*let res = try *)
+    let ast = try 
+        ignore(Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run ns);
+        true
+    with
+         | Infer.Type_error _ -> false
+         | _ -> true
+    in ast
 
 
 
@@ -723,3 +746,4 @@ function foo(): Point
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
 (* Objects have their own memory pool UNLESS they're value objects. Or, ref types can define which memory strategy to use, like Boehm, ref count, or pool with controlled aliasing/escape?  *)
 (* Cannot only use void-function as statements (no ignore()?) *)
+(* Interaction between val types and ref types? Most coerce val types to ref when added? That is, copy mem to correct box. *)
