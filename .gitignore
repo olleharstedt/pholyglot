@@ -6,6 +6,6 @@ m4/_m4.c
 m4/m4
 oop/a.out
 oop/oop
-oop/_oop.c
+_oop.c
 a.out
 *.s
