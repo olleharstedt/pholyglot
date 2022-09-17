@@ -151,21 +151,8 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         end
     | s -> s
 
-(** Check if return type is correct, in relation to declared function type *)
-let check_return_type ns stmt typ = 
-    match stmt with
-    | Return exp ->
-        Log.debug "%s %s" "check_return_type" (show_statement stmt);
-        let return_type = typ_of_expression ns exp in
-        if compare_typ typ return_type = 0 then
-            ()
-        else
-            failwith (sprintf "Return type %s is not expected type %s" (show_typ return_type) (show_typ typ))
-    | _ -> ()
-    (* TODO: If, foreach, etc *)
-
 let rec kind_of_typ ns t : kind = match t with
-    | Int -> Val
+    | Int | Void -> Val
     | String -> Ref
     | Class_type s -> begin
         match Namespace.find_class ns s with
@@ -192,6 +179,21 @@ and infer_kind ns k (props : (string * typ) list) : kind =
     end
     | k -> k
 
+
+(** Check if return type is correct, in relation to declared function type *)
+let check_return_type ns stmt typ = 
+    match stmt with
+    | Return exp ->
+        Log.debug "%s %s" "check_return_type" (show_statement stmt);
+        let return_type = typ_of_expression ns exp in
+        if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot return a Ref kind");
+        if compare_typ typ return_type = 0 then
+            ()
+        else
+            failwith (sprintf "Return type %s is not expected type %s" (show_typ return_type) (show_typ typ))
+    | _ -> ()
+    (* TODO: If, foreach, etc *)
+
 let infer_declaration decl ns : declaration = 
     Log.debug "%s %s" "infer_declaration" (show_declaration decl);
     match decl with
@@ -200,6 +202,7 @@ let infer_declaration decl ns : declaration =
     | Struct of struct_name * struct_field list
     *)
     | Function (name, params, stmts, Function_type {return_type; arguments}) ->
+            if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
         let typ = Function_type {return_type; arguments} in
         Namespace.add_function_type ns name typ;
         let ns = Namespace.reset_identifiers ns in

@@ -533,7 +533,11 @@ let%test_unit "infer object access" =
         Function ("main", [], [
             Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
             Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
-            Function_call (Function_type {return_type = Void; arguments = [String_literal; Int]}, "printf", [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]);
+            Function_call (
+                Function_type {return_type = Void; arguments = [String_literal; Int]},
+                "printf",
+                [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]
+            );
             Return (Num 0)
         ], Function_type {return_type = Int; arguments = []})
     ])
@@ -610,9 +614,8 @@ let%test_unit "string class property" =
 class Thing {
     public string $name;
 }
-
-function foo(Thing $t): string {
-    return $t->name;
+function foo(Thing $t): void {
+    printf("%s", $t->name);
 }
 |} in
     let linebuf = Lexing.from_string source in
@@ -626,16 +629,22 @@ function foo(Thing $t): string {
             "foo",
             [Param ("t", Class_type "Thing")],
             [
-                Return (Object_access ("t", Property_access "__object_property_name"));
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; String_literal]},
+                    "printf",
+                    [Coerce (String_literal, String "\"%s\""); Object_access ("t", Property_access "__object_property_name")]
+                    (*[Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]*)
+                );
+                (*Return (Object_access ("t", Property_access "__object_property_name"));*)
             ],
-            Function_type {return_type = String; arguments = [Class_type "Thing"]}
+            Function_type {return_type = Void; arguments = [Class_type "Thing"]}
         );
     ])
 
-let%test_unit "string class property asd" =
+let%test_unit "alias check" =
     let source = {|<?php // @pholyglot
-    function foo(): string {
-        $a = "moo";
+    function foo(): int {
+        $a = 123;
         $b = $a;
         return $b;
     }
@@ -648,11 +657,38 @@ let%test_unit "string class property asd" =
     in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("foo", [], [
-            Assignment (String, Variable "a", String "\"moo\"");
-            Assignment (String, Variable "b", Variable "a");
+            Assignment (Int, Variable "a", Num 123);
+            Assignment (Int, Variable "b", Variable "a");
             Return (Variable "b");
-        ], Function_type {return_type = String; arguments = []})
+        ], Function_type {return_type = Int; arguments = []})
     ])
+
+let%test "return ref type is invalid" =
+    let source = {|<?php // @pholyglot
+class Point {
+    public string $className;
+}
+function foo(): Point
+{
+    $p = new Point();
+    return $p;
+}
+|} in
+    let ns = Namespace.create () in
+    (*let res = try *)
+    let ast = try 
+        ignore(Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run ns);
+        false
+    with
+         | Infer.Type_error _ -> true
+         | _ -> false
+    in ast
+
+        (*[%test_eq: Ast.program] ast (Declaration_list [])*)
+
+
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
@@ -686,3 +722,4 @@ let%test_unit "string class property asd" =
 (* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
 (* Objects have their own memory pool UNLESS they're value objects. Or, ref types can define which memory strategy to use, like Boehm, ref count, or pool with controlled aliasing/escape?  *)
+(* Cannot only use void-function as statements (no ignore()?) *)

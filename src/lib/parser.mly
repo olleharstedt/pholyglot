@@ -45,6 +45,7 @@
 %token ARROW "->"
 %token DOLLAR "$"
 %token INT_TYPE "int"
+%token VOID_TYPE "void"
 %token STRING_TYPE "string"
 %token RETURN "return"
 %token NEW "new"
@@ -89,8 +90,9 @@ arg_decl:
   | t=typ "$" n=NAME          {Param (n, t)}
 
 typ:
-  | INT_TYPE                    {Int : Ast.typ}
+  | "int"                       {Int : Ast.typ}
   | "string"                    {String : Ast.typ}
+  | "void"                      {Void : Ast.typ}
   | s=CLASS_NAME                {Class_type s : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                      {failwith ("Unknown type: " ^ s)}

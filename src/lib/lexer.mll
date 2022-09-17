@@ -66,6 +66,7 @@ rule token = parse
   | "class"                       { CLASS }
   | "public"                      { PUBLIC }
   | "int"                         { INT_TYPE }
+  | "void"                        { VOID_TYPE }
   | "string"                      { STRING_TYPE }
   | "$"                           { DOLLAR }
   | ['"'] [^ '"']+ ['"'] as s     { STRING_LITERAL s }
