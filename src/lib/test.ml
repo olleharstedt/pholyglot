@@ -711,7 +711,60 @@ function foo(): Point
          | _ -> true
     in ast
 
+let%test "assign wrong object property" =
+    let source = {|<?php // @pholyglot
+class Point {
+    public int $x;
+}
+function main(): int
+{
+    $p = new Point();
+    $p->x = "moo";
+    return 0;
+}
+|}
+    in
+    let ast = try 
+        ignore (
+            Lexing.from_string source |>
+            Parser.program Lexer.token |>
+            Infer.run (Namespace.create ())
+        );
+        false
+    with
+         | Infer.Type_error _ -> true
+         | _ -> false
+     in ast
 
+    (*
+let%test_unit "composite val type" =
+    let source = {|<?php // @pholyglot
+class Point {
+    public int $x;
+    public int $y;
+}
+class Rectangle {
+    public Point $t;
+    public Point $b;
+}
+function main(): int
+{
+    $p1 = new Point();
+    $p2 = new Point();
+    $r = new Rectangle();
+    $r->t = 10;
+    $r->b = $p2;
+    return 0;
+}
+|} in
+    let ns = Namespace.create () in
+    (*let res = try *)
+    let ast = Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run ns
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [])
+    *)
 
 (* TODO: *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
@@ -747,3 +800,4 @@ function foo(): Point
 (* Objects have their own memory pool UNLESS they're value objects. Or, ref types can define which memory strategy to use, like Boehm, ref count, or pool with controlled aliasing/escape?  *)
 (* Cannot only use void-function as statements (no ignore()?) *)
 (* Interaction between val types and ref types? Most coerce val types to ref when added? That is, copy mem to correct box. *)
+(* Chaining property access, like $rectangle->point->x *)

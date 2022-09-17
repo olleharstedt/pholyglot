@@ -130,9 +130,32 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let t = typ_of_expression ns expr in
         Namespace.add_identifier ns id t;
         Assignment (typ_of_expression ns expr, Variable id, infer_expression ns expr)
-    | Assignment (Infer_me, id, expr) ->
+    (* TODO: Generalize this with lvalue *)
+    | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
         let t = typ_of_expression ns expr in
-        Assignment (typ_of_expression ns expr, id, expr)
+        (* Check if class def has property with name and type *)
+        let class_name = match Namespace.find_identifier ns variable_name with
+            | Some (Class_type s) -> s
+            | None -> failwith ("infer_stmt: Could not find identifier " ^ variable_name)
+        in
+        let (k, props) = match Namespace.find_class ns class_name with
+            | Some v -> v
+            | None -> failwith ("infer_stmt: Could not find class type " ^ class_name)
+        in
+        let prop_type = match List.find_opt (fun (prop_name2, p) -> prop_name = prop_name2) props with
+            | Some (name, t) -> t
+            | None -> failwith ("infer_stmt: Found no class property with name " ^ prop_name)
+        in
+        if not (prop_type = t) then raise (Type_error
+            (
+                sprintf
+                "Right-hand expression type %s is not the same as the defined property type %s : %s"
+                (show_typ t)
+                prop_name
+                (show_typ prop_type)
+            )
+        );
+        Assignment (typ_of_expression ns expr, Object_access (variable_name, Property_access prop_name), expr)
     (* printf is hard-coded *)
     (* Head of expressions is always a format string to printf *)
     | Function_call (Infer_me, "printf", String s :: xs) ->
