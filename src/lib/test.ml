@@ -736,7 +736,7 @@ function main(): int
          | _ -> false
      in ast
 
-let%test_unit "array of points" =
+let%test_unit "wrong printf type" =
     let source = {|<?php // @pholyglot
 class Point
 {
@@ -745,11 +745,7 @@ class Point
 function main(): int
 {
     $p = new Point();
-    $p->x = 10;
-    $ps = [
-        $p
-    ];
-    printf("%d\n", $ps[0]);
+    printf("%s\n", 123);
     return 0;
 }
 |} in
@@ -758,9 +754,7 @@ function main(): int
         (* TODO: Infer should fail, printf has wrong args *)
         Infer.run (Namespace.create ())
     in
-    let phast = Transpile.run ast in
-    let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code ""
+    [%test_eq: bool] true false
 
     (*
 let%test_unit "composite val type" =
