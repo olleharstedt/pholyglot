@@ -736,6 +736,32 @@ function main(): int
          | _ -> false
      in ast
 
+let%test_unit "array of points" =
+    let source = {|<?php // @pholyglot
+class Point
+{
+    public int $x;
+}
+function main(): int
+{
+    $p = new Point();
+    $p->x = 10;
+    $ps = [
+        $p
+    ];
+    printf("%d\n", $ps[0]);
+    return 0;
+}
+|} in
+    let ast =Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        (* TODO: Infer should fail, printf has wrong args *)
+        Infer.run (Namespace.create ())
+    in
+    let phast = Transpile.run ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: string] pholyglot_code ""
+
     (*
 let%test_unit "composite val type" =
     let source = {|<?php // @pholyglot
@@ -801,3 +827,5 @@ function main(): int
 (* Cannot only use void-function as statements (no ignore()?) *)
 (* Interaction between val types and ref types? Most coerce val types to ref when added? That is, copy mem to correct box. *)
 (* Chaining property access, like $rectangle->point->x *)
+(* Nullable *)
+(* All props must have default values *)
