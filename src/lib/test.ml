@@ -823,6 +823,7 @@ function main(): int
 (* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
 (* Objects have their own memory pool UNLESS they're value objects. Or, ref types can define which memory strategy to use, like Boehm, ref count, or pool with controlled aliasing/escape?  *)
+(* Define memory model by interface? Pholly\Memory\RefCount. Or better to inject in constructor, to not lock it in? But then runtime? Or must be possible to infer at compile time? *)
 (* Cannot only use void-function as statements (no ignore()?) *)
 (* Interaction between val types and ref types? Most coerce val types to ref when added? That is, copy mem to correct box. *)
 (* Chaining property access, like $rectangle->point->x *)
