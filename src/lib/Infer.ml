@@ -174,9 +174,10 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
                 if expr_typ <> t then raise (
                     Type_error (
                         sprintf
-                        "Wrong argument given to printf: Got %s but expected %s"
+                        "infer_stmt: Wrong argument given to printf: Got %s but expected %s (or %s?)"
                         (show_typ expr_typ)
                         (show_typ t)
+                        (show_expression e)
                     )
                 );
                 e
