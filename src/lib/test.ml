@@ -761,6 +761,21 @@ function main(): int
     in
     result
 
+let%test "nbody benchmark" =
+    let source = {|<?php // @pholyglot
+class Body
+{
+    public int $x;
+    public int $y;
+    public int $z;
+    public int $vx;
+    public int $vy;
+    public int $vz;
+    public int $mass;
+}
+|} in
+    false
+
     (*
 let%test_unit "composite val type" =
     let source = {|<?php // @pholyglot
@@ -792,6 +807,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* Support for double/float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
 (* $b = [1, "Moo"];  Tuple *)
