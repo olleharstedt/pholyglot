@@ -743,7 +743,8 @@ class Point
 function main(): int
 {
     $p = new Point();
-    printf("%s\n", 123);
+    $p->x = 123;
+    printf("%s\n", $p->x);
     return 0;
 }
 |} in
