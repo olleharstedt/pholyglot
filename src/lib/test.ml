@@ -632,10 +632,8 @@ function foo(Thing $t): void {
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},
                     "printf",
-                    [Coerce (String_literal, String "\"%s\""); Object_access ("t", Property_access "__object_property_name")]
-                    (*[Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]*)
+                    [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access ("t", Property_access "__object_property_name"))]
                 );
-                (*Return (Object_access ("t", Property_access "__object_property_name"));*)
             ],
             Function_type {return_type = Void; arguments = [Class_type "Thing"]}
         );
@@ -734,9 +732,9 @@ function main(): int
     with
          | Infer.Type_error _ -> true
          | _ -> false
-     in ast
+    in ast
 
-let%test_unit "wrong printf type" =
+let%test "wrong printf type" =
     let source = {|<?php // @pholyglot
 class Point
 {
@@ -749,12 +747,18 @@ function main(): int
     return 0;
 }
 |} in
-    let ast =Lexing.from_string source |>
-        Parser.program Lexer.token |>
-        (* TODO: Infer should fail, printf has wrong args *)
-        Infer.run (Namespace.create ())
+    let result = try 
+        ignore (
+            Lexing.from_string source |>
+            Parser.program Lexer.token |>
+            Infer.run (Namespace.create ())
+        );
+        false
+    with
+        | Infer.Type_error _ -> true
+        | _ -> false
     in
-    [%test_eq: bool] true false
+    result
 
     (*
 let%test_unit "composite val type" =

@@ -170,9 +170,9 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let exprs : expression list = Coerce (String_literal, String s) :: List.map2 (fun e t -> match e, t with
             | String s, String_literal -> Coerce (String_literal, e)
             | e, t -> begin
-                let expr_typ = typ_of_expression ns e in
-                (* TODO: Add coerce to String_literal here for the general expression case *)
-                if expr_typ <> t then raise (
+                match typ_of_expression ns e with
+                | String -> Coerce (String_literal, e)
+                | expr_typ when expr_typ <> t -> raise (
                     Type_error (
                         sprintf
                         "infer_stmt: Wrong argument given to printf: Got %s but expected %s (expression = %s?)"
@@ -180,8 +180,8 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
                         (show_typ t)
                         (show_expression e)
                     )
-                );
-                e
+                )
+                | _ -> e
             end
         ) xs expected_types in
         Function_call (Function_type {return_type = Void; arguments = String_literal :: expected_types}, "printf", exprs)
