@@ -88,6 +88,11 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         | Some t -> failwith ("not a function: " ^ show_typ t)
         | _ -> failwith ("found no function declared with name " ^ id)
     end
+    | Array_access (id, expr) -> begin
+        match Namespace.find_identifier ns id with
+        | Some (Fixed_array (t, length)) -> t
+        | _ -> raise (Type_error (sprintf "typ_of_expression: Found no array with id %s, or could not infer type" id))
+    end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 let infer_expression ns expr = 
