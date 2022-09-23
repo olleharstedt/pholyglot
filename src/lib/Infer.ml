@@ -89,6 +89,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         | _ -> failwith ("found no function declared with name " ^ id)
     end
     | Array_access (id, expr) -> begin
+        Log.debug "%s %s" "Array_access " id;
         match Namespace.find_identifier ns id with
         | Some (Fixed_array (t, length)) -> t
         | _ -> raise (Type_error (sprintf "typ_of_expression: Found no array with id %s, or could not infer type" id))
@@ -132,6 +133,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
+        Log.debug "%s %s" "assignment " id;
         let t = typ_of_expression ns expr in
         Namespace.add_identifier ns id t;
         Assignment (typ_of_expression ns expr, Variable id, infer_expression ns expr)
@@ -241,7 +243,7 @@ let infer_declaration decl ns : declaration =
     | Struct of struct_name * struct_field list
     *)
     | Function (name, params, stmts, Function_type {return_type; arguments}) ->
-            if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
+        if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
         let typ = Function_type {return_type; arguments} in
         Namespace.add_function_type ns name typ;
         let ns = Namespace.reset_identifiers ns in

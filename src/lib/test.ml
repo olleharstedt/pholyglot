@@ -86,10 +86,6 @@ function main()
 // <?php ob_end_clean(); main();|}
 
 let%test_unit "trivial arith transpile" =
-    Log.set_log_level Log.DEBUG;
-    (* Location becomes ./_build/default/lib/debug.txt *)
-    Log.set_output (open_out "debug.txt");
-    Log.debug "trivial arith transpile";
     let ast  = Ast.Declaration_list [
         Function ("main", [], [
             Assignment (Infer_me, Variable "a", Num 0);
@@ -99,9 +95,6 @@ let%test_unit "trivial arith transpile" =
     let ast = Infer.run (Namespace.create ()) ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
-    Log.debug "should not be visible";
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
@@ -216,14 +209,21 @@ let%test_unit "trivial array infer" =
     ])
 
 let%test_unit "trivial array infer and print" =
+    Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/debug.txt *)
+    Log.set_output (open_out "debug.txt");
+    Log.debug "trivial arith infer and print";
     let ns = Namespace.create () in
     let ast = Ast.Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
             Return (Num 0)
         ], Function_type {return_type = Int; arguments = []})
     ] |> Infer.run ns in
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
+    Log.debug "should not be visible";
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
