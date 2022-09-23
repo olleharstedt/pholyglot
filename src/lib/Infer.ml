@@ -171,10 +171,11 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
             | String s, String_literal -> Coerce (String_literal, e)
             | e, t -> begin
                 let expr_typ = typ_of_expression ns e in
+                (* TODO: Add coerce to String_literal here for the general expression case *)
                 if expr_typ <> t then raise (
                     Type_error (
                         sprintf
-                        "infer_stmt: Wrong argument given to printf: Got %s but expected %s (or %s?)"
+                        "infer_stmt: Wrong argument given to printf: Got %s but expected %s (expression = %s?)"
                         (show_typ expr_typ)
                         (show_typ t)
                         (show_expression e)
