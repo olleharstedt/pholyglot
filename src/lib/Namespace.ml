@@ -25,7 +25,7 @@ let add_identifier t key value : unit =
 
 let add_param t param : unit = 
     match param with
-    | Param (id, typ) -> add_identifier t id typ
+    | Param (id, typ) | RefParam (id, typ) -> add_identifier t id typ
 
 let add_params t params : unit = List.iter (fun p -> add_param t p) params
 

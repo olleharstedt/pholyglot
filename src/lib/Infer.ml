@@ -59,7 +59,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         let first_elem = List.nth exprs 0 in
         if List.for_all (fun x -> typ_of_expression ns x = typ_of_expression ns first_elem) exprs then
             (* TODO: Should be able to update this to Dynamic_array *)
-            Fixed_array (typ_of_expression ns first_elem, List.length exprs)
+            Fixed_array (typ_of_expression ns first_elem, Some (List.length exprs))
         else
             (* TODO: Tuple here *)
             raise (Type_error "not all element in array_init have the same type")

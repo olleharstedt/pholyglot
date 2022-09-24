@@ -9,7 +9,8 @@ let rec typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
     | Ast.String -> Pholyglot_ast.String
     | Ast.String_literal -> Pholyglot_ast.String_literal
-    | Ast.Fixed_array (t, n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
+    | Ast.Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
+    | Ast.Fixed_array (_, None) -> failwith "typ_to_pholyglot: array has size None, not fully inferred"
     | Ast.Void -> Pholyglot_ast.Void
     | Ast.Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)

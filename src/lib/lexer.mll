@@ -68,7 +68,9 @@ rule token = parse
   | "int"                         { INT_TYPE }
   | "void"                        { VOID_TYPE }
   | "string"                      { STRING_TYPE }
+  | "array"                       { ARRAY_TYPE }
   | "$"                           { DOLLAR }
+  | "&"                           { AMPERSAND }
   | ['"'] [^ '"']+ ['"'] as s     { STRING_LITERAL s }
   | class_name as n               { CLASS_NAME n}
   | identifier as id              { NAME id }

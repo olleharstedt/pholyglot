@@ -44,9 +44,11 @@
 %token RBRACK "]"
 %token ARROW "->"
 %token DOLLAR "$"
+%token AMPERSAND "&"
 %token INT_TYPE "int"
 %token VOID_TYPE "void"
 %token STRING_TYPE "string"
+%token ARRAY_TYPE "array"
 %token RETURN "return"
 %token NEW "new"
 %token FUNCTION "function"
@@ -87,12 +89,16 @@ statement:
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
 
 arg_decl:
+  | "array" "&" "$" n=NAME    {RefParam (n, Fixed_array (Infer_me, None))}
+  | t=typ "&" "$" n=NAME      {raise (Parser_exception "Only array type can be passed by reference")}
+  | "array" "$" n=NAME        {raise (Parser_exception "Array must be passed as a reference - Pholly does not support array value semantics")}
   | t=typ "$" n=NAME          {Param (n, t)}
 
 typ:
   | "int"                       {Int : Ast.typ}
   | "string"                    {String : Ast.typ}
   | "void"                      {Void : Ast.typ}
+  | "array"                     {Fixed_array (Infer_me, None) : Ast.typ}
   | s=CLASS_NAME                {Class_type s : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                      {failwith ("Unknown type: " ^ s)}

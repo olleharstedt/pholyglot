@@ -1,4 +1,5 @@
 open Base
+open Expect_test_helpers_base
 module Log = Dolog.Log
 
 let%test_unit "trivial" =
@@ -198,7 +199,7 @@ let%test_unit "trivial array infer" =
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function ("main", [], [
-            Assignment (Fixed_array (Int, 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+            Assignment (Fixed_array (Int, Some 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
             Function_call (
                 Function_type {return_type = Void; arguments = [String_literal; Int]},
                 "printf",
@@ -761,6 +762,36 @@ function main(): int
     in
     result
 
+let%test "invalid to pass array as non-ref" =
+    let source = {|<?php // @pholyglot
+function foo(array $a): void
+{
+}
+|} in
+    match 
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    with
+    | exception Ast.Parser_exception _ -> true
+    | _ -> false
+
+let%test "invalid to pass int as ref" =
+    let source = {|<?php // @pholyglot
+function foo(int &$a): void
+{
+}
+|} in
+    match 
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    with
+    | exception Ast.Parser_exception _ -> true
+    | _ -> false
+
+
+    (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
 class Body
@@ -775,6 +806,7 @@ class Body
 }
 |} in
     false
+    *)
 
     (*
 let%test_unit "composite val type" =

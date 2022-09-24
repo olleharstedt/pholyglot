@@ -4,6 +4,8 @@
 
 open Base
 
+exception Parser_exception of string
+
 type program = 
     | Declaration_list of declaration list
 [@@deriving show, compare, sexp]
@@ -22,8 +24,8 @@ and typ =
     | String
     | String_literal            (* For library code *)
     | Class_type of class_name
-    (*| Mixed*)
-    | Fixed_array of typ * int
+    (* Fixed array can have Infer_me * None, when size is not yet known *)
+    | Fixed_array of typ * int option
     (*| Dynamic_array of typ*)
     (*| Tuple of typ              (* Example: Fixed_array (Tuple Int) *) *)
     (*| Linked_list*)
@@ -36,6 +38,8 @@ and typ =
 
 and param =
     | Param of identifier * typ
+    (* For params with &$foo notation. Should only be allowed by arrays. *)
+    | RefParam of identifier * typ
 
 (** Top-level constructs *)
 and declaration =
@@ -93,7 +97,7 @@ and expression =
     | Coerce of typ * expression
 
 let get_arg_types_from_args args =
-    List.map ~f:(fun (Param (n, t)) -> t) args
+    List.map ~f:(fun (Param (n, t) | RefParam (n, t)) -> t) args
 
 (* Returns true if typ is "value type" and allowed to escape/be copied automatically by C *)
 let typ_is_val = function
