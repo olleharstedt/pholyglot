@@ -723,17 +723,13 @@ function main(): int
 }
 |}
     in
-    let ast = try 
-        ignore (
-            Lexing.from_string source |>
-            Parser.program Lexer.token |>
-            Infer.run (Namespace.create ())
-        );
-        false
+    match
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
     with
-         | Infer.Type_error _ -> true
-         | _ -> false
-    in ast
+    | exception Infer.Type_error _ -> true
+    | _ -> false
 
 let%test "wrong printf type" =
     let source = {|<?php // @pholyglot
