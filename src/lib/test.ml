@@ -749,18 +749,13 @@ function main(): int
     return 0;
 }
 |} in
-    let result = try 
-        ignore (
-            Lexing.from_string source |>
-            Parser.program Lexer.token |>
-            Infer.run (Namespace.create ())
-        );
-        false
+    match
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
     with
-        | Infer.Type_error _ -> true
+        | exception Infer.Type_error _ -> true
         | _ -> false
-    in
-    result
 
 let%test "invalid to pass array as non-ref" =
     let source = {|<?php // @pholyglot
