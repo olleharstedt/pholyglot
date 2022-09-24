@@ -674,7 +674,6 @@ function foo(): User
 }
 |} in
     let ns = Namespace.create () in
-    (*let res = try *)
     let ast = try 
         ignore(Lexing.from_string source |>
         Parser.program Lexer.token |>
@@ -684,8 +683,6 @@ function foo(): User
          | Infer.Type_error _ -> true
          | _ -> false
     in ast
-
-        (*[%test_eq: Ast.program] ast (Declaration_list [])*)
 
 let%test "return val type is valid" =
     let source = {|<?php // @pholyglot
