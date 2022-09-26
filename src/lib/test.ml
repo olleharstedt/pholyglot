@@ -861,6 +861,7 @@ function main(): int
 (* function foo(): int { return "moo"; } Invalid return type *)
 (* Only one return statement per function allowed? Must be last statement? Unless void type *)
 (* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
+(* $foo = /** @stack */ new Foo(); *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
 (* Objects have their own memory pool UNLESS they're value objects. Or, ref types can define which memory strategy to use, like Boehm, ref count, or pool with controlled aliasing/escape?  *)
 (* Define memory model by interface? Pholly\Memory\RefCount. Or better to inject in constructor, to not lock it in? But then runtime? Or must be possible to infer at compile time? *)
