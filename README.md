@@ -171,3 +171,19 @@ function bar(array &$a): array
     return [$b];
 }
 ```
+
+```
+/**
+ * OK in Psalm
+ * @return &array<int>
+ */
+function &foo(): array
+{
+    $a = [1, 2, 3];
+    return $a;
+}
+[$a, $b, $c] = foo();
+echo $a;
+echo $b;
+echo $c;
+```
