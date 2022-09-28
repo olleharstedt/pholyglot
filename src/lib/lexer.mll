@@ -35,6 +35,7 @@ let integer_constant = decimal_constant
 
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
+  | "/*"                          { multiline_comment lexbuf; token lexbuf }
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
@@ -83,7 +84,15 @@ and initial_linebegin = parse
   | ""                            { token lexbuf }
 
   (* Single-line comment terminated by a newline *)
-  and singleline_comment = parse
+and singleline_comment = parse
   | '\n'   { new_line lexbuf }
   | eof    { () }
   | _      { singleline_comment lexbuf }
+
+
+  (* Multi-line comment terminated by "*/" *)
+and multiline_comment = parse
+  | "*/"   { () }
+  | eof    { failwith "unterminated comment" }
+  | '\n'   { new_line lexbuf; multiline_comment lexbuf }
+  | _      { multiline_comment lexbuf }
