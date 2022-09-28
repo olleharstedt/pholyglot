@@ -778,6 +778,18 @@ function foo(int &$a): void
     | exception Ast.Parser_exception _ -> true
     | _ -> false
 
+let%test_unit "multiline comment" =
+    let source = {|<?php // @pholyglot
+/*
+Comment
+*/
+|} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [])
 
     (*
 let%test "nbody benchmark" =
