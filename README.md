@@ -146,3 +146,28 @@ class Point
 {
 }
 ```
+
+Arrays
+
+```php
+use _ as tuple;
+
+/**
+ * @param array<int>  // Fixed or dynamic or list?
+ */
+function foo(array $arr): void {
+}
+
+$foo = /** @alloc stack */ new Foo();
+$foo = /** @alloc pool */ new Foo();
+
+/**
+ * @param-pholly vect<int>
+ * @return-pholly tuple
+ */
+function bar(array &$a): array
+{
+    $b = $a[0];  // Fixed-size
+    return [$b];
+}
+```
