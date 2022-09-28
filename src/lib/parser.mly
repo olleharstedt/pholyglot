@@ -54,6 +54,7 @@
 %token FUNCTION "function"
 %token CLASS "class"
 %token PUBLIC "public"
+%token DOCBLOCK_PARAM "@param"
 
 %left DOT
 %left PLUS MINUS        /* lowest precedence */
