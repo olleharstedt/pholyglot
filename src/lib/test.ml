@@ -791,6 +791,24 @@ Comment
     in
     [%test_eq: Ast.program] ast (Declaration_list [])
 
+let%test_unit "multiline comment inline" =
+    let source = "<?php // @pholyglot
+    /* mo mo */ function /* mo */ main(): /* mo */ int {
+        return /* mo
+        mo
+        */
+        0;
+    }
+    " in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function ("main", [], [
+            Return (Num 0)
+        ], Function_type {return_type = Int; arguments = []})
+    ])
+
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
