@@ -1,6 +1,38 @@
+open Printf
 open Base
 open Expect_test_helpers_base
 module Log = Dolog.Log
+
+let string_of_token (token : Parser.token) : string =
+    let open Parser in
+    match token with
+        | STRING_LITERAL s -> "STRING_LITERAL " ^ s
+        | SEMICOLON -> "SEMICOLON"
+        | RPAREN -> "RPAREN"
+        | RETURN -> "RETURN"
+        | RBRACK -> "RBRACE"
+        | RBRACE -> "RBRACE"
+        | PLUS -> "PLUS"
+        | NEW -> "NEW"
+        | NAME s  -> "NAME " ^ s
+        | MINUS -> "MINUS"
+        | LT -> "LT"
+        | LPAREN -> "LPAREN"
+        | LBRACK -> "LBRACK"
+        | LBRACE -> "LBRACE"
+        | INT i -> "INT" ^ string_of_int i
+        | GT -> "GT"
+        | EQEQ -> "EQEQ"
+        | EQ -> "EQ"
+        | EOF -> "EOF"
+        | CONSTANT -> "CONSTANT"
+        | START_SCRIPT -> "START_SCRIPT"
+        | FUNCTION -> "FUNCTION"
+        | DOT -> "DOT"
+        | COLON -> "COLON"
+        | DOLLAR -> "DOLLAR"
+        | QUOTE -> "QUOTE"
+        | _ -> failwith "string_of_token: Unknown token"
 
 let%test_unit "trivial" =
     let source = "<?php // @pholyglot" in
@@ -930,17 +962,28 @@ let%test_unit "multiline comment inline" =
         }
     ])
 
-let%test_unit "multiline comment inline" =
+let%test_unit "docblock array" =
     let source = "<?php // @pholyglot
     /**
-     * @param array<int> $ints
+     * @param
      */
     function foo(array &$ints): void {
     }
     " in
     let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
-    [%test_eq: Ast.program] ast (Declaration_list [
+
+    let rec dump_tokens linebuf =
+        let token = Lexer.token linebuf in
+        match token with
+            | Parser.EOF -> ()
+            | t ->
+                printf "%s" ((string_of_token t) ^ " ");
+                dump_tokens linebuf
+    in
+    dump_tokens linebuf;
+    (*let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in*)
+    [%test_eq: Ast.program] (Declaration_list []) (Declaration_list [
         Function {
             name = "main";
             docblock = [];

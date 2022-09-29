@@ -79,10 +79,10 @@ program:
 (*int main() { return 0; }*)
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
-    | "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+    | docblock_lines=list(dockblock_line) "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         Function {
             name;
-            docblock = [];
+            docblock = docblock_lines;
             params;
             stmts;
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
@@ -94,6 +94,9 @@ statement:
   | "return" e=expr ";"                                      {Return e}
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
+
+dockblock_line:
+  | "@param"  {Param ("moo", Int) : Ast.docblock_comment}
 
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
 
