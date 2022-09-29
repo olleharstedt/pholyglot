@@ -930,7 +930,6 @@ let%test_unit "multiline comment inline" =
         }
     ])
 
-    (*
 let%test_unit "multiline comment inline" =
     let source = "<?php // @pholyglot
     /**
@@ -950,7 +949,7 @@ let%test_unit "multiline comment inline" =
             function_type = Function_type {return_type = Int; arguments = [Fixed_array (Int, None)]}
         }
     ])
-*)
+
 
     (*
 let%test "nbody benchmark" =
