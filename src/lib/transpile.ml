@@ -57,12 +57,17 @@ let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with
     | (name, t) -> (name, typ_to_pholyglot t)
 
 let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration = match d with
-    | Function (name, params, statements, typ) ->
+    | Function {
+        name;
+        params;
+        stmts;
+        function_type;
+    } ->
         Pholyglot_ast.Function (
             name,
             List.map param_to_pholyglot params,
-            List.map statement_to_pholyglot statements,
-            typ_to_pholyglot typ
+            List.map statement_to_pholyglot stmts,
+            typ_to_pholyglot function_type
         )
     | Class (name, k, props) -> Pholyglot_ast.Class (name, kind_to_pholyglot k, List.map prop_to_pholyglot props)
 

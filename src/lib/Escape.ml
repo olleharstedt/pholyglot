@@ -18,7 +18,13 @@ let run : (program -> escape_status list) = function
     | Declaration_list decls ->
         (* Loop through all functions and statements to create namespace bindings *)
         let iter_decl = function
-            | Function (name, params, stmts, typ) as fn ->
+            | Function {
+                name;
+                docblock;
+                params;
+                stmts;
+                function_type;
+            } as fn ->
                 let namespace = Namespace.create () in
                 Namespace.add_assignments namespace fn;
                 Escapes
@@ -59,7 +65,13 @@ let get_basic_escapes_data (namespace : Namespace.t) (f : declaration) : escapes
         | Assignment _ :: ss -> iter_stmts ss
     in
     match f with
-    | Function (name, params, stmts, typ) as fn -> 
+    | Function {
+        name;
+        docblock;
+        params;
+        stmts;
+        function_type;
+    } as fn -> 
         Namespace.add_assignments namespace fn;
         iter_stmts stmts;
         ed
@@ -80,7 +92,13 @@ let get_alias_graph (namespace : Namespace.t) (fun_decl : declaration) : alias_g
         | s :: ss -> iter_stmts ss
     in
     match fun_decl with
-    | Function (name, params, stmts, typ) as f ->
+    | Function {
+        name;
+        docblock;
+        params;
+        stmts;
+        function_type;
+    } as f ->
         let _ = Namespace.add_assignments namespace f in
         iter_stmts stmts;
         aliases

@@ -182,8 +182,23 @@ function &foo(): array
     $a = [1, 2, 3];
     return $a;
 }
-[$a, $b, $c] = foo();
+[$a, $b, $c] = &foo();
 echo $a;
 echo $b;
 echo $c;
+```
+
+Error. All good if error message is empty (as in Go).
+
+```
+function bar(): array
+{
+    //return [128, null];
+    return [127, "error message"];
+}
+if (([$result, $error] = bar()) === [$result, null]) {
+    echo 'all good, we got result ' . $result;
+} else {
+    echo $error;
+}
 ```

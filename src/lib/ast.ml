@@ -33,9 +33,16 @@ and typ =
     | Infer_me
     (* TODO: Infer_me of string option ? *)
     | Infer_class_name of string
-    | Function_type of {return_type: typ; arguments: typ list}
+    | Function_type of {
+        return_type: typ;
+        arguments: typ list;
+    }
     | Void
 
+and docblock_comment =
+    | Param of identifier * typ
+
+(* Function argument types *)
 and param =
     | Param of identifier * typ
     (* For params with &$foo notation. Should only be allowed by arrays. *)
@@ -44,7 +51,13 @@ and param =
 (** Top-level constructs *)
 and declaration =
     (* TODO: Replace tuples with inline records *)
-    | Function of function_name * param list * statement list * typ
+    | Function of {
+        name:           function_name;
+        docblock:       docblock_comment list;
+        params:         param list;
+        stmts:          statement list;
+        function_type:  typ
+    }
     | Class of class_name * kind * class_property list
 
 and function_name = string
@@ -97,7 +110,8 @@ and expression =
     | Coerce of typ * expression
 
 let get_arg_types_from_args args =
-    List.map ~f:(fun (Param (n, t) | RefParam (n, t)) -> t) args
+    let f : param -> typ = fun (Param (_, t) | RefParam (_, t)) -> t in
+    List.map ~f:f args
 
 (* Returns true if typ is "value type" and allowed to escape/be copied automatically by C *)
 let typ_is_val = function

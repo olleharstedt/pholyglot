@@ -53,7 +53,13 @@ let find_function t id : typ option =
 
 (** Add variable assignments info namespace *)
 let add_assignments t func = match func with
-    | Function (name, params, stmts, typ) ->
+    | Function {
+        name;
+        docblock;
+        params;
+        stmts;
+        function_type;
+    } ->
         List.iter (fun (Param (id, v)) -> add_identifier t id v) params;
         let iter_stmt = function
             | Assignment (typ, Variable id, expression) -> add_identifier t id typ

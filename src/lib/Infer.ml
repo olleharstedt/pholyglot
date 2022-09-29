@@ -244,7 +244,13 @@ let infer_declaration decl ns : declaration =
     | Function of function_name * param list * statement list * typ
     | Struct of struct_name * struct_field list
     *)
-    | Function (name, params, stmts, Function_type {return_type; arguments}) ->
+    | Function {
+        name;
+        docblock;
+        params;
+        stmts;
+        function_type = Function_type {return_type; arguments};
+    } ->
         if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
         let typ = Function_type {return_type; arguments} in
         Namespace.add_function_type ns name typ;
@@ -253,8 +259,8 @@ let infer_declaration decl ns : declaration =
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
-        Function (name, params, new_stmts, typ)
-    | Function (_, _, _, typ) -> failwith ("infer_declaration function typ " ^ show_typ typ)
+        Function {name; docblock; params; stmts = new_stmts; function_type = typ}
+    | Function {function_type = typ} -> failwith ("infer_declaration function typ " ^ show_typ typ)
     | Class (name, Infer_kind, props) -> 
         let k = infer_kind ns Infer_kind props in
         let c = Class (name, k, props) in

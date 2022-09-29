@@ -17,9 +17,15 @@ let%test_unit "trivial main" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "trivial assignment" =
@@ -32,10 +38,16 @@ let%test_unit "trivial assignment" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "a", Num 0);
-            Return (Variable "a")
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name= "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "a", Num 0);
+                Return (Variable "a");
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "trivial arith" =
@@ -48,18 +60,30 @@ let%test_unit "trivial arith" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "a", Num 0);
-            Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "a", Num 0);
+                Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 (* Transpile from Pholly AST to polyglot AST *)
 let%test_unit "trivial transpile" =
     let ast = Ast.Declaration_list [
-        Function ("main", [], [
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ] in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
@@ -88,10 +112,15 @@ function main()
 
 let%test_unit "trivial arith transpile" =
     let ast  = Ast.Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "a", Num 0);
-            Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "a", Num 0);
+                Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}}
     ] in
     let ast = Infer.run (Namespace.create ()) ast in
     let phast = Transpile.run ast in
@@ -132,10 +161,16 @@ let%test_unit "trivial string" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "str", String "\"Hello\"");
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "str", String "\"Hello\"");
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "trivial concat" =
@@ -148,10 +183,16 @@ let%test_unit "trivial concat" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "str", Concat (String "\"Hello\"", String "\"world\""));
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "str", Concat (String "\"Hello\"", String "\"world\""));
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test "trivial concat type error" =
@@ -180,10 +221,16 @@ let%test_unit "trivial array" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "trivial array infer" =
@@ -198,15 +245,21 @@ let%test_unit "trivial array infer" =
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Assignment (Fixed_array (Int, Some 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (
-                Function_type {return_type = Void; arguments = [String_literal; Int]},
-                "printf",
-                [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]
-            );
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Fixed_array (Int, Some 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    "printf",
+                    [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]
+                );
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "trivial array infer and print" =
@@ -216,11 +269,17 @@ let%test_unit "trivial array infer and print" =
     Log.debug "trivial arith infer and print";
     let ns = Namespace.create () in
     let ast = Ast.Declaration_list [
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
-            Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+                Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ] |> Infer.run ns in
     Log.set_log_level Log.FATAL;
     Log.clear_prefix ();
@@ -318,21 +377,23 @@ function main(): int {
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
-        Function (
-            "foo",
-            [Param ("c", Int)],
-            [Return (Plus ((Variable "c"), (Num 20)))],
-            Function_type {return_type = Int; arguments = [Int]}
-        );
-        Function (
-            "main",
-            [],
-            [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [Param ("c", Int)];
+            stmts = [Return (Plus ((Variable "c"), (Num 20)))];
+            function_type = Function_type {return_type = Int; arguments = [Int]}
+        };
+        Function { 
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
                 Assignment (Int, Variable "b", Function_call (Function_type {return_type = Int; arguments = [Int]}, "foo", [Plus ((Num 10), (Num 20))]));
                 Return (Plus (Variable "b", Num 30))
-            ],
-            Function_type {return_type = Int; arguments = []}
-        )
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "two functions to pholyglot" =
@@ -398,18 +459,24 @@ let%test_unit "double printf" =
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Function_call (
-                Function_type {return_type = Void; arguments = [String_literal; String_literal; Int]},
-                "printf",
-                [
-                    Coerce (String_literal, String "\"%s %d\"");
-                    Coerce (String_literal, String "\"Hello\"");
-                    Num 1
-                ]
-            );
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; String_literal; Int]},
+                    "printf",
+                    [
+                        Coerce (String_literal, String "\"%s %d\"");
+                        Coerce (String_literal, String "\"Hello\"");
+                        Num 1
+                    ]
+                );
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "trivial class declare" =
@@ -429,9 +496,15 @@ let%test_unit "trivial class declare" =
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
-        Function ("main", [], [
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "class new" =
@@ -452,10 +525,16 @@ let%test_unit "class new" =
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "object lvalue assignment" =
@@ -477,11 +556,17 @@ let%test_unit "object lvalue assignment" =
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
-            Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "object object access in expression" =
@@ -504,12 +589,18 @@ let%test_unit "object object access in expression" =
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
-            Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
-            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "__object_property_x")]);
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
+                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "__object_property_x")]);
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "infer object access" =
@@ -519,28 +610,40 @@ let%test_unit "infer object access" =
             ("x", Int);
             ("y", Int)
         ]);
-        Function ("main", [], [
-            Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
-            Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
-            Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
+                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ] |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class ("Point", Val, [
             ("x", Int);
             ("y", Int)
         ]);
-        Function ("main", [], [
-            Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
-            Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
-            Function_call (
-                Function_type {return_type = Void; arguments = [String_literal; Int]},
-                "printf",
-                [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]
-            );
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    "printf",
+                    [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]
+                );
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test_unit "output object access" =
@@ -549,19 +652,25 @@ let%test_unit "output object access" =
             ("__object_property_x", Int);
             ("__object_property_y", Int)
         ]);
-        Function ("main", [], [
-            Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
-            Assignment (Int, Object_access ("p", Property_access "__object_property_x"), (Num 1));
-            Function_call (
-                Function_type {return_type = Void; arguments = [String_literal; Int]},
-                "printf",
-                [
-                    Coerce (String_literal, String "\"%d\"");
-                    Object_access ("p", Property_access "__object_property_x")
-                ]
-            );
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
+                Assignment (Int, Object_access ("p", Property_access "__object_property_x"), (Num 1));
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    "printf",
+                    [
+                        Coerce (String_literal, String "\"%d\"");
+                        Object_access ("p", Property_access "__object_property_x")
+                    ]
+                );
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ]
          |> Transpile.run
          |> Pholyglot_ast.string_of_program
@@ -626,18 +735,19 @@ function foo(Thing $t): void {
         Class ("Thing", Ref, [
             ("__object_property_name", String);
         ]);
-        Function (
-            "foo",
-            [Param ("t", Class_type "Thing")],
-            [
+        Function { 
+            name = "foo";
+            docblock = [];
+            params = [Param ("t", Class_type "Thing")];
+            stmts = [
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},
                     "printf",
                     [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access ("t", Property_access "__object_property_name"))]
                 );
-            ],
-            Function_type {return_type = Void; arguments = [Class_type "Thing"]}
-        );
+            ];
+            function_type = Function_type {return_type = Void; arguments = [Class_type "Thing"]}
+        };
     ])
 
 let%test_unit "alias check" =
@@ -655,11 +765,17 @@ let%test_unit "alias check" =
         Infer.run ns
     in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("foo", [], [
-            Assignment (Int, Variable "a", Num 123);
-            Assignment (Int, Variable "b", Variable "a");
-            Return (Variable "b");
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Int, Variable "a", Num 123);
+                Assignment (Int, Variable "b", Variable "a");
+                Return (Variable "b");
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
 let%test "return ref type is invalid" =
@@ -803,11 +919,38 @@ let%test_unit "multiline comment inline" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function ("main", [], [
-            Return (Num 0)
-        ], Function_type {return_type = Int; arguments = []})
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
     ])
 
+    (*
+let%test_unit "multiline comment inline" =
+    let source = "<?php // @pholyglot
+    /**
+     * @param array<int> $ints
+     */
+    function foo(array &$ints): void {
+    }
+    " in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [];
+            function_type = Function_type {return_type = Int; arguments = [Fixed_array (Int, None)]}
+        }
+    ])
+*)
 
     (*
 let%test "nbody benchmark" =

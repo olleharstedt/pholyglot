@@ -79,7 +79,15 @@ program:
 (*int main() { return 0; }*)
 (*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
-    | "function" f=NAME "(" args=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" s=list(statement) "}" {Function (f, args, s, Function_type {return_type = t; arguments = get_arg_types_from_args args})}
+    | "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+        Function {
+            name;
+            docblock = [];
+            params;
+            stmts;
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+        }
+    }
     | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, Infer_kind, f)}
 
 statement: 
