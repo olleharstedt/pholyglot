@@ -75,11 +75,9 @@
 program:
     | START_SCRIPT d=list(declaration); EOF {Declaration_list d}
 
-(*NAME int NAME main LPAREN RPAREN LBRACE RETURN INT0 SEMICOLON RBRACE*)
-(*int main() { return 0; }*)
-(*declaration: t=NAME n=NAME LPAREN RPAREN LBRACE RBRACE {Function (n, [], [], Int)}*)
 declaration:
-    | docblock_lines=list(dockblock_line) "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+    (* TODO: Why isn't the lexer eating '*/' ? *)
+    | docblock_lines=list(dockblock_line) option("*") option("/") "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         Function {
             name;
             docblock = docblock_lines;

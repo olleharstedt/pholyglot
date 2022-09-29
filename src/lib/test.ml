@@ -32,6 +32,12 @@ let string_of_token (token : Parser.token) : string =
         | COLON -> "COLON"
         | DOLLAR -> "DOLLAR"
         | QUOTE -> "QUOTE"
+        | DOCBLOCK_PARAM -> "DOCBLOCK_PARAM"
+        | VOID_TYPE -> "VOID_TYPE"
+        | ARRAY_TYPE -> "ARRAY_TYPE"
+        | AMPERSAND -> "AMPERSAND"
+        | TIMES -> "TIMES"
+        | DIV -> "DIV"
         | _ -> failwith "string_of_token: Unknown token"
 
 let%test_unit "trivial" =
@@ -970,8 +976,8 @@ let%test_unit "docblock array" =
     function foo(array &$ints): void {
     }
     " in
+    (*
     let linebuf = Lexing.from_string source in
-
     let rec dump_tokens linebuf =
         let token = Lexer.token linebuf in
         match token with
@@ -981,9 +987,10 @@ let%test_unit "docblock array" =
                 dump_tokens linebuf
     in
     dump_tokens linebuf;
-    (*let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in*)
-    [%test_eq: Ast.program] (Declaration_list []) (Declaration_list [
+    *)
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
         Function {
             name = "main";
             docblock = [];
