@@ -37,7 +37,7 @@ let integer_constant = decimal_constant
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
   | "/*"                          { multiline_comment lexbuf; token lexbuf }
-  | "/**"                         { docblock [] lexbuf }
+  | "/**"                         { list(docblock [] lexbuf) }
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
