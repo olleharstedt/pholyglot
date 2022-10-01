@@ -102,6 +102,7 @@ and multiline_comment = parse
 and docblock = parse
   | whitespace_char_no_newline+   { docblock lexbuf }
   | "*"                 { docblock lexbuf }
+  | ""                  { docblock lexbuf }
   | "@param"            { DOCBLOCK_PARAM }
   | "<"                 { LT }
   | ">"                 { GT }
@@ -117,4 +118,4 @@ and docblock = parse
   | '\n'                { new_line lexbuf; docblock lexbuf }
   | "*/"                { token lexbuf }
   | eof                 { failwith "unterminated comment" }
-  | _                   {raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
+  | _                   { raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
