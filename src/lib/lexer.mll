@@ -37,7 +37,7 @@ let integer_constant = decimal_constant
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
   | "/*"                          { multiline_comment lexbuf; token lexbuf }
-  | "/**"                         { docblock lexbuf }
+  | "/**"                         { docblock [] lexbuf }
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
@@ -99,25 +99,27 @@ and multiline_comment = parse
   | '\n'   { new_line lexbuf; multiline_comment lexbuf }
   | _      { multiline_comment lexbuf }
 
-and docblock = parse
+and docblock result = parse
     (*
-  | "<"                 { LT }
-  | ">"                 { GT }
-  | ","                 { COMMA }
   | "$"                 { DOLLAR }
-  | identifier as id    { NAME id }
   | class_name as n     { CLASS_NAME n}
   (* TODO: Type regexp, like array<int>, so alphanumeric + <> + comma *)
   (* TODO: Class name with capital letter *)
   (* TODO: array<Point> *)
   (* TODO: array<string, int> *)
   (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
-  | "*/"                { token lexbuf }
   | eof                 { failwith "unterminated comment" }
   | ""                  { docblock lexbuf }
   *)
-  | "@param"            { DOCBLOCK_PARAM }
-  | whitespace_char_no_newline+   { docblock lexbuf }
-  | "*"                 { docblock lexbuf }
-  | '\n'                { new_line lexbuf; docblock lexbuf }
+  | "@param"            { docblock (DOCBLOCK_PARAM :: result) lexbuf; }
+  | "array"             { docblock (ARRAY_TYPE :: result) lexbuf; }
+  | "int"               { docblock (INT_TYPE :: result) lexbuf; }
+  | "<"                 { docblock (LT :: result) lexbuf; }
+  | ">"                 { docblock (GT :: result) lexbuf; }
+  | ","                 { docblock (COMMA :: result) lexbuf; }
+  | "$" identifier as id  { docblock (NAME id :: result) lexbuf; }
+  | whitespace_char_no_newline+   { docblock result lexbuf }
+  | "*"                 { docblock result lexbuf }
+  | '\n'                { new_line lexbuf; docblock result lexbuf }
+  | "*/"                { result }
   | _                   { raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
