@@ -983,6 +983,7 @@ let%test_unit "docblock array" =
     function foo(array &$ints): void {
     }
     " in
+    (*
     let linebuf = Lexing.from_string source in
     let rec dump_tokens linebuf =
         let token = Lexer.token linebuf in
@@ -993,8 +994,8 @@ let%test_unit "docblock array" =
                 dump_tokens linebuf
     in
     dump_tokens linebuf;
+    *)
 
-    (*
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
@@ -1006,8 +1007,6 @@ let%test_unit "docblock array" =
             function_type = Function_type {return_type = Int; arguments = [Fixed_array (Int, None)]}
         }
     ])
-    *)
-
 
     (*
 let%test "nbody benchmark" =
