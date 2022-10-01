@@ -100,10 +100,7 @@ and multiline_comment = parse
   | _      { multiline_comment lexbuf }
 
 and docblock = parse
-  | whitespace_char_no_newline+   { docblock lexbuf }
-  | "*"                 { docblock lexbuf }
-  | ""                  { docblock lexbuf }
-  | "@param"            { DOCBLOCK_PARAM }
+    (*
   | "<"                 { LT }
   | ">"                 { GT }
   | ","                 { COMMA }
@@ -115,7 +112,12 @@ and docblock = parse
   (* TODO: array<Point> *)
   (* TODO: array<string, int> *)
   (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
-  | '\n'                { new_line lexbuf; docblock lexbuf }
   | "*/"                { token lexbuf }
   | eof                 { failwith "unterminated comment" }
+  | ""                  { docblock lexbuf }
+  *)
+  | "@param"            { DOCBLOCK_PARAM }
+  | whitespace_char_no_newline+   { docblock lexbuf }
+  | "*"                 { docblock lexbuf }
+  | '\n'                { new_line lexbuf; docblock lexbuf }
   | _                   { raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
