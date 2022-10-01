@@ -20,7 +20,6 @@
 %token <string> NAME
 %token <string> STRING_LITERAL
 %token <string> CLASS_NAME
-%token CONSTANT
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"

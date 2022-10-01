@@ -15,17 +15,17 @@ let string_of_token (token : Parser.token) : string =
         | PLUS -> "PLUS"
         | NEW -> "NEW"
         | NAME s  -> "NAME " ^ s
+        | CLASS_NAME s -> "CLASS_NAME " ^ s
         | MINUS -> "MINUS"
         | LT -> "LT"
+        | GT -> "GT"
         | LPAREN -> "LPAREN"
         | LBRACK -> "LBRACK"
         | LBRACE -> "LBRACE"
         | INT i -> "INT" ^ string_of_int i
-        | GT -> "GT"
         | EQEQ -> "EQEQ"
         | EQ -> "EQ"
         | EOF -> "EOF"
-        | CONSTANT -> "CONSTANT"
         | START_SCRIPT -> "START_SCRIPT"
         | FUNCTION -> "FUNCTION"
         | DOT -> "DOT"
@@ -38,6 +38,12 @@ let string_of_token (token : Parser.token) : string =
         | AMPERSAND -> "AMPERSAND"
         | TIMES -> "TIMES"
         | DIV -> "DIV"
+        | COMMA -> "COMMA"
+        | ARROW -> "ARROW"
+        | INT_TYPE -> "INT_TYPE"
+        | STRING_TYPE -> "STRING_TYPE"
+        | CLASS -> "CLASS"
+        | PUBLIC -> "PUBLIC"
         | _ -> failwith "string_of_token: Unknown token"
 
 let%test_unit "trivial" =
@@ -971,12 +977,11 @@ let%test_unit "multiline comment inline" =
 let%test_unit "docblock array" =
     let source = "<?php // @pholyglot
     /**
-     * @param
+     * @param array <int> $ints
      */
     function foo(array &$ints): void {
     }
     " in
-    (*
     let linebuf = Lexing.from_string source in
     let rec dump_tokens linebuf =
         let token = Lexer.token linebuf in
@@ -987,7 +992,8 @@ let%test_unit "docblock array" =
                 dump_tokens linebuf
     in
     dump_tokens linebuf;
-    *)
+
+    (*
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
@@ -999,6 +1005,7 @@ let%test_unit "docblock array" =
             function_type = Function_type {return_type = Int; arguments = [Fixed_array (Int, None)]}
         }
     ])
+    *)
 
 
     (*

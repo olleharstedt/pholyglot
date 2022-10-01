@@ -18,6 +18,7 @@ open Lexing
 open Parser
 
 exception Error of string
+exception SyntaxError of string
 }
 
 (** Copied from Jacques-Henri Jourdan, Inria Paris *)
@@ -99,8 +100,21 @@ and multiline_comment = parse
   | _      { multiline_comment lexbuf }
 
 and docblock = parse
-  | "*/"     { token lexbuf }
-  | "@param" { DOCBLOCK_PARAM }
-  | eof      { failwith "unterminated comment" }
-  | '\n'     { new_line lexbuf; docblock lexbuf }
-  | _        { docblock lexbuf }
+  | whitespace_char_no_newline+   { docblock lexbuf }
+  | "*"                 { docblock lexbuf }
+  | "@param"            { DOCBLOCK_PARAM }
+  | "<"                 { LT }
+  | ">"                 { GT }
+  | ","                 { COMMA }
+  | "$"                 { DOLLAR }
+  | identifier as id    { NAME id }
+  | class_name as n     { CLASS_NAME n}
+  (* TODO: Type regexp, like array<int>, so alphanumeric + <> + comma *)
+  (* TODO: Class name with capital letter *)
+  (* TODO: array<Point> *)
+  (* TODO: array<string, int> *)
+  (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
+  | '\n'                { new_line lexbuf; docblock lexbuf }
+  | "*/"                { token lexbuf }
+  | eof                 { failwith "unterminated comment" }
+  | _                   {raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
