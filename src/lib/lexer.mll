@@ -37,7 +37,7 @@ let integer_constant = decimal_constant
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
   | "/*"                          { multiline_comment lexbuf; token lexbuf }
-  | "/**"                         { list(docblock [] lexbuf) }
+  | "/**"                         { DOCBLOCK (List.rev (docblock [] lexbuf)) }
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
@@ -101,25 +101,25 @@ and multiline_comment = parse
 
 and docblock result = parse
     (*
-  | "$"                 { DOLLAR }
   | class_name as n     { CLASS_NAME n}
   (* TODO: Type regexp, like array<int>, so alphanumeric + <> + comma *)
   (* TODO: Class name with capital letter *)
   (* TODO: array<Point> *)
   (* TODO: array<string, int> *)
   (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
-  | eof                 { failwith "unterminated comment" }
   | ""                  { docblock lexbuf }
   *)
+  | "$"                 { docblock (DOLLAR :: result) lexbuf; }
   | "@param"            { docblock (DOCBLOCK_PARAM :: result) lexbuf; }
   | "array"             { docblock (ARRAY_TYPE :: result) lexbuf; }
   | "int"               { docblock (INT_TYPE :: result) lexbuf; }
   | "<"                 { docblock (LT :: result) lexbuf; }
   | ">"                 { docblock (GT :: result) lexbuf; }
   | ","                 { docblock (COMMA :: result) lexbuf; }
-  | "$" identifier as id  { docblock (NAME id :: result) lexbuf; }
+  | identifier as id  { docblock (NAME id :: result) lexbuf; }
   | whitespace_char_no_newline+   { docblock result lexbuf }
   | "*"                 { docblock result lexbuf }
   | '\n'                { new_line lexbuf; docblock result lexbuf }
   | "*/"                { result }
+  | eof                 { failwith "unterminated comment" }
   | _                   { raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }

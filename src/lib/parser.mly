@@ -20,6 +20,7 @@
 %token <string> NAME
 %token <string> STRING_LITERAL
 %token <string> CLASS_NAME
+%token <token list> DOCBLOCK
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"
@@ -75,8 +76,7 @@ program:
     | START_SCRIPT d=list(declaration); EOF {Declaration_list d}
 
 declaration:
-    (* TODO: Why isn't the lexer eating '*/' ? *)
-    | docblock_lines=list(dockblock_line) option("*") option("/") "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+    | docblock_lines=list(dockblock_line) "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         Function {
             name;
             docblock = docblock_lines;

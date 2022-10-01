@@ -3,7 +3,7 @@ open Base
 open Expect_test_helpers_base
 module Log = Dolog.Log
 
-let string_of_token (token : Parser.token) : string =
+let rec string_of_token (token : Parser.token) : string =
     let open Parser in
     match token with
         | STRING_LITERAL s -> "STRING_LITERAL " ^ s
@@ -44,6 +44,7 @@ let string_of_token (token : Parser.token) : string =
         | STRING_TYPE -> "STRING_TYPE"
         | CLASS -> "CLASS"
         | PUBLIC -> "PUBLIC"
+        | DOCBLOCK l -> sprintf "DOCBLOCK (%s)" (List.fold_left l ~init:"" ~f:(fun a b -> a ^ " " ^ string_of_token b))
         | _ -> failwith "string_of_token: Unknown token"
 
 let%test_unit "trivial" =
