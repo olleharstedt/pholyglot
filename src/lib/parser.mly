@@ -76,10 +76,10 @@ program:
     | START_SCRIPT d=list(declaration); EOF {Declaration_list d}
 
 declaration:
-    | docblock_lines=list(dockblock_line) "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+    | docblock_list=docblock(DOCBLOCK) "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         Function {
             name;
-            docblock = docblock_lines;
+            docblock = docblock_list;
             params;
             stmts;
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
@@ -92,8 +92,13 @@ statement:
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
+docblock(t):
+  | DOCBLOCK l=list(dockblock_line) {l : Ast.docblock_comment list}
+  |                                 {[]}
+
+    (*DOCBLOCK ( DOCBLOCK_PARAM ARRAY_TYPE LT INT_TYPE GT DOLLAR NAME ints)*)
 dockblock_line:
-  | "@param"  {Param ("moo", Int) : Ast.docblock_comment}
+    | DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}
 
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
 
