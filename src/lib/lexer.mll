@@ -16,9 +16,15 @@
 {
 open Lexing
 open Parser
+open Docblockparser
 
 exception Error of string
 exception SyntaxError of string
+
+type state =
+    | Normal_state
+    | Docblock_state
+let state = ref Normal_state
 }
 
 (** Copied from Jacques-Henri Jourdan, Inria Paris *)
@@ -109,14 +115,14 @@ and docblock result = parse
   (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
   | ""                  { docblock lexbuf }
   *)
-  | "$"                 { docblock (DOLLAR :: result) lexbuf; }
-  | "@param"            { docblock (DOCBLOCK_PARAM :: result) lexbuf; }
-  | "array"             { docblock (ARRAY_TYPE :: result) lexbuf; }
-  | "int"               { docblock (INT_TYPE :: result) lexbuf; }
-  | "<"                 { docblock (LT :: result) lexbuf; }
-  | ">"                 { docblock (GT :: result) lexbuf; }
-  | ","                 { docblock (COMMA :: result) lexbuf; }
-  | identifier as id  { docblock (NAME id :: result) lexbuf; }
+  | "$"                 { docblock (DOC_DOLLAR :: result) lexbuf; }
+  | "@param"            { docblock (DOC_DOCBLOCK_PARAM :: result) lexbuf; }
+  | "array"             { docblock (DOC_ARRAY_TYPE :: result) lexbuf; }
+  | "int"               { docblock (DOC_INT_TYPE :: result) lexbuf; }
+  | "<"                 { docblock (DOC_LT :: result) lexbuf; }
+  | ">"                 { docblock (DOC_GT :: result) lexbuf; }
+  | ","                 { docblock (DOC_COMMA :: result) lexbuf; }
+  | identifier as id  { docblock (DOC_NAME id :: result) lexbuf; }
   | whitespace_char_no_newline+   { docblock result lexbuf }
   | "*"                 { docblock result lexbuf }
   | '\n'                { new_line lexbuf; docblock result lexbuf }

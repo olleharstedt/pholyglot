@@ -3,6 +3,18 @@ open Base
 open Expect_test_helpers_base
 module Log = Dolog.Log
 
+let rec string_of_doctoken (token : Docblockparser.token) : string =
+    let open Docblockparser in
+    match token with
+    | DOC_ARRAY_TYPE -> "array"
+    | DOC_DOLLAR -> "$"
+    | DOC_DOCBLOCK_PARAM -> "@param"
+    | DOC_INT_TYPE -> "int"
+    | DOC_LT -> "<"
+    | DOC_GT -> ">"
+    | DOC_COMMA -> ","
+    | DOC_NAME s -> "DOC_NAME " ^ s
+
 let rec string_of_token (token : Parser.token) : string =
     let open Parser in
     match token with
@@ -44,7 +56,7 @@ let rec string_of_token (token : Parser.token) : string =
         | STRING_TYPE -> "STRING_TYPE"
         | CLASS -> "CLASS"
         | PUBLIC -> "PUBLIC"
-        | DOCBLOCK l -> sprintf "DOCBLOCK (%s)" (List.fold_left l ~init:"" ~f:(fun a b -> a ^ " " ^ string_of_token b))
+        | DOCBLOCK l -> sprintf "DOCBLOCK (%s)" (List.fold_left l ~init:"" ~f:(fun a b -> a ^ " " ^ string_of_doctoken b))
         | _ -> failwith "string_of_token: Unknown token"
 
 let%test_unit "trivial" =
@@ -978,7 +990,7 @@ let%test_unit "multiline comment inline" =
 let%test_unit "docblock array" =
     let source = "<?php // @pholyglot
     /**
-     * @param
+     * @param array<int> $ints
      */
     function foo(array &$ints): void {
     }

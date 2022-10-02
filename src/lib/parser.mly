@@ -14,13 +14,15 @@
 
 %{
   open Ast
+
+  (* Copy from https://github.com/ocaml/ocaml/blob/trunk/stdlib/seq.mli ? *)
 %}
 
 %token <int> INT
 %token <string> NAME
 %token <string> STRING_LITERAL
 %token <string> CLASS_NAME
-%token <token list> DOCBLOCK
+%token <Docblockparser.token list> DOCBLOCK
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"
@@ -76,10 +78,27 @@ program:
     | START_SCRIPT d=list(declaration); EOF {Declaration_list d}
 
 declaration:
-    | docblock_list=docblock(DOCBLOCK) "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+    | "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         Function {
             name;
-            docblock = docblock_list;
+            docblock = [];
+            params;
+            stmts;
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+        }
+    }
+    | cb=DOCBLOCK "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+        let linebuf = Lexing.from_string "" in
+
+        let dispenser_of_token_list (l : Docblockparser.token list) : Lexing.lexbuf -> Docblockparser.token =
+            let d = OSeq.to_gen (OSeq.of_list l) in
+            fun _lexbuf -> Option.get (d ())
+        in
+        let disp = dispenser_of_token_list cb in
+        let cb = if List.length cb > 0 then Docblockparser.docblock disp linebuf else [] in
+        Function {
+            name;
+            docblock = cb;
             params;
             stmts;
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
@@ -92,13 +111,15 @@ statement:
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
+  (*
 docblock(t):
-  | DOCBLOCK l=list(dockblock_line) {l : Ast.docblock_comment list}
-  |                                 {[]}
-
-    (*DOCBLOCK ( DOCBLOCK_PARAM ARRAY_TYPE LT INT_TYPE GT DOLLAR NAME ints)*)
-dockblock_line:
-    | DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}
+  | {[] : Ast.docblock_comment list}
+  (*| t DOCBLOCK_PARAM n=NAME {[Param (n, Int)] : Ast.docblock_comment list}*)
+    (*
+  | DOCBLOCK_PARAM {failwith "qwe"}
+  |  {failwith "asd";}
+  *)
+    *)
 
 class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
 
