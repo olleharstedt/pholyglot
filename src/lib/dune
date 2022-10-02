@@ -1,5 +1,5 @@
 (library
- (libraries base stdio str re dolog expect_test_helpers_kernel oseq)
+ (libraries base stdio str re dolog expect_test_helpers_kernel oseq menhir)
  (preprocess (pps ppx_deriving.show ppx_deriving.ord ppx_inline_test ppx_assert ppx_expect ppx_compare ppx_sexp_conv))
  (inline_tests)
  (name pholyglot))

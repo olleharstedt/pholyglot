@@ -89,12 +89,18 @@ declaration:
     }
     | cb=DOCBLOCK "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         let linebuf = Lexing.from_string "" in
-
         let dispenser_of_token_list (l : Docblockparser.token list) : Lexing.lexbuf -> Docblockparser.token =
             let d = OSeq.to_gen (OSeq.of_list l) in
             fun _lexbuf -> Option.get (d ())
         in
         let disp = dispenser_of_token_list cb in
+        (*
+        let revised_parser dispenser =
+              MenhirLib.Convert.Simplified.traditional2revised
+                  menhir_generated_parser
+                  dispenser
+        in
+        *)
         let cb = if List.length cb > 0 then Docblockparser.docblock disp linebuf else [] in
         Function {
             name;

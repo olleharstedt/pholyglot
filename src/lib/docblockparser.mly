@@ -18,4 +18,5 @@ docblock:
   | d=list(docblock_line) {d}
 
 docblock_line:
-  | DOC_DOCBLOCK_PARAM DOC_INT_TYPE n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }
+  (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
+  | DOC_DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}

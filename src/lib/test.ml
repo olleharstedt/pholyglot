@@ -990,7 +990,7 @@ let%test_unit "multiline comment inline" =
 let%test_unit "docblock array" =
     let source = "<?php // @pholyglot
     /**
-     * @param int $int
+     * @param
      */
     function foo(array &$ints): void {
     }
