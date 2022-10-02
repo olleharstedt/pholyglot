@@ -10,6 +10,7 @@
 %token GT ">"
 %token COMMA ","
 %token <string> NAME
+%token START_OF_COMMENT "/**"
 %token END_OF_COMMENT "*/"
 %token EOF
 
@@ -17,8 +18,10 @@
 %%
 
 docblock:
-  | d=list(docblock_line) {d}
+  | START_OF_COMMENT d=list(docblock_line) {d}
+  | START_OF_COMMENT d=list(docblock_line) END_OF_COMMENT {d}
 
 docblock_line:
   (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
   | DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}
+  | START_OF_COMMENT { failwith "wrong" }

@@ -26,6 +26,8 @@ rule docblock = parse
   (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
   | ""                  { docblock lexbuf }
   *)
+  | whitespace_char_no_newline+   { docblock lexbuf }
+  | '*'                 { docblock lexbuf }
   | "$"                 { DOLLAR }
   | "@param"            { DOCBLOCK_PARAM }
   | "array"             { ARRAY_TYPE }
@@ -34,8 +36,8 @@ rule docblock = parse
   | ">"                 { GT }
   | ","                 { COMMA }
   | identifier as id    { NAME id }
-  | whitespace_char_no_newline+   { docblock lexbuf }
   | '\n'                { new_line lexbuf; docblock lexbuf }
+  | "/**"               { START_OF_COMMENT }
   | "*/"                { END_OF_COMMENT }
   | eof                 { EOF }
   | _                   { raise (DocblockSyntaxError ("Docblocklexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }

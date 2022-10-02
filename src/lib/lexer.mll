@@ -43,9 +43,9 @@ let integer_constant = decimal_constant
 
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
+  | "/**" _* as s "*/"            { DOCBLOCK_AS_STR s }
   | "/*"                          { multiline_comment lexbuf; token lexbuf }
   (*| "/**"                         { DOCBLOCK (List.rev (docblock [] lexbuf)) }*)
-  | "/**" _* as s "*/"            { DOCBLOCK_AS_STR s }
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }

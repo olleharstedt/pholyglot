@@ -8,13 +8,16 @@ let rec string_of_doctoken (token : Docblockparser.token) : string =
     match token with
     | ARRAY_TYPE -> "array"
     | DOLLAR -> "$"
-    | DOCBLOCK_PARAM -> "@param"
+    | DOCBLOCK_PARAM -> "DOCBLOCK_PARAM"
     | INT_TYPE -> "int"
     | LT -> "<"
     | GT -> ">"
     | COMMA -> ","
     | NAME s -> "DOC_NAME " ^ s
     | EOF -> "EOF"
+    | START_OF_COMMENT -> "START_OF_COMMENT"
+    | END_OF_COMMENT -> "END_OF_COMMENT"
+    | _ -> failwith "string_of_doctoken: unknown token"
 
 let rec string_of_token (token : Parser.token) : string =
     let open Parser in
@@ -997,6 +1000,24 @@ let%test_unit "docblock array" =
     function foo(array &$ints): void {
     }
     " in
+    let comment = {|
+    /**
+     * @param
+|} in
+    (*
+    let linebuf = Lexing.from_string comment in
+    let rec dump_tokens linebuf =
+        let token = Docblocklexer.docblock linebuf in
+        match token with
+            | Docblockparser.EOF -> ()
+            | t ->
+                printf "%s" ((string_of_doctoken t) ^ " ");
+                dump_tokens linebuf
+            | _ ->failwith "match failure?"
+    in
+    dump_tokens linebuf;
+    *)
+
     (*
     let linebuf = Lexing.from_string source in
     let rec dump_tokens linebuf =
