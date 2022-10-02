@@ -43,7 +43,7 @@ let integer_constant = decimal_constant
 
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
-  | "/**" _* as s "*/"            { DOCBLOCK_AS_STR s }
+  | "/**" _* as s "*/"            { DOCBLOCK_AS_STR s } (* s includes '/**' but not '*/' *)
   | "/*"                          { multiline_comment lexbuf; token lexbuf }
   (*| "/**"                         { DOCBLOCK (List.rev (docblock [] lexbuf)) }*)
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }

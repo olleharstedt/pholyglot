@@ -18,10 +18,10 @@
 %%
 
 docblock:
-  | START_OF_COMMENT d=list(docblock_line) {d}
-  | START_OF_COMMENT d=list(docblock_line) END_OF_COMMENT {d}
+  | START_OF_COMMENT d=list(docblock_line) EOF {d}
 
 docblock_line:
   (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
-  | DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}
+  | DOCBLOCK_PARAM {DocParam ("asd", Int) }
+  | DOCBLOCK_PARAM INT_TYPE DOLLAR s=NAME {DocParam (s, Int) }
   | START_OF_COMMENT { failwith "wrong" }

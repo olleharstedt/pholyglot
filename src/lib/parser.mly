@@ -90,6 +90,7 @@ declaration:
     }
     | doc=DOCBLOCK_AS_STR "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         let linebuf = Lexing.from_string doc in
+        let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in
         (*
         let dispenser_of_token_list (l : Docblockparser.token list) : Lexing.lexbuf -> Docblockparser.token =
             let d = OSeq.to_gen (OSeq.of_list l) in
@@ -104,10 +105,9 @@ declaration:
                   dispenser
         in
         *)
-        let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in
         Function {
             name;
-            docblock = [];
+            docblock = cb;
             params;
             stmts;
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};

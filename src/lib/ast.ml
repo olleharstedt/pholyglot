@@ -40,7 +40,7 @@ and typ =
     | Void
 
 and docblock_comment =
-    | Param of identifier * typ
+    | DocParam of identifier * typ
 
 (* Function argument types *)
 and param =

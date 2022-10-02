@@ -995,15 +995,22 @@ let%test_unit "multiline comment inline" =
 let%test_unit "docblock array" =
     let source = "<?php // @pholyglot
     /**
-     * @param
+     * @param int $i
      */
     function foo(array &$ints): void {
     }
     " in
+
+    (*
     let comment = {|
     /**
-     * @param
+     * @param int $i
 |} in
+    let linebuf = Lexing.from_string comment in
+    let comment_list = Docblockparser.docblock Docblocklexer.docblock linebuf in
+    [%test_eq: Ast.docblock_comment list] comment_list [Param ("ads", Int)]
+    *)
+
     (*
     let linebuf = Lexing.from_string comment in
     let rec dump_tokens linebuf =
@@ -1029,6 +1036,9 @@ let%test_unit "docblock array" =
                 dump_tokens linebuf
     in
     dump_tokens linebuf;
+    *)
+
+    (*
     START_SCRIPT 
     DOCBLOCK ( DOCBLOCK_PARAM ARRAY_TYPE LT INT_TYPE GT DOLLAR NAME ints)
     FUNCTION NAME foo LPAREN ARRAY_TYPE AMPERSAND DOLLAR NAME ints RPAREN COLON VOID_TYPE LBRACE RBRACE 
