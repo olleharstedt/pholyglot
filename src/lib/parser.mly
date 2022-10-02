@@ -22,7 +22,8 @@
 %token <string> NAME
 %token <string> STRING_LITERAL
 %token <string> CLASS_NAME
-%token <Docblockparser.token list> DOCBLOCK
+(*%token <Docblockparser.token list> DOCBLOCK*)
+%token <string> DOCBLOCK_AS_STR
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
 %token MINUS "-"
@@ -87,13 +88,15 @@ declaration:
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
         }
     }
-    | cb=DOCBLOCK "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
-        let linebuf = Lexing.from_string "" in
+    | doc=DOCBLOCK_AS_STR "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+        let linebuf = Lexing.from_string doc in
+        (*
         let dispenser_of_token_list (l : Docblockparser.token list) : Lexing.lexbuf -> Docblockparser.token =
             let d = OSeq.to_gen (OSeq.of_list l) in
             fun _lexbuf -> Option.get (d ())
         in
         let disp = dispenser_of_token_list cb in
+        *)
         (*
         let revised_parser dispenser =
               MenhirLib.Convert.Simplified.traditional2revised
@@ -101,10 +104,10 @@ declaration:
                   dispenser
         in
         *)
-        let cb = if List.length cb > 0 then Docblockparser.docblock disp linebuf else [] in
+        let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in
         Function {
             name;
-            docblock = cb;
+            docblock = [];
             params;
             stmts;
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};

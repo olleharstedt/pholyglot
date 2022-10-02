@@ -6,14 +6,15 @@ module Log = Dolog.Log
 let rec string_of_doctoken (token : Docblockparser.token) : string =
     let open Docblockparser in
     match token with
-    | DOC_ARRAY_TYPE -> "array"
-    | DOC_DOLLAR -> "$"
-    | DOC_DOCBLOCK_PARAM -> "@param"
-    | DOC_INT_TYPE -> "int"
-    | DOC_LT -> "<"
-    | DOC_GT -> ">"
-    | DOC_COMMA -> ","
-    | DOC_NAME s -> "DOC_NAME " ^ s
+    | ARRAY_TYPE -> "array"
+    | DOLLAR -> "$"
+    | DOCBLOCK_PARAM -> "@param"
+    | INT_TYPE -> "int"
+    | LT -> "<"
+    | GT -> ">"
+    | COMMA -> ","
+    | NAME s -> "DOC_NAME " ^ s
+    | EOF -> "EOF"
 
 let rec string_of_token (token : Parser.token) : string =
     let open Parser in
@@ -56,7 +57,8 @@ let rec string_of_token (token : Parser.token) : string =
         | STRING_TYPE -> "STRING_TYPE"
         | CLASS -> "CLASS"
         | PUBLIC -> "PUBLIC"
-        | DOCBLOCK l -> sprintf "DOCBLOCK (%s)" (List.fold_left l ~init:"" ~f:(fun a b -> a ^ " " ^ string_of_doctoken b))
+        (*| DOCBLOCK l -> sprintf "DOCBLOCK (%s)" (List.fold_left l ~init:"" ~f:(fun a b -> a ^ " " ^ string_of_doctoken b))*)
+        | DOCBLOCK_AS_STR s -> "DOCBLOCK_AS_STR " ^ s
         | _ -> failwith "string_of_token: Unknown token"
 
 let%test_unit "trivial" =

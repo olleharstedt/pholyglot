@@ -16,15 +16,16 @@
 {
 open Lexing
 open Parser
-open Docblockparser
 
 exception Error of string
 exception SyntaxError of string
 
+(*
 type state =
     | Normal_state
     | Docblock_state
 let state = ref Normal_state
+*)
 }
 
 (** Copied from Jacques-Henri Jourdan, Inria Paris *)
@@ -43,7 +44,8 @@ let integer_constant = decimal_constant
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
   | "/*"                          { multiline_comment lexbuf; token lexbuf }
-  | "/**"                         { DOCBLOCK (List.rev (docblock [] lexbuf)) }
+  (*| "/**"                         { DOCBLOCK (List.rev (docblock [] lexbuf)) }*)
+  | "/**" _* as s "*/"            { DOCBLOCK_AS_STR s }
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
@@ -105,6 +107,7 @@ and multiline_comment = parse
   | '\n'   { new_line lexbuf; multiline_comment lexbuf }
   | _      { multiline_comment lexbuf }
 
+  (*
 and docblock result = parse
     (*
   | class_name as n     { CLASS_NAME n}
@@ -129,3 +132,4 @@ and docblock result = parse
   | "*/"                { result }
   | eof                 { failwith "unterminated comment" }
   | _                   { raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
+  *)

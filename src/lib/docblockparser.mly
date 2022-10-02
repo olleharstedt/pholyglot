@@ -2,14 +2,15 @@
   open Ast
 %}
 
-%token DOC_ARRAY_TYPE "array"
-%token DOC_DOLLAR "$"
-%token DOC_DOCBLOCK_PARAM "@param"
-%token DOC_INT_TYPE "int"
-%token DOC_LT "<"
-%token DOC_GT ">"
-%token DOC_COMMA ","
-%token <string> DOC_NAME
+%token ARRAY_TYPE "array"
+%token DOLLAR "$"
+%token DOCBLOCK_PARAM "@param"
+%token INT_TYPE "int"
+%token LT "<"
+%token GT ">"
+%token COMMA ","
+%token <string> NAME
+%token EOF
 
 %start<Ast.docblock_comment list> docblock
 %%
@@ -19,4 +20,4 @@ docblock:
 
 docblock_line:
   (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
-  | DOC_DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}
+  | DOCBLOCK_PARAM {Param ("asd", Int) : Ast.docblock_comment}
