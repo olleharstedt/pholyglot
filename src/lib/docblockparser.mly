@@ -18,7 +18,7 @@
 %%
 
 docblock:
-  | START_OF_COMMENT d=list(docblock_line) EOF {d}
+  | d=list(docblock_line) EOF {d}
 
 docblock_line:
   (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)

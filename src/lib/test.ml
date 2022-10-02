@@ -999,9 +999,6 @@ let%test_unit "docblock array" =
      */
     function foo(array &$ints): void {
     }
-    /*
-    mo
-    */
     " in
 
     (*
