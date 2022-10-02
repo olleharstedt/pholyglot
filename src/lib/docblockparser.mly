@@ -10,6 +10,7 @@
 %token GT ">"
 %token COMMA ","
 %token <string> NAME
+%token END_OF_COMMENT "*/"
 %token EOF
 
 %start<Ast.docblock_comment list> docblock

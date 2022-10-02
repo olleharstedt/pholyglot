@@ -36,6 +36,6 @@ rule docblock = parse
   | identifier as id    { NAME id }
   | whitespace_char_no_newline+   { docblock lexbuf }
   | '\n'                { new_line lexbuf; docblock lexbuf }
-  | "/"                { EOF }
-  | eof                 { failwith "unterminated comment" }
+  | "*/"                { END_OF_COMMENT }
+  | eof                 { EOF }
   | _                   { raise (DocblockSyntaxError ("Docblocklexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
