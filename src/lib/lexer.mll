@@ -110,6 +110,7 @@ and multiline_comment = parse
 and docblock_comment buffer = parse
   | "*/"                          { DOCBLOCK_AS_STR (Buffer.contents buffer) }
   | '\n'                          { new_line lexbuf; docblock_comment buffer lexbuf }
+  | whitespace_char_no_newline+   { docblock_comment buffer lexbuf }
   | _? as s                       { Buffer.add_string buffer s; docblock_comment buffer lexbuf }
   | eof                           { failwith "unterminated docblock" }
 
