@@ -992,7 +992,7 @@ let%test_unit "multiline comment inline" =
         }
     ])
 
-let%test_unit "docblock array" =
+let%test_unit "docblock int" =
     let source = "<?php // @pholyglot
     /**
      * @param int $i
@@ -1012,6 +1012,28 @@ let%test_unit "docblock array" =
             function_type = Function_type {return_type = Void; arguments = [Int]}
         }
     ])
+
+let%test_unit "docblock int array" =
+    let source = "<?php // @pholyglot
+    /**
+     * @param array<int> $ints
+     */
+    function foo(array $i): void {
+    }
+    " in
+
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [DocParam ("ints", Dynamic_array (Int))];
+            params = [Param ("i", Int)];
+            stmts = [];
+            function_type = Function_type {return_type = Void; arguments = [Int]}
+        }
+    ])
+
 
     (*
 let%test "nbody benchmark" =

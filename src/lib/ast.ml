@@ -26,7 +26,7 @@ and typ =
     | Class_type of class_name
     (* Fixed array can have Infer_me * None, when size is not yet known *)
     | Fixed_array of typ * int option
-    (*| Dynamic_array of typ*)
+    | Dynamic_array of typ
     (*| Tuple of typ              (* Example: Fixed_array (Tuple Int) *) *)
     (*| Linked_list*)
     (*| Hash_table*)
