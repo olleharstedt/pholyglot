@@ -1126,3 +1126,4 @@ function main(): int
 (* Chaining property access, like $rectangle->point->x *)
 (* Nullable *)
 (* All props must have default values *)
+(* docblock with text *)
