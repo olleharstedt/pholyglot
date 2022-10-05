@@ -24,4 +24,8 @@ docblock_line:
   (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
   | DOCBLOCK_PARAM {DocParam ("asd", Int) }
   | DOCBLOCK_PARAM INT_TYPE DOLLAR s=NAME {DocParam (s, Int) }
+  | DOCBLOCK_PARAM "array" "<" t=typ ">" DOLLAR s=NAME {DocParam (s, Dynamic_array t) }
   | START_OF_COMMENT { failwith "wrong" }
+
+typ:
+  | "int" {Int : Ast.typ}

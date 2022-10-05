@@ -1018,7 +1018,7 @@ let%test_unit "docblock int array" =
     /**
      * @param array<int> $ints
      */
-    function foo(array $i): void {
+    function foo(array &$ints): void {
     }
     " in
 
@@ -1028,9 +1028,9 @@ let%test_unit "docblock int array" =
         Function {
             name = "foo";
             docblock = [DocParam ("ints", Dynamic_array (Int))];
-            params = [Param ("i", Int)];
+            params = [RefParam ("ints", Fixed_array (Infer_me, None))];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Int]}
+            function_type = Function_type {return_type = Void; arguments = [Fixed_array (Infer_me, None)]}
         }
     ])
 
