@@ -997,62 +997,19 @@ let%test_unit "docblock array" =
     /**
      * @param int $i
      */
-    function foo(array &$ints): void {
+    function foo(int $i): void {
     }
     " in
-
-    (*
-    let comment = {|
-    /**
-     * @param int $i
-|} in
-    let linebuf = Lexing.from_string comment in
-    let comment_list = Docblockparser.docblock Docblocklexer.docblock linebuf in
-    [%test_eq: Ast.docblock_comment list] comment_list [Param ("ads", Int)]
-    *)
-
-    (*
-    let linebuf = Lexing.from_string comment in
-    let rec dump_tokens linebuf =
-        let token = Docblocklexer.docblock linebuf in
-        match token with
-            | Docblockparser.EOF -> ()
-            | t ->
-                printf "%s" ((string_of_doctoken t) ^ " ");
-                dump_tokens linebuf
-            | _ ->failwith "match failure?"
-    in
-    dump_tokens linebuf;
-    *)
-
-    (*
-    let linebuf = Lexing.from_string source in
-    let rec dump_tokens linebuf =
-        let token = Lexer.token linebuf in
-        match token with
-            | Parser.EOF -> ()
-            | t ->
-                printf "%s" ((string_of_token t) ^ " ");
-                dump_tokens linebuf
-    in
-    dump_tokens linebuf;
-    *)
-
-    (*
-    START_SCRIPT 
-    DOCBLOCK ( DOCBLOCK_PARAM ARRAY_TYPE LT INT_TYPE GT DOLLAR NAME ints)
-    FUNCTION NAME foo LPAREN ARRAY_TYPE AMPERSAND DOLLAR NAME ints RPAREN COLON VOID_TYPE LBRACE RBRACE 
-    *)
 
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
         Function {
-            name = "main";
-            docblock = [];
-            params = [];
+            name = "foo";
+            docblock = [DocParam ("i", Int)];
+            params = [Param ("i", Int)];
             stmts = [];
-            function_type = Function_type {return_type = Int; arguments = [Fixed_array (Int, None)]}
+            function_type = Function_type {return_type = Void; arguments = [Int]}
         }
     ])
 
