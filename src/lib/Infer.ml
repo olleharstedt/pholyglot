@@ -237,6 +237,27 @@ let check_return_type ns stmt typ =
     | _ -> ()
     (* TODO: If, foreach, etc *)
 
+let find_docblock (l : docblock_comment list) (id : string) : docblock_comment option =
+    List.find_opt (fun docblock_comment -> match docblock_comment with
+        | DocParam (id_, _) -> id = id_
+        | _ -> false
+    ) l
+
+(**
+ * docblock takes precedence, because it's more precise, unless there's a conflict
+ *)
+let unify_params_with_docblock (params : param list) (comments : docblock_comment list) : param list =
+    (* Are all params represented in the docblock? *)
+    let map = (fun p -> match p with
+        | RefParam (id, Fixed_array (t, size_option)) ->
+            begin match find_docblock comments id with
+                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array t_)
+                | None -> p
+            end
+        | _ -> p
+    ) in
+    List.map map params
+
 let infer_declaration decl ns : declaration = 
     Log.debug "%s %s" "infer_declaration" (show_declaration decl);
     match decl with
@@ -252,6 +273,8 @@ let infer_declaration decl ns : declaration =
         function_type = Function_type {return_type; arguments};
     } ->
         if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
+        let params = unify_params_with_docblock params docblock in
+        (* TODO: unify params with arguments *)
         let typ = Function_type {return_type; arguments} in
         Namespace.add_function_type ns name typ;
         let ns = Namespace.reset_identifiers ns in
