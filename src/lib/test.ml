@@ -1057,6 +1057,29 @@ let%test_unit "infer docblock int array" =
         }
     ])
 
+let%test_unit "infer docblock string array" =
+    let source = "<?php // @pholyglot
+    /**
+     * @param array<string> $strings
+     */
+    function foo(array &$strings): void {
+    }
+    " in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [DocParam ("strings", Dynamic_array (String))];
+            params = [RefParam ("strings", Dynamic_array (String))];
+            stmts = [];
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (String)]}
+        }
+    ])
+
 
     (*
 let%test "nbody benchmark" =

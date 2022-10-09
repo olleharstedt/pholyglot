@@ -32,6 +32,7 @@ rule docblock = parse
   | "@param"            { DOCBLOCK_PARAM }
   | "array"             { ARRAY_TYPE }
   | "int"               { INT_TYPE }
+  | "string"            { STRING_TYPE }
   | "<"                 { LT }
   | ">"                 { GT }
   | ","                 { COMMA }
