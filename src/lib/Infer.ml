@@ -258,6 +258,23 @@ let unify_params_with_docblock (params : param list) (comments : docblock_commen
     ) in
     List.map map params
 
+(**
+ * Infer and resolve conflicts between docblock, params and function type.
+ *)
+let unify_params_with_function_type params (Function_type {return_type; arguments}) =
+    let map = (fun param arg ->
+        match param, arg with
+        (* Dynamic_array from docblock always wins over non-yet inferred Fixed_array *)
+        | RefParam (id, Dynamic_array t), Fixed_array (Infer_me, None) -> Dynamic_array t
+        | _, Fixed_array (Infer_me, _) -> arg
+        | _, _ -> arg
+    ) in
+    Function_type {
+        return_type;
+        arguments = List.map2 map params arguments;
+    }
+
+
 let infer_declaration decl ns : declaration = 
     Log.debug "%s %s" "infer_declaration" (show_declaration decl);
     match decl with
@@ -274,16 +291,19 @@ let infer_declaration decl ns : declaration =
     } ->
         if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
         let params = unify_params_with_docblock params docblock in
-        (* TODO: unify params with arguments *)
-        let typ = Function_type {return_type; arguments} in
-        Namespace.add_function_type ns name typ;
+        let ftyp =
+            unify_params_with_function_type
+            params
+            (Function_type {return_type; arguments})
+        in
+        Namespace.add_function_type ns name ftyp;
         let ns = Namespace.reset_identifiers ns in
         Namespace.add_params ns params;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
-        Function {name; docblock; params; stmts = new_stmts; function_type = typ}
-    | Function {function_type = typ} -> failwith ("infer_declaration function typ " ^ show_typ typ)
+        Function {name; docblock; params; stmts = new_stmts; function_type = ftyp}
+    | Function {function_type = ftyp} -> failwith ("infer_declaration function typ " ^ show_typ ftyp)
     | Class (name, Infer_kind, props) -> 
         let k = infer_kind ns Infer_kind props in
         let c = Class (name, k, props) in
