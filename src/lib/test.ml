@@ -7,13 +7,13 @@ let rec string_of_doctoken (token : Docblockparser.token) : string =
     let open Docblockparser in
     match token with
     | ARRAY_TYPE -> "array"
-    | DOLLAR -> "$"
     | DOCBLOCK_PARAM -> "DOCBLOCK_PARAM"
     | INT_TYPE -> "int"
     | LT -> "<"
     | GT -> ">"
     | COMMA -> ","
     | NAME s -> "DOC_NAME " ^ s
+    | VAR_NAME s  -> "VAR_NAME " ^ s
     | EOF -> "EOF"
     | START_OF_COMMENT -> "START_OF_COMMENT"
     | END_OF_COMMENT -> "END_OF_COMMENT"
@@ -31,6 +31,7 @@ let rec string_of_token (token : Parser.token) : string =
         | PLUS -> "PLUS"
         | NEW -> "NEW"
         | NAME s  -> "NAME " ^ s
+        | VAR_NAME s  -> "VAR_NAME " ^ s
         | CLASS_NAME s -> "CLASS_NAME " ^ s
         | MINUS -> "MINUS"
         | LT -> "LT"
@@ -46,7 +47,6 @@ let rec string_of_token (token : Parser.token) : string =
         | FUNCTION -> "FUNCTION"
         | DOT -> "DOT"
         | COLON -> "COLON"
-        | DOLLAR -> "DOLLAR"
         | QUOTE -> "QUOTE"
         | DOCBLOCK_PARAM -> "DOCBLOCK_PARAM"
         | VOID_TYPE -> "VOID_TYPE"
@@ -1080,6 +1080,30 @@ let%test_unit "infer docblock string array" =
         }
     ])
 
+let%test_unit "infer docblock int and string" =
+    let source = "<?php // @pholyglot
+    /**
+     * @param string $string
+     * @param int $int
+     */
+    function foo(string $string, int $int): void {
+    }
+    " in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [DocParam ("string", String); DocParam ("int", Int)];
+            params = [Param ("string", String); Param ("int", Int)];
+            stmts = [];
+            function_type = Function_type {return_type = Void; arguments = [String; Int]}
+        }
+    ])
+
 
     (*
 let%test "nbody benchmark" =
@@ -1173,3 +1197,4 @@ function main(): int
 (* Nullable *)
 (* All props must have default values *)
 (* docblock with text *)
+(* string passed as ref or not? *)

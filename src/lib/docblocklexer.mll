@@ -14,6 +14,7 @@ let lowercase = ['a'-'z']
 let nonzero_digit = ['1'-'9']
 let decimal_constant = nonzero_digit digit*
 let identifier = lowercase (nondigit|digit)*
+let var_identifier = '$' lowercase (nondigit|digit)*
 let whitespace_char_no_newline = [' ' '\t' '\012' '\r']
 
 rule docblock = parse
@@ -27,18 +28,18 @@ rule docblock = parse
   | ""                  { docblock lexbuf }
   *)
   | whitespace_char_no_newline+   { docblock lexbuf }
-  | '*'                 { docblock lexbuf }
-  | "$"                 { DOLLAR }
-  | "@param"            { DOCBLOCK_PARAM }
-  | "array"             { ARRAY_TYPE }
-  | "int"               { INT_TYPE }
-  | "string"            { STRING_TYPE }
-  | "<"                 { LT }
-  | ">"                 { GT }
-  | ","                 { COMMA }
-  | identifier as id    { NAME id }
-  | '\n'                { new_line lexbuf; docblock lexbuf }
-  | "/**"               { START_OF_COMMENT }
-  | "*/"                { END_OF_COMMENT }
-  | eof                 { EOF }
-  | _                   { raise (DocblockSyntaxError ("Docblocklexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
+  | '*'                  { docblock lexbuf }
+  | "@param"             { DOCBLOCK_PARAM }
+  | "array"              { ARRAY_TYPE }
+  | "int"                { INT_TYPE }
+  | "string"             { STRING_TYPE }
+  | "<"                  { LT }
+  | ">"                  { GT }
+  | ","                  { COMMA }
+  | identifier as id     { NAME id }
+  | var_identifier as id { VAR_NAME (String.sub id 1 (String.length id - 1)) }
+  | '\n'                 { new_line lexbuf; docblock lexbuf }
+  | "/**"                { START_OF_COMMENT }
+  | "*/"                 { END_OF_COMMENT }
+  | eof                  { EOF }
+  | _                    { raise (DocblockSyntaxError ("Docblocklexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }

@@ -37,6 +37,7 @@ let lowercase = ['a'-'z']
 let nonzero_digit = ['1'-'9']
 let decimal_constant = nonzero_digit digit*
 let identifier = lowercase (nondigit|digit)*
+let var_identifier = '$' lowercase (nondigit|digit)*
 let class_name = uppercase (nondigit|digit)*
 let whitespace_char_no_newline = [' ' '\t' '\012' '\r']
 let integer_constant = decimal_constant
@@ -80,10 +81,10 @@ rule token = parse
   | "void"                        { VOID_TYPE }
   | "string"                      { STRING_TYPE }
   | "array"                       { ARRAY_TYPE }
-  | "$"                           { DOLLAR }
   | "&"                           { AMPERSAND }
   | ['"'] [^ '"']+ ['"'] as s     { STRING_LITERAL s }
   | class_name as n               { CLASS_NAME n}
+  | var_identifier as id          { VAR_NAME (String.sub id 1 (String.length id - 1)) }
   | identifier as id              { NAME id }
   | eof                           { EOF }
   | _ { raise (Error (Printf.sprintf "At offset %d: unexpected character.\n" (Lexing.lexeme_start lexbuf))) }

@@ -20,6 +20,7 @@
 
 %token <int> INT
 %token <string> NAME
+%token <string> VAR_NAME  (* This one with dollar-sign *)
 %token <string> STRING_LITERAL
 %token <string> CLASS_NAME
 (*%token <Docblockparser.token list> DOCBLOCK*)
@@ -46,7 +47,6 @@
 %token LBRACK "["
 %token RBRACK "]"
 %token ARROW "->"
-%token DOLLAR "$"
 %token AMPERSAND "&"
 %token INT_TYPE "int"
 %token VOID_TYPE "void"
@@ -130,13 +130,13 @@ docblock(t):
   *)
     *)
 
-class_property: "public" t=typ "$" s=NAME ";"  {("__object_property_" ^ s, t)}
+class_property: "public" t=typ s=VAR_NAME ";"  {("__object_property_" ^ s, t)}
 
 arg_decl:
-  | "array" "&" "$" n=NAME    {RefParam (n, Fixed_array (Infer_me, None))}
-  | t=typ "&" "$" n=NAME      {raise (Parser_exception "Only array type can be passed by reference")}
-  | "array" "$" n=NAME        {raise (Parser_exception "Array must be passed as a reference - Pholly does not support array value semantics")}
-  | t=typ "$" n=NAME          {Param (n, t)}
+  | "array" "&" n=VAR_NAME    {RefParam (n, Fixed_array (Infer_me, None))}
+  | t=typ "&" n=VAR_NAME      {raise (Parser_exception "Only array type can be passed by reference")}
+  | "array" n=VAR_NAME        {raise (Parser_exception "Array must be passed as a reference - Pholly does not support array value semantics")}
+  | t=typ n=VAR_NAME          {Param (n, t)}
 
 typ:
   | "int"                       {Int : Ast.typ}
@@ -148,9 +148,9 @@ typ:
   | s=NAME                      {failwith ("Unknown type: " ^ s)}
 
 lvalue:
-  | "$" n=NAME                  {Variable n}
+  | n=VAR_NAME                  {Variable n}
   | id=NAME                     {Property_access ("__object_property_" ^ id)}
-  | "$" n=NAME "->" v=lvalue    {Object_access (n, v)}
+  | n=VAR_NAME "->" v=lvalue    {Object_access (n, v)}
 
 expr:
   | i=INT                                                        {Num i}
@@ -161,12 +161,12 @@ expr:
   | e=expr "/" f=expr                                            {Div (e, f)} 
   | e=expr "." f=expr                                            {Concat (e, f)} 
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
-  | "$" n=NAME "[" e=expr "]"                                    {Array_access (n, e)}
+  | n=VAR_NAME "[" e=expr "]"                                    {Array_access (n, e)}
 
-  | "$" n=NAME "->" e=expr                                       {Object_access (n, e)}
+  | n=VAR_NAME "->" e=expr                                       {Object_access (n, e)}
   | n=NAME                                                       {Property_access ("__object_property_" ^ n)}
 
-  | "$" n=NAME                                                   {Variable n}
+  | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init array_init}
