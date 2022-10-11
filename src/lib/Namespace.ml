@@ -30,7 +30,7 @@ let add_param t param : unit =
 let add_params t params : unit = List.iter (fun p -> add_param t p) params
 
 let add_class_type t (c : Ast.declaration) = match c with
-    | Class (name, kind, props) ->
+    | Class {name; kind; properties = props; methods} ->
         if Hashtbl.mem t.classes name then
             raise (Namespace_error (sprintf "add_class_type: Class name '%s' already exists in classes namespace" name))
         else

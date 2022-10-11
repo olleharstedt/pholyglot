@@ -554,10 +554,15 @@ let%test_unit "trivial class declare" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Infer_kind, [
-            ("__object_property_x", Int);
-            ("__object_property_y", Int)
-        ]);
+        Class {
+            name= "Point";
+            kind = Infer_kind;
+            properties = [
+                ("__object_property_x", Int);
+                ("__object_property_y", Int);
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -583,10 +588,15 @@ let%test_unit "class new" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Infer_kind, [
-            ("__object_property_x", Int);
-            ("__object_property_y", Int)
-        ]);
+        Class {
+            name = "Point";
+            kind = Infer_kind;
+            properties = [
+                ("__object_property_x", Int);
+                ("__object_property_y", Int)
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -614,10 +624,15 @@ let%test_unit "object lvalue assignment" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Infer_kind, [
-            ("__object_property_x", Int);
-            ("__object_property_y", Int)
-        ]);
+        Class {
+            name = "Point";
+            kind = Infer_kind;
+            properties = [
+                ("__object_property_x", Int);
+                ("__object_property_y", Int)
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -647,10 +662,15 @@ let%test_unit "object object access in expression" =
     let linebuf = Lexing.from_string source in
     let ast = Parser.program Lexer.token linebuf in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Infer_kind, [
-            ("__object_property_x", Int);
-            ("__object_property_y", Int)
-        ]);
+        Class {
+            name = "Point";
+            kind = Infer_kind;
+            properties = [
+                ("__object_property_x", Int);
+                ("__object_property_y", Int)
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -668,10 +688,15 @@ let%test_unit "object object access in expression" =
 let%test_unit "infer object access" =
     let ns = Namespace.create () in
     let ast : Ast.program = Ast.Declaration_list [
-        Class ("Point", Infer_kind, [
-            ("x", Int);
-            ("y", Int)
-        ]);
+        Class {
+            name = "Point";
+            kind = Infer_kind;
+            properties = [
+                ("x", Int);
+                ("y", Int);
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -686,10 +711,15 @@ let%test_unit "infer object access" =
         }
     ] |> Infer.run ns in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Class ("Point", Val, [
-            ("x", Int);
-            ("y", Int)
-        ]);
+        Class {
+            name = "Point";
+            kind = Val;
+            properties = [
+                ("x", Int);
+                ("y", Int);
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -710,10 +740,15 @@ let%test_unit "infer object access" =
 
 let%test_unit "output object access" =
     let code = Ast.Declaration_list [
-        Class ("Point", Val, [
-            ("__object_property_x", Int);
-            ("__object_property_y", Int)
-        ]);
+        Class {
+            name = "Point";
+            kind = Val;
+            properties = [
+                ("__object_property_x", Int);
+                ("__object_property_y", Int)
+            ];
+            methods = [];
+        };
         Function {
             name = "main";
             docblock = [];
@@ -794,9 +829,14 @@ function foo(Thing $t): void {
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
-        Class ("Thing", Ref, [
-            ("__object_property_name", String);
-        ]);
+        Class {
+            name = "Thing";
+            kind = Ref;
+            properties = [
+                ("__object_property_name", String);
+            ];
+            methods = [];
+        };
         Function { 
             name = "foo";
             docblock = [];
@@ -1104,6 +1144,31 @@ let%test_unit "infer docblock int and string" =
         }
     ])
 
+let%test_unit "method call" =
+    let source = "<?php // @pholyglot
+class Point
+{
+    public int $x;
+    public function getX(): int
+    {
+        return $this->x;
+    }
+}
+    " in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [DocParam ("string", String); DocParam ("int", Int)];
+            params = [Param ("string", String); Param ("int", Int)];
+            stmts = [];
+            function_type = Function_type {return_type = Void; arguments = [String; Int]}
+        }
+    ])
 
     (*
 let%test "nbody benchmark" =

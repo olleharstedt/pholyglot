@@ -58,7 +58,12 @@ and declaration =
         stmts:          statement list;
         function_type:  typ
     }
-    | Class of class_name * kind * class_property list
+    | Class of {
+        name: string; 
+        kind: kind; 
+        properties: class_property list;
+        methods: declaration list;
+    }
 
 and function_name = string
 and class_name = string

@@ -304,12 +304,12 @@ let infer_declaration decl ns : declaration =
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
         Function {name; docblock; params; stmts = new_stmts; function_type = ftyp}
     | Function {function_type = ftyp} -> failwith ("infer_declaration function typ " ^ show_typ ftyp)
-    | Class (name, Infer_kind, props) -> 
+    | Class {name; kind; properties = props; methods} when kind = Infer_kind -> 
         let k = infer_kind ns Infer_kind props in
-        let c = Class (name, k, props) in
+        let c = Class {name; kind = k; properties = props; methods} in
         Namespace.add_class_type ns c;
         c
-    | Class (name, k, props) -> failwith ("infer_declaration: Class with kind " ^ show_kind k ^ " " ^ name)
+    | Class {name; kind; properties; methods} -> failwith ("infer_declaration: Class with kind " ^ show_kind kind ^ " " ^ name)
 
 let run (ns : Namespace.t) (p : program): program = 
     Log.debug "Infer.run";

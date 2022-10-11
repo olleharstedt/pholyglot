@@ -113,7 +113,7 @@ declaration:
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
         }
     }
-    | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class (s, Infer_kind, f)}
+    | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class {name = s; kind = Infer_kind; properties = f; methods = []}}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}

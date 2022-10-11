@@ -69,7 +69,7 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
             List.map statement_to_pholyglot stmts,
             typ_to_pholyglot function_type
         )
-    | Class (name, k, props) -> Pholyglot_ast.Class (name, kind_to_pholyglot k, List.map prop_to_pholyglot props)
+    | Class {name; kind = k; properties = props; methods} -> Pholyglot_ast.Class (name, kind_to_pholyglot k, List.map prop_to_pholyglot props)
 
 (** Transpile from Pholly AST to Pholyglot AST *)
 let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
