@@ -57,7 +57,7 @@
 %token FUNCTION "function"
 %token CLASS "class"
 %token PUBLIC "public"
-%token DOCBLOCK_PARAM "@param"
+%token PRIVATE "private"
 
 %left DOT
 %left PLUS MINUS        /* lowest precedence */
@@ -67,6 +67,7 @@
 %type <declaration> declaration
 %type <statement> statement
 %type <class_property> class_property
+%type <declaration> method_
 %type <typ> typ
 %type <expression> expr
 
@@ -91,20 +92,6 @@ declaration:
     | doc=DOCBLOCK_AS_STR "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         let linebuf = Lexing.from_string doc in
         let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in
-        (*
-        let dispenser_of_token_list (l : Docblockparser.token list) : Lexing.lexbuf -> Docblockparser.token =
-            let d = OSeq.to_gen (OSeq.of_list l) in
-            fun _lexbuf -> Option.get (d ())
-        in
-        let disp = dispenser_of_token_list cb in
-        *)
-        (*
-        let revised_parser dispenser =
-              MenhirLib.Convert.Simplified.traditional2revised
-                  menhir_generated_parser
-                  dispenser
-        in
-        *)
         Function {
             name;
             docblock = cb;
@@ -113,24 +100,35 @@ declaration:
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
         }
     }
-    | "class" s=CLASS_NAME "{" f=list(class_property) "}" {Class {name = s; kind = Infer_kind; properties = f; methods = []}}
+    | "class" s=CLASS_NAME "{" p=list(class_property) m=list(method_) "}" {Class {name = s; kind = Infer_kind; properties = p; methods = m}}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
-  (*
-docblock(t):
-  | {[] : Ast.docblock_comment list}
-  (*| t DOCBLOCK_PARAM n=NAME {[Param (n, Int)] : Ast.docblock_comment list}*)
-    (*
-  | DOCBLOCK_PARAM {failwith "qwe"}
-  |  {failwith "asd";}
-  *)
-    *)
+(* TODO: Must use property and method in same rule to avoid reduce/reduce ? *)
+class_property: 
+  | property_modifier t=typ s=VAR_NAME ";"  {("__object_property_" ^ s, t)}
+  | property_modifier {("", Infer_me)}
 
-class_property: "public" t=typ s=VAR_NAME ";"  {("__object_property_" ^ s, t)}
+property_modifier:
+  | "public" {}
+
+(* TODO: Code duplication *)
+method_:
+    | method_modifier "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+        Function {
+            name;
+            docblock = [];
+            params;
+            stmts;
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+        }
+    }
+
+method_modifier:
+  | "private" {}
 
 arg_decl:
   | "array" "&" n=VAR_NAME    {RefParam (n, Fixed_array (Infer_me, None))}

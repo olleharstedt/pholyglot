@@ -20,12 +20,6 @@ open Parser
 exception Error of string
 exception SyntaxError of string
 
-(*
-type state =
-    | Normal_state
-    | Docblock_state
-let state = ref Normal_state
-*)
 }
 
 (** Copied from Jacques-Henri Jourdan, Inria Paris *)
@@ -77,6 +71,7 @@ rule token = parse
   | "function"                    { FUNCTION }
   | "class"                       { CLASS }
   | "public"                      { PUBLIC }
+  | "private"                     { PRIVATE }
   | "int"                         { INT_TYPE }
   | "void"                        { VOID_TYPE }
   | "string"                      { STRING_TYPE }
@@ -114,30 +109,3 @@ and docblock_comment buffer = parse
   | whitespace_char_no_newline+   { docblock_comment buffer lexbuf }
   | _? as s                       { Buffer.add_string buffer s; docblock_comment buffer lexbuf }
   | eof                           { failwith "unterminated docblock" }
-
-  (*
-and docblock result = parse
-    (*
-  | class_name as n     { CLASS_NAME n}
-  (* TODO: Type regexp, like array<int>, so alphanumeric + <> + comma *)
-  (* TODO: Class name with capital letter *)
-  (* TODO: array<Point> *)
-  (* TODO: array<string, int> *)
-  (* TODO: Variable name, $moo, so $ + alphanumeric and underscore *)
-  | ""                  { docblock lexbuf }
-  *)
-  | "$"                 { docblock (DOC_DOLLAR :: result) lexbuf; }
-  | "@param"            { docblock (DOC_DOCBLOCK_PARAM :: result) lexbuf; }
-  | "array"             { docblock (DOC_ARRAY_TYPE :: result) lexbuf; }
-  | "int"               { docblock (DOC_INT_TYPE :: result) lexbuf; }
-  | "<"                 { docblock (DOC_LT :: result) lexbuf; }
-  | ">"                 { docblock (DOC_GT :: result) lexbuf; }
-  | ","                 { docblock (DOC_COMMA :: result) lexbuf; }
-  | identifier as id  { docblock (DOC_NAME id :: result) lexbuf; }
-  | whitespace_char_no_newline+   { docblock result lexbuf }
-  | "*"                 { docblock result lexbuf }
-  | '\n'                { new_line lexbuf; docblock result lexbuf }
-  | "*/"                { result }
-  | eof                 { failwith "unterminated comment" }
-  | _                   { raise (SyntaxError ("Lexer - Illegal character: " ^ Lexing.lexeme lexbuf)) }
-  *)

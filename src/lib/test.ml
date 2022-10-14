@@ -48,7 +48,6 @@ let rec string_of_token (token : Parser.token) : string =
         | DOT -> "DOT"
         | COLON -> "COLON"
         | QUOTE -> "QUOTE"
-        | DOCBLOCK_PARAM -> "DOCBLOCK_PARAM"
         | VOID_TYPE -> "VOID_TYPE"
         | ARRAY_TYPE -> "ARRAY_TYPE"
         | AMPERSAND -> "AMPERSAND"
@@ -1148,10 +1147,8 @@ let%test_unit "method call" =
     let source = "<?php // @pholyglot
 class Point
 {
-    public int $x;
-    public function getX(): int
+    private function getX(): int
     {
-        return $this->x;
     }
 }
     " in
