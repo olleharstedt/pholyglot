@@ -70,18 +70,19 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
             function_type = typ_to_pholyglot function_type
         }
     | Class {name; kind = k; properties = props; methods} ->
+        let fn : Ast.function_def -> Pholyglot_ast.function_def = fun {name; params; stmts; function_type;} ->
+            {
+                name;
+                params = List.map param_to_pholyglot params;
+                stmts = List.map statement_to_pholyglot stmts;
+                function_type = typ_to_pholyglot function_type
+            }
+        in
         Pholyglot_ast.Class (
             name,
             kind_to_pholyglot k,
             List.map prop_to_pholyglot props,
-            List.map (fun ({name; params; stmts; function_type;} : Ast.function_def -> Pholyglot_ast.function_def) ->
-                Pholyglot_ast.Function {
-                    name;
-                    params = List.map param_to_pholyglot params;
-                    stmts = List.map statement_to_pholyglot stmts;
-                    function_type = typ_to_pholyglot function_type
-                }
-            ) methods
+            List.map fn methods
         )
 
 (** Transpile from Pholly AST to Pholyglot AST *)

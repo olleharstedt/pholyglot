@@ -459,21 +459,21 @@ function main(): int {
 
 let%test_unit "two functions to pholyglot" =
     let code = [
-        Pholyglot_ast.Function (
-            "foo",
-            [Param ("c", Int)],
-            [Return (Plus ((Variable "c"), (Num 20)))],
-            Function_type {return_type = Int; arguments = [Int]}
-        );
-        Pholyglot_ast.Function (
-            "main",
-            [],
-            [
+        Pholyglot_ast.Function {
+            name = "foo";
+            params = [Param ("c", Int)];
+            stmts = [Return (Plus ((Variable "c"), (Num 20)))];
+            function_type = Function_type {return_type = Int; arguments = [Int]};
+        };
+        Pholyglot_ast.Function {
+            name = "main";
+            params = [];
+            stmts = [
                 Assignment (Int, Variable "b", Function_call (Function_type {return_type = Int; arguments = [Int]}, "foo", [Plus ((Num 10), (Num 20))]));
                 Return (Plus (Variable "b", Num 30))
-            ],
-            Function_type {return_type = Int; arguments = []}
-        )
+            ];
+            function_type = Function_type {return_type = Int; arguments = []};
+        }
     ] |> Pholyglot_ast.string_of_declares
     in
     [%test_eq: string] code {|#define function int
