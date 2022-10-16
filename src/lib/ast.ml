@@ -48,21 +48,27 @@ and param =
     (* For params with &$foo notation. Should only be allowed by arrays. *)
     | RefParam of identifier * typ
 
-(** Top-level constructs *)
-and declaration =
-    (* TODO: Replace tuples with inline records *)
-    | Function of {
+and function_def = {
         name:           function_name;
         docblock:       docblock_comment list;
         params:         param list;
         stmts:          statement list;
         function_type:  typ
     }
+
+(* reduce/reduce conflict hack regarding "public" keyword *)
+and class_elements =
+    | Property of class_property
+    | Method of function_def
+
+(** Top-level constructs *)
+and declaration =
+    | Function of function_def
     | Class of {
         name: string; 
         kind: kind; 
         properties: class_property list;
-        methods: declaration list;
+        methods: function_def list;
     }
 
 and function_name = string

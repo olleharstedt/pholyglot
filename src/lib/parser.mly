@@ -13,9 +13,15 @@
 /**************************************************************************/
 
 %{
-  open Ast
+open Ast
 
-  (* Copy from https://github.com/ocaml/ocaml/blob/trunk/stdlib/seq.mli ? *)
+let get_class_properties elems =
+    List.map (fun e -> match e with Property p -> p)
+    (List.filter (fun e -> match e with Property _ -> true | _ -> false) elems)
+
+let get_class_methods elems =
+    List.map (fun e -> match e with Method m -> m)
+    (List.filter (fun e -> match e with Method _ -> true | _ -> false) elems)
 %}
 
 %token <int> INT
@@ -66,8 +72,6 @@
 
 %type <declaration> declaration
 %type <statement> statement
-%type <class_property> class_property
-%type <declaration> method_
 %type <typ> typ
 %type <expression> expr
 
@@ -100,7 +104,7 @@ declaration:
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
         }
     }
-    | "class" s=CLASS_NAME "{" p=list(class_property) m=list(method_) "}" {Class {name = s; kind = Infer_kind; properties = p; methods = m}}
+    | "class" s=CLASS_NAME "{" elems=list(class_element) "}" {Class {name = s; kind = Infer_kind; properties = get_class_properties(elems); methods = get_class_methods(elems)}}
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
@@ -108,9 +112,18 @@ statement:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
 
 (* TODO: Must use property and method in same rule to avoid reduce/reduce ? *)
-class_property: 
-  | property_modifier t=typ s=VAR_NAME ";"  {("__object_property_" ^ s, t)}
-  | property_modifier {("", Infer_me)}
+class_element: 
+  | property_modifier t=typ s=VAR_NAME ";"  {Property ("__object_property_" ^ s, t)}
+  | property_modifier {Property ("", Infer_me)}
+  | property_modifier "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+        Method {
+            name;
+            docblock = [];
+            params;
+            stmts;
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+        }
+    }
 
 property_modifier:
   | "public" {}

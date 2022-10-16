@@ -1147,8 +1147,10 @@ let%test_unit "method call" =
     let source = "<?php // @pholyglot
 class Point
 {
-    private function getX(): int
+    public int $x;
+    public function getX(): int
     {
+        return $this->x;
     }
 }
     " in
@@ -1158,12 +1160,21 @@ class Point
         Infer.run (Namespace.create ())
     in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function {
-            name = "foo";
-            docblock = [DocParam ("string", String); DocParam ("int", Int)];
-            params = [Param ("string", String); Param ("int", Int)];
-            stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [String; Int]}
+        Class {
+            name = "Point";
+            kind = Val;
+            properties = [("__object_property_x", Int)];
+            methods = [
+                {
+                    name = "getX";
+                    docblock = [];
+                    params = [];
+                    stmts = [
+                        Return (Object_access ("this", Property_access "__object_property_x"))
+                    ];
+                    function_type = Function_type {return_type = Int; arguments = []}
+                }
+            ]
         }
     ])
 
@@ -1256,7 +1267,7 @@ function main(): int
 (* Cannot only use void-function as statements (no ignore()?) *)
 (* Interaction between val types and ref types? Most coerce val types to ref when added? That is, copy mem to correct box. *)
 (* Chaining property access, like $rectangle->point->x *)
-(* Nullable *)
+(* Nullable types and refinement *)
 (* All props must have default values *)
-(* docblock with text *)
+(* class property docblock *)
 (* string passed as ref or not? *)
