@@ -1179,8 +1179,7 @@ class Point
     ])
 
 let%test_unit "method call" =
-    let code = Ast.Declaration_list [
-        Class {
+    let code = Ast.Class {
             name = "Point";
             kind = Val;
             properties = [("__object_property_x", Int)];
@@ -1196,9 +1195,8 @@ let%test_unit "method call" =
                 }
             ]
         }
-    ]
-         |> Transpile.run
-         |> Pholyglot_ast.string_of_program
+         |> Transpile.declaration_to_pholyglot
+         |> Pholyglot_ast.string_of_declare
     in
     [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
 |}
