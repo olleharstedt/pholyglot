@@ -204,8 +204,16 @@ let string_of_prop (p : class_property) : string = match p with
     n
 
 (* #__C__ char* (*getName) (struct Point*); *)
-let string_of_function_pointer (m : function_def ) : string = match m with
-  | {name; params; stmts; function_type} -> ""
+let string_of_function_pointer (m) : string = match m with
+  (*| (name, params, stmts, Function_type {return_type; arguments}) ->*)
+    | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
+    sprintf {|#__C__ %s (*%s) (%s);|}
+    (* Return type *)
+    (string_of_typ (Function_type {return_type; arguments}))
+    (* Function name *)
+    name
+    (* Params *)
+    (concat ~sep:", " (List.map params ~f:string_of_param))
 
 let string_of_declare (d : declaration) : string = match d with
     | Function {
