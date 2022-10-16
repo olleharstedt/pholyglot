@@ -1178,6 +1178,31 @@ class Point
         }
     ])
 
+let%test_unit "method call" =
+    let code = (Declaration_list [
+        Class {
+            name = "Point";
+            kind = Val;
+            properties = [("__object_property_x", Int)];
+            methods = [
+                {
+                    name = "getX";
+                    docblock = [];
+                    params = [];
+                    stmts = [
+                        Return (Object_access ("this", Property_access "__object_property_x"))
+                    ];
+                    function_type = Function_type {return_type = Int; arguments = []}
+                }
+            ]
+        }
+    ])
+         |> Transpile.run
+         |> Pholyglot_ast.string_of_program
+    in
+    [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
+|}
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
