@@ -75,7 +75,7 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
                 name;
                 params = List.map param_to_pholyglot params;
                 stmts = List.map statement_to_pholyglot stmts;
-                function_type = typ_to_pholyglot function_type
+                function_type = typ_to_pholyglot function_type;
             }
         in
         Pholyglot_ast.Class (

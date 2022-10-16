@@ -203,6 +203,10 @@ let string_of_prop (p : class_property) : string = match p with
     n
     n
 
+(* #__C__ char* (*getName) (struct Point*); *)
+let string_of_function_pointer (m : function_def ) : string = match m with
+  | {name; params; stmts; function_type} -> ""
+
 let string_of_declare (d : declaration) : string = match d with
     | Function {
         name;
@@ -224,13 +228,21 @@ function %s(%s)
         sprintf {|
 class %s {
     %s
-};
+    %s
+// End of C struct def. Class methods are outside the struct.
+#__C__ };
+#if __PHP__
+// End of PHP class def.
+}
+#endif
+
 #if __PHP__
 define("%s", "%s");  // Needed to make new_() work with C macro
 #endif
 |}
         name
         (concat (List.map ~f:string_of_prop props))
+        (concat (List.map ~f:string_of_function_pointer methods))
         name
         name
 
