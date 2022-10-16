@@ -63,13 +63,26 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
         stmts;
         function_type;
     } ->
-        Pholyglot_ast.Function (
+        Pholyglot_ast.Function {
+            name;
+            params = List.map param_to_pholyglot params;
+            stmts = List.map statement_to_pholyglot stmts;
+            function_type = typ_to_pholyglot function_type
+        }
+    | Class {name; kind = k; properties = props; methods} ->
+        Pholyglot_ast.Class (
             name,
-            List.map param_to_pholyglot params,
-            List.map statement_to_pholyglot stmts,
-            typ_to_pholyglot function_type
+            kind_to_pholyglot k,
+            List.map prop_to_pholyglot props,
+            List.map (fun ({name; params; stmts; function_type;} : Ast.function_def -> Pholyglot_ast.function_def) ->
+                Pholyglot_ast.Function {
+                    name;
+                    params = List.map param_to_pholyglot params;
+                    stmts = List.map statement_to_pholyglot stmts;
+                    function_type = typ_to_pholyglot function_type
+                }
+            ) methods
         )
-    | Class {name; kind = k; properties = props; methods} -> Pholyglot_ast.Class (name, kind_to_pholyglot k, List.map prop_to_pholyglot props)
 
 (** Transpile from Pholly AST to Pholyglot AST *)
 let run (ast : Ast.program) : Pholyglot_ast.program = match ast with

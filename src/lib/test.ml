@@ -1179,7 +1179,7 @@ class Point
     ])
 
 let%test_unit "method call" =
-    let code = (Declaration_list [
+    let code = Ast.Declaration_list [
         Class {
             name = "Point";
             kind = Val;
@@ -1196,7 +1196,7 @@ let%test_unit "method call" =
                 }
             ]
         }
-    ])
+    ]
          |> Transpile.run
          |> Pholyglot_ast.string_of_program
     in

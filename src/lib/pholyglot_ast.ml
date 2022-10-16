@@ -33,9 +33,19 @@ and typ =
 and param =
     | Param of identifier * typ
 
+and docblock_comment =
+    | DocParam of identifier * typ
+
+and function_def = {
+        name:           function_name;
+        params:         param list;
+        stmts:          statement list;
+        function_type:  typ
+    }
+
 and declaration =
-    | Function of function_name * param list * statement list * typ
-    | Class of class_name * kind * class_property list
+    | Function of function_def
+    | Class of class_name * kind * class_property list * function_def list
 
 and function_name = string
 and class_name = string
@@ -194,7 +204,12 @@ let string_of_prop (p : class_property) : string = match p with
     n
 
 let string_of_declare (d : declaration) : string = match d with
-    | Function (name, params, stmts, typ) ->
+    | Function {
+        name;
+        params;
+        stmts;
+        function_type = typ
+    } ->
         sprintf {|#define function %s
 function %s(%s)
 {
@@ -205,7 +220,7 @@ function %s(%s)
         name
         (concat ~sep:", " (List.map params ~f:string_of_param))
         (concat (List.map stmts ~f:string_of_statement))
-    | Class (name, kind, props) ->
+    | Class (name, kind, props, methods) ->
         sprintf {|
 class %s {
     %s
