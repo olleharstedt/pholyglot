@@ -799,6 +799,7 @@ class Point {
     
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
+
 #if __PHP__
 // End of PHP class def.
 };
