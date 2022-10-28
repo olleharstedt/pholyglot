@@ -796,7 +796,13 @@ class Point {
     public $__object_property_y;
 #undef public
 
+    
+// End of C struct def. Class methods are outside the struct.
+#__C__ };
+#if __PHP__
+// End of PHP class def.
 };
+#endif
 #if __PHP__
 define("Point", "Point");  // Needed to make new_() work with C macro
 #endif

@@ -241,9 +241,8 @@ class %s {
 #__C__ };
 #if __PHP__
 // End of PHP class def.
-}
+};
 #endif
-
 #if __PHP__
 define("%s", "%s");  // Needed to make new_() work with C macro
 #endif
