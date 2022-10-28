@@ -1204,7 +1204,7 @@ let%test_unit "method call" =
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
     in
-    [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
+    [%test_eq: string] code {|
 |}
 
     (*

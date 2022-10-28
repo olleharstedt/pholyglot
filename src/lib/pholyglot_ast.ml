@@ -134,6 +134,7 @@ let rec string_of_expression = function
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
     | Variable id -> "$" ^ id
     (* TODO: Alloc type *)
+    (* TODO: Init function pointers *)
     | New (Class_type (ct), exprs) -> 
         (*let t_text = show_typ t in*)
         sprintf {|new_(%s)|}
@@ -204,7 +205,7 @@ let string_of_prop (p : class_property) : string = match p with
     n
 
 (* #__C__ char* (*getName) (struct Point*); *)
-let string_of_function_pointer (m) : string = match m with
+let string_of_function_pointer meth : string = match meth with
   (*| (name, params, stmts, Function_type {return_type; arguments}) ->*)
     | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
     sprintf {|#__C__ %s (*%s) (%s);|}
@@ -214,6 +215,40 @@ let string_of_function_pointer (m) : string = match m with
     name
     (* Params *)
     (concat ~sep:", " (List.map params ~f:string_of_param))
+
+(**
+ * A method must be valid both as C function and PHP class method
+ *
+ * @param name : string Class name, used by self
+ * @param meth : method
+ * @return string
+ *)
+let string_of_method class_name meth = match meth with
+    | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
+        let self : param = Param ("self", Class_type class_name) in
+        let self_params = self :: params in
+        sprintf {|
+#if __PHP__
+public function %s(%s $self %s): %s
+#endif
+#__C__ %s %s_%s (struct %s* $self)
+{
+    %s
+}
+|}
+    name
+    (* Self PHP arg *)
+    class_name
+    (* Params for PHP *)
+    (concat ~sep:", " (List.map params ~f:string_of_param))
+    (* PHP return type *)
+    (string_of_typ (Function_type {return_type; arguments}))
+    (* C Return type *)
+    (string_of_typ (Function_type {return_type; arguments}))
+    class_name
+    name
+    class_name
+    (concat (List.map stmts ~f:string_of_statement))
 
 let string_of_declare (d : declaration) : string = match d with
     | Function {
@@ -233,12 +268,14 @@ function %s(%s)
         (concat ~sep:", " (List.map params ~f:string_of_param))
         (concat (List.map stmts ~f:string_of_statement))
     | Class (name, kind, props, methods) ->
+        let string_of_method = fun (m) -> string_of_method name m in
         sprintf {|
 class %s {
     %s
     %s
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
+%s
 #if __PHP__
 // End of PHP class def.
 };
@@ -250,6 +287,7 @@ define("%s", "%s");  // Needed to make new_() work with C macro
         name
         (concat (List.map ~f:string_of_prop props))
         (concat (List.map ~f:string_of_function_pointer methods))
+        (concat (List.map ~f:string_of_method methods))
         name
         name
 
