@@ -118,7 +118,10 @@ let string_of_param (p: param) : string = match p with
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
-    | Object_access (id, Property_access prop_name) -> sprintf {|%s->%s|} id prop_name
+    | Object_access (id, Property_access prop_name) ->
+        (* TODO Code duplication *)
+        let id = if id = "this" then "self" else id in
+        sprintf {|%s->%s|} id prop_name
     | Property_access n -> n
 
 let rec string_of_expression = function
@@ -156,7 +159,10 @@ let rec string_of_expression = function
     | Array_access (id, expr) ->
         (* TODO: It's assumed that expr has type Int here *)
         sprintf {|$%s[%s]|} id (string_of_expression expr)
-    | Object_access (id, Property_access prop_name) -> sprintf {|$%s->%s|} id prop_name
+    | Object_access (id, Property_access prop_name) ->
+        (* TODO: Code duplication *)
+        let id = if id = "this" then "self" else id in
+        sprintf {|$%s->%s|} id prop_name
     | Property_access n -> n
     | Function_call (Function_type {return_type; arguments}, name, param_exprs) ->
         sprintf

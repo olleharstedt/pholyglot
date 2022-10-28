@@ -1300,3 +1300,4 @@ function main(): int
 (* All props must have default values *)
 (* class property docblock *)
 (* string passed as ref or not? *)
+(* Ban $self variable name, since it's used internally instead of $this *)
