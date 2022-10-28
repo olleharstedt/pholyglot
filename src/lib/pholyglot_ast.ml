@@ -132,7 +132,9 @@ let rec string_of_expression = function
     | Times (i, j) -> (string_of_expression i) ^ " * " ^ (string_of_expression j)
     | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
-    | Variable id -> "$" ^ id
+    | Variable id ->
+        let id = if id = "this" then "self" else id in
+        "$" ^ id
     (* TODO: Alloc type *)
     (* TODO: Init function pointers *)
     | New (Class_type (ct), exprs) -> 
