@@ -1185,7 +1185,7 @@ class Point
         }
     ])
 
-let%test_unit "method call" =
+let%test_unit "simple getter" =
     let code = Ast.Class {
             name = "Point";
             kind = Val;
@@ -1206,6 +1206,32 @@ let%test_unit "method call" =
          |> Pholyglot_ast.string_of_declare
     in
     [%test_eq: string] code {|
+class Point {
+    #define public int
+#define __object_property_x $__object_property_x
+    public $__object_property_x;
+#undef public
+
+    #__C__ int (*getX) ();
+// End of C struct def. Class methods are outside the struct.
+#__C__ };
+
+#if __PHP__
+public function getX(Point $self ): int
+#endif
+#__C__ int Point_getX (struct Point* $self)
+{
+    return $self->__object_property_x;
+
+}
+
+#if __PHP__
+// End of PHP class def.
+};
+#endif
+#if __PHP__
+define("Point", "Point");  // Needed to make new_() work with C macro
+#endif
 |}
 
     (*
@@ -1256,6 +1282,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* new_Point() to init function pointers in C code *)
 (* Support for double/float. `+` won't type-cast automatically. *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
