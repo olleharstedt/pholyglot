@@ -1330,3 +1330,4 @@ function main(): int
 (* string passed as ref or not? *)
 (* Ban $self variable name, since it's used internally instead of $this *)
 (* inline "new" but must init function pointers? *)
+(* typedef to get rid of struct Point* $self C-only code *)

@@ -52,6 +52,7 @@ new_Point(struct Point* $p)
 function main()
 {
     #__C__ struct Point*
+    // TODO: When is Point released? Where the scope?
     $p = new_Point(new_(Point));
     $p->__object_property_x 
     = 100;
