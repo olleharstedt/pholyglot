@@ -27,12 +27,10 @@ let string_of_token (token : Parser.token) : string =
         | EQEQ -> "EQEQ"
         | EQ -> "EQ"
         | EOF -> "EOF"
-        | CONSTANT -> "CONSTANT"
         | START_SCRIPT -> "START_SCRIPT"
         | FUNCTION -> "FUNCTION"
         | DOT -> "DOT"
         | COLON -> "COLON"
-        | DOLLAR -> "DOLLAR"
         | QUOTE -> "QUOTE"
         | _ -> failwith "string_of_token: Unknown token"
 

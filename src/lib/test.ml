@@ -1161,7 +1161,7 @@ let%test_unit "infer docblock int and string" =
         }
     ])
 
-let%test_unit "method call" =
+let%test_unit "method" =
     let source = "<?php // @pholyglot
 class Point
 {
@@ -1257,7 +1257,7 @@ function new_Point($p) { return $p; }
 #endif
 |}
 
-let%test_unit "infer method call" =
+let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
 class Point
 {
@@ -1298,6 +1298,70 @@ class Point
         }
     ])
 
+let%test_unit "infer method" =
+    let source = {|<?php // @pholyglot
+class Point
+{
+    public int $x;
+    public function getX(): int
+    {
+        printf("Hello");
+        return $this->x;
+    }
+}
+function main(): int
+{
+    $p = new Point();
+    printf("%d", $p->getX());
+    return 0;
+}
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name = "Point";
+            kind = Val;
+            properties = [("__object_property_x", Int)];
+            methods = [
+                {
+                    name = "getX";
+                    docblock = [];
+                    params = [];
+                    stmts = [
+                        Function_call (
+                            Function_type {return_type = Void; arguments = [String_literal]},
+                            "printf",
+                            [Coerce (String_literal, String "\"Hello\"")]
+                        );
+                        Return (Object_access ("this", Property_access "__object_property_x"))
+                    ];
+                    function_type = Function_type {return_type = Int; arguments = []}
+                }
+            ]
+        };
+        Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    "printf",
+                    [
+                        Coerce (String_literal, String "\"%d\"");
+                        Object_access ("p", Function_call (Infer_me, "getX", []))
+                    ]
+                );
+                Return (Num 0)
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
+    ])
 
     (*
 let%test "nbody benchmark" =
@@ -1394,5 +1458,5 @@ function main(): int
 (* Ban $self variable name, since it's used internally instead of $this *)
 (* inline "new" but must init function pointers? *)
 (* typedef to get rid of struct Point* $self C-only code *)
-(* Check return type for methods *)
-(* Method with multiple statements *)
+(* Infer return type for methods *)
+(* Object access method call *)

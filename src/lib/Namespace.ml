@@ -4,7 +4,8 @@ open Ast
 type t = {
     (* Variables and functions go in identifiers bucket *)
     identifiers : (string, typ) Hashtbl.t;
-    classes : (string, (kind * class_property list)) Hashtbl.t;
+    (* In PHP, you can have property and method with same name, so we need a triple instead of truple here *)
+    classes : (string, (kind * class_property list * function_def list)) Hashtbl.t;
     functions: (string, typ) Hashtbl.t;
 }
 
@@ -34,7 +35,7 @@ let add_class_type t (c : Ast.declaration) = match c with
         if Hashtbl.mem t.classes name then
             raise (Namespace_error (sprintf "add_class_type: Class name '%s' already exists in classes namespace" name))
         else
-        Hashtbl.add t.classes name (kind, props)
+        Hashtbl.add t.classes name (kind, props, methods)
 
 let add_function_type t name (typ : Ast.typ) =
     if Hashtbl.mem t.functions name then
@@ -45,7 +46,7 @@ let add_function_type t name (typ : Ast.typ) =
 let find_identifier t key : typ option =
     Hashtbl.find_opt t.identifiers key
 
-let find_class t id : (kind * class_property list) option = 
+let find_class t id : (kind * class_property list * function_def list) option = 
     Hashtbl.find_opt t.classes id
 
 let find_function t id : typ option =

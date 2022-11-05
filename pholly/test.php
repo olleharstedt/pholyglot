@@ -13,5 +13,7 @@ class Point
 function main(): int
 {
     printf("Hello, world!\n");
+    $p = new Point();
+    printf("%d", $p->getX());
     return 0;
 }
