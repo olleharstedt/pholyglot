@@ -42,4 +42,5 @@ let _ =
     let ns = Namespace.create () in
     let ast = Pholyglot.Infer.run ns ast in
     let phast = Pholyglot.Transpile.run ast in
-    print_endline (Pholyglot.Pholyglot_ast.string_of_program phast)
+    let pholly = Pholyglot.Pholyglot_ast.string_of_program phast in
+

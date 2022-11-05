@@ -218,7 +218,7 @@ and infer_kind ns k (props : (string * typ) list) : kind =
     in
     match k with
     | Infer_kind -> begin
-        if all_props_are_val props then Val else Ref
+    if all_props_are_val props then Val else Ref
     end
     | k -> k
 
@@ -274,6 +274,8 @@ let unify_params_with_function_type params (Function_type {return_type; argument
         arguments = List.map2 map params arguments;
     }
 
+let infer_method meth ns : function_def =
+    ()
 
 let infer_declaration decl ns : declaration = 
     Log.debug "%s %s" "infer_declaration" (show_declaration decl);
