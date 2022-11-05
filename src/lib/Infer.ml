@@ -274,8 +274,24 @@ let unify_params_with_function_type params (Function_type {return_type; argument
         arguments = List.map2 map params arguments;
     }
 
-let infer_method meth ns : function_def =
-    ()
+let infer_method meth ns : function_def = match meth with
+    | {
+        name;
+        docblock;
+        params;
+        stmts;
+        function_type = Function_type {return_type; arguments};
+    } ->
+        let params = unify_params_with_docblock params docblock in
+        let ftyp =
+            unify_params_with_function_type
+            params
+            (Function_type {return_type; arguments})
+        in
+        let ns = Namespace.reset_identifiers ns in
+        let inf = fun s -> infer_stmt s ns in
+        let new_stmts = List.map inf stmts in
+        {name; docblock; params; stmts = new_stmts; function_type = ftyp}
 
 let infer_declaration decl ns : declaration = 
     Log.debug "%s %s" "infer_declaration" (show_declaration decl);
@@ -308,6 +324,7 @@ let infer_declaration decl ns : declaration =
     | Function {function_type = ftyp} -> failwith ("infer_declaration function typ " ^ show_typ ftyp)
     | Class {name; kind; properties = props; methods} when kind = Infer_kind -> 
         let k = infer_kind ns Infer_kind props in
+        let methods = List.map (fun m -> infer_method m ns) methods in
         let c = Class {name; kind = k; properties = props; methods} in
         Namespace.add_class_type ns c;
         c

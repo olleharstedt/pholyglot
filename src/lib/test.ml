@@ -1257,6 +1257,48 @@ function new_Point($p) { return $p; }
 #endif
 |}
 
+let%test_unit "infer method call" =
+    let source = {|<?php // @pholyglot
+class Point
+{
+    public int $x;
+    public function getX(): int
+    {
+        printf("Hello");
+        return $this->x;
+    }
+}
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name = "Point";
+            kind = Val;
+            properties = [("__object_property_x", Int)];
+            methods = [
+                {
+                    name = "getX";
+                    docblock = [];
+                    params = [];
+                    stmts = [
+                        Function_call (
+                            Function_type {return_type = Void; arguments = [String_literal]},
+                            "printf",
+                            [Coerce (String_literal, String "\"Hello\"")]
+                        );
+                        Return (Object_access ("this", Property_access "__object_property_x"))
+                    ];
+                    function_type = Function_type {return_type = Int; arguments = []}
+                }
+            ]
+        }
+    ])
+
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
