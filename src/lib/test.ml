@@ -1305,7 +1305,7 @@ function main(): int
     *)
 
 (* TODO: *)
-(* new_Point() to init function pointers in C code *)
+(* Complete the pipeline from pholly -> C -> binary, so I can try it properly *)
 (* Support for double/float. `+` won't type-cast automatically. *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
