@@ -24,6 +24,7 @@ let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
 let rec lvalue_to_pholyglot lvalue = match lvalue with
     | Ast.Variable identifier -> Pholyglot_ast.Variable identifier
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
+    | Ast.Function_call ()
     | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
 
 let rec expression_to_pholyglot exp = match exp with
