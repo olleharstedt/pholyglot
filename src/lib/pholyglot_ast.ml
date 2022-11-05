@@ -258,6 +258,14 @@ public function %s(%s $self %s): %s
     class_name
     (concat (List.map stmts ~f:string_of_statement))
 
+let string_of_function_pointer_init class_name meth = match meth with
+    | { name; } ->
+        sprintf {|$p->%s = &%s_%s;
+|}
+        name
+        class_name
+        name
+
 let string_of_declare (d : declaration) : string = match d with
     | Function {
         name;
@@ -277,6 +285,7 @@ function %s(%s)
         (concat (List.map stmts ~f:string_of_statement))
     | Class (name, kind, props, methods) ->
         let string_of_method = fun (m) -> string_of_method name m in
+        let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init name m in
         sprintf {|
 class %s {
     %s
@@ -291,12 +300,28 @@ class %s {
 #if __PHP__
 define("%s", "%s");  // Needed to make new_() work with C macro
 #endif
+//?>
+// Function pointer init
+struct %s* new_%s(struct %s *$p)
+{
+    %s
+    return $p;
+}
+//<?php
+#if __PHP__
+function new_%s($p) { return $p; }
+#endif
 |}
         name
         (concat (List.map ~f:string_of_prop props))
         (concat (List.map ~f:string_of_function_pointer methods))
         (concat (List.map ~f:string_of_method methods))
         name
+        name
+        name
+        name
+        name
+        (concat (List.map ~f:string_of_function_pointer_init methods))
         name
 
 (** Probably only to be used in tests *)

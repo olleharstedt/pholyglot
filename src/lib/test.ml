@@ -807,6 +807,17 @@ class Point {
 #if __PHP__
 define("Point", "Point");  // Needed to make new_() work with C macro
 #endif
+//?>
+// Function pointer init
+struct Point* new_Point(struct Point *$p)
+{
+    
+    return $p;
+}
+//<?php
+#if __PHP__
+function new_Point($p) { return $p; }
+#endif
 #define function int
 function main()
 {
@@ -1231,6 +1242,18 @@ public function getX(Point $self ): int
 #endif
 #if __PHP__
 define("Point", "Point");  // Needed to make new_() work with C macro
+#endif
+//?>
+// Function pointer init
+struct Point* new_Point(struct Point *$p)
+{
+    $p->getX = &Point_getX;
+
+    return $p;
+}
+//<?php
+#if __PHP__
+function new_Point($p) { return $p; }
 #endif
 |}
 

@@ -40,19 +40,22 @@ function new_($class) { return new $class; }
   #if __PHP__
   define("Point", "Point");  // Needed to make new_() work with C macro
   #endif
- 
-#__C__ struct Point*
-new_Point(struct Point* $p)
+
+//?>
+struct Point* new_Point(struct Point *$p)
 {
     $p->getX = &Point_getX;
     return $p;
 }
-
+//<?php
+#if __PHP__
+function new_Point($p) { return $p; }
+#endif
+ 
 #__C__ int
 function main()
 {
     #__C__ struct Point*
-    // TODO: When is Point released? Where the scope?
     $p = new_Point(new_(Point));
     $p->__object_property_x 
     = 100;
