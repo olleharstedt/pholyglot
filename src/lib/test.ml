@@ -1298,13 +1298,27 @@ class Point
         }
     ])
 
-    (*
-let%test_unit "infer function call" =
+let%test_unit "infer method call" =
     let ns = Namespace.create () in
+    let c : Ast.declaration = Class {
+        name = "Point";
+        kind = Val;
+        properties = [];
+        methods = [
+            {
+                name          = "getX";
+                docblock      = [];
+                params        = [];
+                stmts         = [];
+                function_type = Function_type {return_type = Int; arguments = []}
+            }
+        ];
+    } in
+    Namespace.add_class_type ns c;
+    Namespace.add_identifier ns "p" (Class_type "Point");
     let expr : Ast.expression = Object_access ("p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; object_name = "p"}) in
     let ast = Infer.infer_expression ns expr in
     [%test_eq: Ast.expression] ast (Object_access ("p", Method_call {return_type = Int; method_name = "getX"; args = []; object_name = "p"}))
-    *)
 
 let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
