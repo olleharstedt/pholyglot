@@ -82,24 +82,28 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
     end
     (* $point->getX() *)
-    | Object_access (class_id, Method_call (Infer_me, method_id, _)) -> begin
-        let class_type_name = match Namespace.find_identifier ns class_id with
+    | Method_call {return_type = Infer_me; method_name; object_name = class_name}
+    | Object_access (class_name, Method_call {return_type = Infer_me; method_name}) -> begin
+        let class_type_name = match Namespace.find_identifier ns class_name with
             | Some (Class_type (c)) -> c
-            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" class_id))
+            | None -> begin
+                print_endline "moo";
+                raise (Type_error (sprintf "typ_of_expression method call: Could not find identifier %s in namespace" class_name))
+            end
         in
         let (k, props, methods) = match Namespace.find_class ns class_type_name with
             | Some class_decl -> class_decl
             | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
         in
-        match List.find_opt (fun {name} -> method_id = name) methods with
+        match List.find_opt (fun {name} -> method_name = name) methods with
             | Some {
                 function_type = Function_type {return_type; arguments}
             }
                 -> return_type
-            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find method with name %s in class %s" method_id class_type_name))
+            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find method with name %s in class %s" method_name class_type_name))
     end
     (* TODO: Will this work with chained calls, like $obj->foo()->moo()? *)
-    | Object_access (class_id, Method_call (t, method_id, _)) -> t
+    | Object_access (class_id, Method_call {return_type}) -> return_type
     | Variable id -> begin
         match Namespace.find_identifier ns id with 
             | Some p -> p
@@ -132,7 +136,10 @@ let rec infer_expression ns expr =
         | Some t -> failwith ("not a function: " ^ show_typ t)
         | _ -> failwith ("infer_expression: found no function declared with name " ^ name)
     end
-    | Method_call (Infer_me, name, args) -> failwith "here"
+    | Method_call {return_type = Infer_me; method_name; object_name; args} as e -> begin
+        let t = typ_of_expression ns e in
+        Method_call {return_type = t; method_name; object_name; args}
+    end
     | Object_access (id, expr) -> Object_access (id, infer_expression ns expr)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
@@ -163,7 +170,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Log.debug "%s %s" "assignment " id;
         let t = typ_of_expression ns expr in
         Namespace.add_identifier ns id t;
-        Assignment (typ_of_expression ns expr, Variable id, infer_expression ns expr)
+        Assignment (t, Variable id, infer_expression ns expr)
     (* TODO: Generalize this with lvalue *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
         let t = typ_of_expression ns expr in
@@ -208,7 +215,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
                         (show_expression e)
                     )
                 )
-                | _ -> e
+                | _ -> infer_expression ns e
             end
         ) xs expected_types in
         Function_call (Function_type {return_type = Void; arguments = String_literal :: expected_types}, "printf", exprs)

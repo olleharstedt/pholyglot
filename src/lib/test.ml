@@ -1298,11 +1298,11 @@ class Point
         }
     ])
 
-    (*
 let%test_unit "infer function call" =
-    let expr : Ast.expression = Function_call (Infer_me, "getX", []) in
-    ()
-    *)
+    let ns = Namespace.create () in
+    let expr : Ast.expression = Object_access ("p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; object_name = "p"}) in
+    let ast = Infer.infer_expression ns expr in
+    [%test_eq: Ast.expression] ast (Object_access ("p", Method_call {return_type = Int; method_name = "getX"; args = []; object_name = "p"}))
 
 let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
@@ -1360,7 +1360,7 @@ function main(): int
                     "printf",
                     [
                         Coerce (String_literal, String "\"%d\"");
-                        Object_access ("p", Method_call (Int, "getX", []))
+                        Object_access ("p", Method_call {return_type = Int; method_name = "getX"; args = []; object_name = "p"})
                     ]
                 );
                 Return (Num 0)
