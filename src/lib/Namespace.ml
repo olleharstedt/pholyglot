@@ -22,7 +22,7 @@ let add_identifier t key value : unit =
     if Hashtbl.mem t.identifiers key then
         raise (Namespace_error (sprintf "add_identifier: Key '%s' already exists in identifiers namespace" key))
     else begin
-        print_endline ("adding identifier " ^ key);
+        (*print_endline ("adding identifier " ^ key);*)
         Hashtbl.add t.identifiers key value
     end
 
