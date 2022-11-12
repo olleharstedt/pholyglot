@@ -115,8 +115,9 @@ and expression =
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
-    | Object_access of identifier * expression
+    | Object_access of identifier * expression (* expression can be property, method, or nested object access *)
     | Property_access of identifier (* Valid sub-expression of object access *)
+    | Method_call of typ * identifier * expression list
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
 

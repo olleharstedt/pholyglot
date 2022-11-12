@@ -24,10 +24,10 @@ let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
 let rec lvalue_to_pholyglot lvalue = match lvalue with
     | Ast.Variable identifier -> Pholyglot_ast.Variable identifier
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
-    | Ast.Function_call ()
+    | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
 
-let rec expression_to_pholyglot exp = match exp with
+and expression_to_pholyglot exp = match exp with
     | Ast.String s -> Pholyglot_ast.String s
     | Ast.Num i -> Pholyglot_ast.Num i
     | Ast.Plus (i, j) -> Pholyglot_ast.Plus (expression_to_pholyglot i, expression_to_pholyglot j)

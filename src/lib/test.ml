@@ -1298,6 +1298,12 @@ class Point
         }
     ])
 
+    (*
+let%test_unit "infer function call" =
+    let expr : Ast.expression = Function_call (Infer_me, "getX", []) in
+    ()
+    *)
+
 let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
 class Point
@@ -1354,7 +1360,7 @@ function main(): int
                     "printf",
                     [
                         Coerce (String_literal, String "\"%d\"");
-                        Object_access ("p", Function_call (Infer_me, "getX", []))
+                        Object_access ("p", Method_call (Int, "getX", []))
                     ]
                 );
                 Return (Num 0)

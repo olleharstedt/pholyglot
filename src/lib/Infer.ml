@@ -1,4 +1,7 @@
-(* Module to infer types of local variables *)
+(*
+ * Module to infer types of local variables
+ * Both inferring types of expression, but also iterating the ast to replace Infer_me with proper types.
+ *)
 
 open Printf
 open Ast
@@ -79,7 +82,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
     end
     (* $point->getX() *)
-    | Object_access (class_id, Function_call (_, method_id, _)) -> begin
+    | Object_access (class_id, Method_call (Infer_me, method_id, _)) -> begin
         let class_type_name = match Namespace.find_identifier ns class_id with
             | Some (Class_type (c)) -> c
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" class_id))
@@ -95,6 +98,8 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
                 -> return_type
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find method with name %s in class %s" method_id class_type_name))
     end
+    (* TODO: Will this work with chained calls, like $obj->foo()->moo()? *)
+    | Object_access (class_id, Method_call (t, method_id, _)) -> t
     | Variable id -> begin
         match Namespace.find_identifier ns id with 
             | Some p -> p
@@ -114,17 +119,21 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
-let infer_expression ns expr = 
+let rec infer_expression ns expr = 
     Log.debug "%s %s" "infer_expression" (show_expression expr);
     match expr with
     (* This is allowed to enable infering aliasing, like $b = $a *)
     | Variable id -> Variable id
     | Function_call (Infer_me, name, params) -> begin
+        let inf = fun e -> infer_expression ns e in
+        let params = List.map inf params in
         match Namespace.find_function ns name with
         | Some (Function_type {return_type; arguments}) -> Function_call (Function_type {return_type; arguments}, name, params)
         | Some t -> failwith ("not a function: " ^ show_typ t)
         | _ -> failwith ("infer_expression: found no function declared with name " ^ name)
     end
+    | Method_call (Infer_me, name, args) -> failwith "here"
+    | Object_access (id, expr) -> Object_access (id, infer_expression ns expr)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 

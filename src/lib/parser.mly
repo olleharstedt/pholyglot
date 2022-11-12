@@ -174,8 +174,10 @@ expr:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
   | n=VAR_NAME "[" e=expr "]"                                    {Array_access (n, e)}
 
-  | n=VAR_NAME "->" e=expr                                       {Object_access (n, e)}
-  | n=NAME                                                       {Property_access ("__object_property_" ^ n)}
+  (*| n=VAR_NAME "->" e=expr                                       {Object_access (n, e)}*)
+  | n=VAR_NAME "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Object_access (n, Method_call (Infer_me, m, args_list)) }
+  | n=VAR_NAME "->" m=NAME                                       {Object_access (n, Property_access ("__object_property_" ^ m)) }
+  (*| n=NAME                                                       {Property_access ("__object_property_" ^ n)}*)
 
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
