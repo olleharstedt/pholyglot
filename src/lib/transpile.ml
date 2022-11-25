@@ -44,6 +44,7 @@ and expression_to_pholyglot exp = match exp with
     | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
     | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, expression_to_pholyglot lvalue)
+    | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
     | Ast.New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
 
