@@ -1385,6 +1385,37 @@ function main(): int
         }
     ])
 
+let%test_unit "transpile method" =
+    let ast : Ast.expression =
+        Function_call (
+            Function_type {return_type = Void; arguments = [String_literal; Int]},
+            "printf",
+            [
+                Coerce (String_literal, String "\"%d\"");
+                Object_access (
+                    "p",
+                    Method_call {
+                        return_type = Int;
+                        method_name = "getX";
+                        args = [
+                            Variable "var1";
+                            Function_call (
+                                Function_type {return_type = Void; arguments = []},
+                                "moo",
+                                []
+                            );
+                            Array_access ("arr", Num 0);
+                        ];
+                        object_name = "p";
+                    }
+                )
+            ]
+        )
+    in
+    let phast = Transpile.expression_to_pholyglot ast in
+    let code = Pholyglot_ast.string_of_expression phast in
+    [%test_eq: string] code {|printf("%d", $p->getX($var1, moo(), $arr[0]))|}
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot

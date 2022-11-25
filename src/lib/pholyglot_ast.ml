@@ -79,6 +79,12 @@ and expression =
     | Object_access of identifier * expression
     | New of typ * expression list
     | Property_access of identifier (* Valid sub-expression of object access *)
+    | Method_call of {
+        return_type: typ;
+        method_name: string;
+        object_name: string;
+        args: expression list;
+    }
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
 
@@ -163,12 +169,18 @@ let rec string_of_expression = function
         (* TODO: Code duplication *)
         let id = if id = "this" then "self" else id in
         sprintf {|$%s->%s|} id prop_name
+    | Object_access (id, Method_call {return_type; method_name; object_name; args}) ->
+        sprintf {|$%s->%s(%s)|}
+        object_name
+        method_name 
+        (concat ~sep:", " (List.map args ~f:string_of_expression))
     | Property_access n -> n
     | Function_call (Function_type {return_type; arguments}, name, param_exprs) ->
         sprintf
         {|%s(%s)|}
         name
         (concat ~sep:", " (List.map param_exprs ~f:string_of_expression))
+    (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 
 let string_of_statement = function
