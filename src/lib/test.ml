@@ -1513,3 +1513,5 @@ function main(): int
 (* typedef to get rid of struct Point* $self C-only code *)
 (* Infer return type for methods *)
 (* Object access method call *)
+(* Method pointer init *)
+(* Property defaults *)
