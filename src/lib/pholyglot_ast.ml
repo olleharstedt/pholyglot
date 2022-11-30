@@ -298,12 +298,14 @@ function %s(%s)
     | Class (class_name, kind, props, methods) ->
         let string_of_method = fun (m) -> string_of_method class_name m in
         let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init class_name m in
+        (* TODO: Add typedefs before class *)
+        (* TODO: Fix macro for sizeof *)
         sprintf {|
 class %s {
     %s
     %s
 // End of C struct def. Class methods are outside the struct.
-#__C__ }; typedef struct %s* %s;
+#__C__ };
 %s
 #if __PHP__
 // End of PHP class def.
