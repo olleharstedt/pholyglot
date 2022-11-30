@@ -22,6 +22,7 @@ class Point {
     int (*getX) (struct Point *p);
 // End of C struct def. Class methods are outside the struct.
 };
+#__C__ typedef struct Point* Point;
 
 #if __PHP__
 public function getX(Point $self ): int

@@ -1223,7 +1223,8 @@ class Point {
     public $__object_property_x;
 #undef public
 
-    #__C__ int (*getX) ();
+    #__C__ int (*getX) (struct Point* $self);
+
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
 

@@ -81,17 +81,17 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
             stmts = List.map statement_to_pholyglot stmts;
             function_type = typ_to_pholyglot function_type
         }
-    | Class {name; kind = k; properties = props; methods} ->
+    | Class {name = class_name; kind = k; properties = props; methods} ->
         let fn : Ast.function_def -> Pholyglot_ast.function_def = fun {name; params; stmts; function_type;} ->
             {
                 name;
-                params = List.map param_to_pholyglot params;
+                params = Param ("self", Class_type class_name) :: List.map param_to_pholyglot params;
                 stmts = List.map statement_to_pholyglot stmts;
                 function_type = typ_to_pholyglot function_type;
             }
         in
         Pholyglot_ast.Class (
-            name,
+            class_name,
             kind_to_pholyglot k,
             List.map prop_to_pholyglot props,
             List.map fn methods

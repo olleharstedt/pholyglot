@@ -110,7 +110,8 @@ let rec string_of_typ (t : typ) : string = match t with
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
-    | Class_type (n) -> sprintf "struct %s*" n
+    (* Assuming we have a proper typedef, this is OK in both PHP and C *)
+    | Class_type (n) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
 
 (** Type notation that goes AFTER the variable name, as in array init *)
@@ -224,6 +225,7 @@ let string_of_prop (p : class_property) : string = match p with
     n
     n
 
+(* Function pointers are defined BEFORE the typedef, so 'struct' needs to be written explicitly for class types *)
 (* #__C__ char* (*getName) (struct Point*); *)
 let string_of_function_pointer meth : string = match meth with
   (*| (name, params, stmts, Function_type {return_type; arguments}) ->*)
@@ -245,20 +247,17 @@ let string_of_function_pointer meth : string = match meth with
  *)
 let string_of_method class_name meth = match meth with
     | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
-        let self : param = Param ("self", Class_type class_name) in
-        let self_params = self :: params in
         sprintf {|
 #if __PHP__
-public function %s(%s $self %s): %s
+public function %s(%s): %s
 #endif
-#__C__ %s %s_%s (struct %s* $self)
+#__C__ %s %s_%s (%s)
 {
     %s
 }
 |}
+    (* PHP function name *)
     name
-    (* Self PHP arg *)
-    class_name
     (* Params for PHP *)
     (concat ~sep:", " (List.map params ~f:string_of_param))
     (* PHP return type *)
@@ -267,7 +266,8 @@ public function %s(%s $self %s): %s
     (string_of_typ (Function_type {return_type; arguments}))
     class_name
     name
-    class_name
+    (* Params for C *)
+    (concat ~sep:", " (List.map params ~f:string_of_param))
     (concat (List.map stmts ~f:string_of_statement))
 
 let string_of_function_pointer_init class_name meth = match meth with
@@ -295,15 +295,15 @@ function %s(%s)
         name
         (concat ~sep:", " (List.map params ~f:string_of_param))
         (concat (List.map stmts ~f:string_of_statement))
-    | Class (name, kind, props, methods) ->
-        let string_of_method = fun (m) -> string_of_method name m in
-        let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init name m in
+    | Class (class_name, kind, props, methods) ->
+        let string_of_method = fun (m) -> string_of_method class_name m in
+        let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init class_name m in
         sprintf {|
 class %s {
     %s
     %s
 // End of C struct def. Class methods are outside the struct.
-#__C__ };
+#__C__ }; typedef struct %s* %s;
 %s
 #if __PHP__
 // End of PHP class def.
@@ -314,7 +314,7 @@ define("%s", "%s");  // Needed to make new_() work with C macro
 #endif
 //?>
 // Function pointer init
-struct %s* new_%s(struct %s *$p)
+%s new_%s(%s $p)
 {
     %s
     return $p;
@@ -324,17 +324,19 @@ struct %s* new_%s(struct %s *$p)
 function new_%s($p) { return $p; }
 #endif
 |}
-        name
+        class_name
         (concat (List.map ~f:string_of_prop props))
         (concat (List.map ~f:string_of_function_pointer methods))
         (concat (List.map ~f:string_of_method methods))
-        name
-        name
-        name
-        name
-        name
+        class_name
+        class_name
+        class_name
+        class_name
+        class_name
+        class_name
+        class_name
         (concat (List.map ~f:string_of_function_pointer_init methods))
-        name
+        class_name
 
 (** Probably only to be used in tests *)
 let string_of_declares ds : string = concat (List.map ds ~f:string_of_declare)
