@@ -19,15 +19,19 @@ class Point {
     public $__object_property_x;
 #undef public
 
-    int (*getX) (struct Point *p);
+    int (*getX) ();
 // End of C struct def. Class methods are outside the struct.
 };
-#__C__ typedef struct Point* Point;
 
 #if __PHP__
 public function getX(Point $self ): int
 #endif
-int Point_getX (struct Point* $self) { return $self->__object_property_x; }
+int Point_getX (struct Point* $self)
+{
+     printf("Mooo");
+    return $self->__object_property_x;
+
+}
 
 #if __PHP__
 // End of PHP class def.
@@ -51,12 +55,11 @@ function new_Point($p) { return $p; }
 #define function int
 function main()
 {
-    printf("Hello, world!\n");
+     printf("Hello, world!\n");
     struct Point*
     $p 
-    = new_Point(new_(Point));
-    $p->__object_property_x = 10;
-    printf("%d\n", $p->getX($p));
+    = new_(Point);
+     printf("%d", $p->getX());
     return 0;
 }
 #undef function

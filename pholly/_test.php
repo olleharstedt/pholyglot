@@ -58,9 +58,8 @@ function main()
      printf("Hello, world!\n");
     #__C__ struct Point*
     $p 
-    = new_Point(new_(Point));
-     $p->__object_property_x = 10;
-     printf("%d", $p->getX($p));
+    = new_(Point);
+     printf("%d", $p->getX());
     return 0;
 }
 #undef function

@@ -1,9 +1,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define new(x) alloca(sizeof(x ## _struct))
+#define new(x) alloca(sizeof(struct Point))
 
-typedef struct Point Point_struct;
 typedef struct Point* Point;
 struct Point
 {
