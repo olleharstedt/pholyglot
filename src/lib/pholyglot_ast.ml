@@ -298,9 +298,12 @@ function %s(%s)
     | Class (class_name, kind, props, methods) ->
         let string_of_method = fun (m) -> string_of_method class_name m in
         let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init class_name m in
-        (* TODO: Add typedefs before class *)
+        let moo = "blabla" in
+        [%string {|This is a test for $$moo|}]
         (* TODO: Fix macro for sizeof *)
+        (*
         sprintf {|
+#__C__ typedef struct %s* %s;
 class %s {
     %s
     %s
@@ -326,7 +329,13 @@ define("%s", "%s");  // Needed to make new_() work with C macro
 function new_%s($p) { return $p; }
 #endif
 |}
+        (* Type def *)
         class_name
+        (* Type def *)
+        class_name
+        (* Main class name *)
+        class_name
+        (* Props *)
         (concat (List.map ~f:string_of_prop props))
         (concat (List.map ~f:string_of_function_pointer methods))
         (concat (List.map ~f:string_of_method methods))
@@ -339,6 +348,7 @@ function new_%s($p) { return $p; }
         class_name
         (concat (List.map ~f:string_of_function_pointer_init methods))
         class_name
+        *)
 
 (** Probably only to be used in tests *)
 let string_of_declares ds : string = concat (List.map ds ~f:string_of_declare)
