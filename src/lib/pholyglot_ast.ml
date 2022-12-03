@@ -298,57 +298,38 @@ function %s(%s)
     | Class (class_name, kind, props, methods) ->
         let string_of_method = fun (m) -> string_of_method class_name m in
         let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init class_name m in
-        let moo = "blabla" in
-        [%string {|This is a test for $$moo|}]
+        let props = (concat (List.map ~f:string_of_prop props)) in
+        let function_pointers = (concat (List.map ~f:string_of_function_pointer methods)) in
+        let function_pointers_init = (concat (List.map ~f:string_of_function_pointer_init methods)) in
+        let methods = (concat (List.map ~f:string_of_method methods)) in
         (* TODO: Fix macro for sizeof *)
-        (*
-        sprintf {|
-#__C__ typedef struct %s* %s;
-class %s {
-    %s
-    %s
+        [%string {|
+#__C__ typedef struct $class_name* $class_name;
+class $class_name {
+    $props
+    $function_pointers
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
-%s
+$methods
 #if __PHP__
 // End of PHP class def.
 };
 #endif
 #if __PHP__
-define("%s", "%s");  // Needed to make new_() work with C macro
+define("$class_name", "$class_name");  // Needed to make new_() work with C macro
 #endif
 //?>
 // Function pointer init
-%s new_%s(%s $p)
+$class_name new_$class_name($class_name $$p)
 {
-    %s
-    return $p;
+    $function_pointers_init
+    return $$p;
 }
 //<?php
 #if __PHP__
-function new_%s($p) { return $p; }
+function new_$class_name($$p) { return $$p; }
 #endif
-|}
-        (* Type def *)
-        class_name
-        (* Type def *)
-        class_name
-        (* Main class name *)
-        class_name
-        (* Props *)
-        (concat (List.map ~f:string_of_prop props))
-        (concat (List.map ~f:string_of_function_pointer methods))
-        (concat (List.map ~f:string_of_method methods))
-        class_name
-        class_name
-        class_name
-        class_name
-        class_name
-        class_name
-        class_name
-        (concat (List.map ~f:string_of_function_pointer_init methods))
-        class_name
-        *)
+|}]
 
 (** Probably only to be used in tests *)
 let string_of_declares ds : string = concat (List.map ds ~f:string_of_declare)
