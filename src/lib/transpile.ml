@@ -46,11 +46,12 @@ and expression_to_pholyglot exp = match exp with
     | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, expression_to_pholyglot lvalue)
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
     | Ast.Method_call {return_type; method_name; object_name; args} ->
+        let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {
             return_type = typ_to_pholyglot return_type;
             method_name;
             object_name;
-            args = List.map expression_to_pholyglot args;
+            args;
         }
     | Ast.New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))

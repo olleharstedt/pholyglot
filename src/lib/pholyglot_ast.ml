@@ -87,6 +87,7 @@ and expression =
     }
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
+    | Self
 
 and includes =
     | Include of include_lib
@@ -171,6 +172,7 @@ let rec string_of_expression = function
         let id = if id = "this" then "self" else id in
         sprintf {|$%s->%s|} id prop_name
     | Object_access (id, Method_call {return_type; method_name; object_name; args}) ->
+        let args = (Variable object_name : expression ) :: args in
         sprintf {|$%s->%s(%s)|}
         object_name
         method_name 

@@ -13,20 +13,21 @@ function new_($class) { return new $class; }
 #endif//?>
 //<?php
 
+typedef struct Point* Point;
 class Point {
     #define public int
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
 
-    int (*getX) ();
+    int (*getX) (Point $self);
 // End of C struct def. Class methods are outside the struct.
 };
 
 #if __PHP__
-public function getX(Point $self ): int
+public function getX(Point $self): int
 #endif
-int Point_getX (struct Point* $self)
+int Point_getX (Point $self)
 {
      printf("Mooo");
     return $self->__object_property_x;
@@ -42,7 +43,7 @@ define("Point", "Point");  // Needed to make new_() work with C macro
 #endif
 //?>
 // Function pointer init
-struct Point* new_Point(struct Point *$p)
+Point new_Point(Point $p)
 {
     $p->getX = &Point_getX;
 
@@ -56,7 +57,7 @@ function new_Point($p) { return $p; }
 function main()
 {
      printf("Hello, world!\n");
-    struct Point*
+    Point
     $p 
     = new_(Point);
      printf("%d", $p->getX());

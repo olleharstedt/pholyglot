@@ -1415,7 +1415,7 @@ let%test_unit "transpile method" =
     in
     let phast = Transpile.expression_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_expression phast in
-    [%test_eq: string] code {|printf("%d", $p->getX($var1, moo(), $arr[0]))|}
+    [%test_eq: string] code {|printf("%d", $p->getX($p, $var1, moo(), $arr[0]))|}
 
     (*
 let%test "nbody benchmark" =
