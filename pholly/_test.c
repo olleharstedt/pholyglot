@@ -4,12 +4,11 @@
 #define $ 
 #define class struct
 #define __PHP__ 0
-#define new_(x) alloca(sizeof(struct x))
+#define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
 function g_string_new(string $str) { return new GString($str); }
 function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
-function new_($class) { return new $class; }
 #endif//?>
 //<?php
 
@@ -39,11 +38,11 @@ int Point_getX (Point $self)
 };
 #endif
 #if __PHP__
-define("Point", "Point");  // Needed to make new_() work with C macro
+define("Point", "Point");  // Needed to make new() work with C macro
 #endif
 //?>
 // Function pointer init
-Point new_Point(Point $p)
+Point Point__constructor(Point $p)
 {
     $p->getX = &Point_getX;
 
@@ -59,8 +58,9 @@ function main()
      printf("Hello, world!\n");
     Point
     $p 
-    = new_(Point);
-     printf("%d", $p->getX());
+    = new(Point);
+    $p->__object_property_x = 10;
+     printf("%d", $p->getX($p));
     return 0;
 }
 #undef function

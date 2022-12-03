@@ -30,6 +30,9 @@
 
     $a = parse_int($_GET['used_id']);
 
+    // TODO: This won't deal with different mem strategies
+    #define new(x) x ## __constructor(alloca(sizeof(struct x)))
+
 `g_printf` vs `printf`?
 
 `g_slice` instead of malloc?

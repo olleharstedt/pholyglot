@@ -59,8 +59,8 @@ function main()
      printf("Hello, world!\n");
     #__C__ Point
     $p 
-    = new_(Point);
-     printf("%d", $p->getX());
+    = new_Point(Point);
+     printf("%d", $p->getX($p));
     return 0;
 }
 #undef function
