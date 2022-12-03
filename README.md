@@ -31,6 +31,7 @@
     $a = parse_int($_GET['used_id']);
 
     // TODO: This won't deal with different mem strategies
+    // BUT: Use _Generic to switch on it? Use same new() with different behaviour - alloca, malloc, Boehm etc.
     #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 
 `g_printf` vs `printf`?
