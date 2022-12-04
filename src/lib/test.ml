@@ -542,7 +542,7 @@ let%test_unit "trivial class declare" =
     let source = {|<?php // @pholyglot
     class Point {
         public int $x;
-        public int $y;
+        public float $y;
     }
     function main(): int {
         return 0;
@@ -556,7 +556,7 @@ let%test_unit "trivial class declare" =
             kind = Infer_kind;
             properties = [
                 ("__object_property_x", Int);
-                ("__object_property_y", Int);
+                ("__object_property_y", Float);
             ];
             methods = [];
         };
@@ -1552,8 +1552,7 @@ function main(): int
     *)
 
 (* TODO: *)
-(* Support for double/float. `+` won't type-cast automatically. *)
-(* $a = 1 + 2.0; int vs float should show error *)
+(* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
 (* $b = [1, "Moo"];  Tuple *)

@@ -84,6 +84,7 @@ rule token = parse
   | "public"                      { PUBLIC }
   | "private"                     { PRIVATE }
   | "int"                         { INT_TYPE }
+  | "float"                       { FLOAT_TYPE }
   | "void"                        { VOID_TYPE }
   | "string"                      { STRING_TYPE }
   | "array"                       { ARRAY_TYPE }

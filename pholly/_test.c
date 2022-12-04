@@ -12,53 +12,35 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 #endif//?>
 //<?php
 
-typedef struct Point* Point;
-class Point {
+typedef struct Body* Body;
+class Body {
     #define public int
-#define __object_property_x $__object_property_x
-    public $__object_property_x;
+#define __object_property_a $__object_property_a
+    public $__object_property_a;
 #undef public
 
-    int (*getX) (Point $self);
+    
 // End of C struct def. Class methods are outside the struct.
 };
-
-#if __PHP__
-public function getX(Point $self): int
-#endif
-int Point__getX (Point $self)
-{
-     printf("Mooo");
-    return $self->__object_property_x;
-
-}
 
 #if __PHP__
 // End of PHP class def.
 };
 #endif
 #if __PHP__
-define("Point", "Point");
+define("Body", "Body");
 #endif
 //?>
 // Function pointer init
-Point Point__constructor(Point $p)
+Body Body__constructor(Body $p)
 {
-    $p->getX = &Point__getX;
-
+    
     return $p;
 }
 //<?php
 #define function int
 function main()
 {
-     printf("Hello, world!\n");
-    Point
-    $p 
-    = new(Point);
-    $p->__object_property_x 
-    = 10;
-     printf("%d", $p->getX($p));
     return 0;
 }
 #undef function
