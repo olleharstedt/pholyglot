@@ -146,11 +146,11 @@ let rec string_of_expression = function
     | Variable id ->
         let id = if id = "this" then "self" else id in
         "$" ^ id
-    (* TODO: Alloc type *)
+    (* TODO: Alloc type, possibly done as Point__stack or Point__boehm + _Generic in C macro etc *)
     (* TODO: Init function pointers *)
     | New (Class_type (ct), exprs) -> 
         (*let t_text = show_typ t in*)
-        sprintf {|new_(%s)|}
+        sprintf {|new(%s)|}
         ct
     | Array_init exprs -> sprintf {|
 #__C__ {
@@ -253,7 +253,7 @@ let string_of_method class_name meth = match meth with
 #if __PHP__
 public function %s(%s): %s
 #endif
-#__C__ %s %s_%s (%s)
+#__C__ %s %s__%s (%s)
 {
     %s
 }
@@ -274,7 +274,7 @@ public function %s(%s): %s
 
 let string_of_function_pointer_init class_name meth = match meth with
     | { name; } ->
-        sprintf {|$p->%s = &%s_%s;
+        sprintf {|$p->%s = &%s__%s;
 |}
         name
         class_name
@@ -318,19 +318,16 @@ $methods
 };
 #endif
 #if __PHP__
-define("$class_name", "$class_name");  // Needed to make new_() work with C macro
+define("$class_name", "$class_name");
 #endif
 //?>
 // Function pointer init
-$class_name new_$class_name($class_name $$p)
+$class_name $(class_name)__constructor($class_name $$p)
 {
     $function_pointers_init
     return $$p;
 }
 //<?php
-#if __PHP__
-function new_$class_name($$p) { return $$p; }
-#endif
 |}]
 
 (** Probably only to be used in tests *)

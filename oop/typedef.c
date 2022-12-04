@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define new(x) alloca(sizeof(struct Point))
+#define new(x) x ## __constructor(alloca(sizeof(struct Point)))
 
 typedef struct Point* Point;
 struct Point
@@ -10,6 +10,10 @@ struct Point
     int y;
     int z;
 };
+
+Point Point__constructor(Point p)
+{
+}
 
 int main()
 {

@@ -116,14 +116,13 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             Define ("class", Some "struct");
             Define ("__PHP__", Some "0");
             (* TODO: new_stack and new_heap? new_pool? *)
-            Define ("new_(x)", Some "alloca(sizeof(struct x))");
+            Define ("new(x)", Some "x ## __constructor(alloca(sizeof(struct x)))");
         ],
         (* Stubs *)
         [
             "class GString { public $str; public function __construct($str) { $this->str = $str; } }\n";
             "function g_string_new(string $str) { return new GString($str); }\n";
             "function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }\n";
-            "function new_($class) { return new $class; }\n";
         ],
         (* Declarations *)
         declares,
