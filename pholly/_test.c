@@ -14,9 +14,33 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 
 typedef struct Body* Body;
 class Body {
-    #define public int
-#define __object_property_a $__object_property_a
-    public $__object_property_a;
+    #define public float
+#define __object_property_x $__object_property_x
+    public $__object_property_x;
+#undef public
+#define public float
+#define __object_property_y $__object_property_y
+    public $__object_property_y;
+#undef public
+#define public float
+#define __object_property_z $__object_property_z
+    public $__object_property_z;
+#undef public
+#define public float
+#define __object_property_vx $__object_property_vx
+    public $__object_property_vx;
+#undef public
+#define public float
+#define __object_property_vy $__object_property_vy
+    public $__object_property_vy;
+#undef public
+#define public float
+#define __object_property_vz $__object_property_vz
+    public $__object_property_vz;
+#undef public
+#define public float
+#define __object_property_mass $__object_property_mass
+    public $__object_property_mass;
 #undef public
 
     
@@ -41,6 +65,25 @@ Body Body__constructor(Body $p)
 #define function int
 function main()
 {
+    Body
+    $jupiter 
+    = new(Body);
+    $jupiter->__object_property_x 
+    = 10.;
+    Body
+    $bodies 
+    [1]
+    = 
+{
+#if __PHP__
+[
+#endif
+    $jupiter
+#if __PHP__
+]
+#endif
+}
+    ;
     return 0;
 }
 #undef function

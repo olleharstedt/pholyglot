@@ -47,16 +47,6 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "typ_of_expression: Mixing float and int in arith expression")
         else
             e_typ
-            (*
-        let check e = 
-            match typ_of_expression ns e with 
-            | Int -> () 
-            | _ -> raise (Type_error "typ_of_expression: Found non-int in arith")
-        in
-        check e;
-        check f;
-        Int
-        *)
     | Concat (e, f) -> 
         let check e = 
             match typ_of_expression ns e with 
@@ -239,7 +229,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
     | s -> s
 
 let rec kind_of_typ ns t : kind = match t with
-    | Int | Void -> Val
+    | Int | Float | Void -> Val
     | String -> Ref
     | Class_type s -> begin
         match Namespace.find_class ns s with
