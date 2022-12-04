@@ -35,11 +35,19 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     Log.debug "%s %s" "typ_of_expression" (show_expression expr);
     match expr with
     | Num _ -> Int
+    | Num_float _ -> Float
     | String s -> String
     | Plus (e, f)
     | Minus (e, f)
     | Times (e, f)
     | Div (e, f) -> 
+        let e_typ = typ_of_expression ns e in
+        let f_typ = typ_of_expression ns f in
+        if e_typ <> f_typ then
+            raise (Type_error "typ_of_expression: Mixing float and int in arith expression")
+        else
+            e_typ
+            (*
         let check e = 
             match typ_of_expression ns e with 
             | Int -> () 
@@ -48,6 +56,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         check e;
         check f;
         Int
+        *)
     | Concat (e, f) -> 
         let check e = 
             match typ_of_expression ns e with 

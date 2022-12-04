@@ -1410,19 +1410,22 @@ let%test_unit "transpile method" =
 let%test_unit "float test" =
     let source = "<?php // @pholyglot
     function main(): int {
-        $a = 1.0;
+        $a = 1.0 + 2.0 - 3.25;
         return 0;
     }
     " in
-    let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
         Function {
             name= "main";
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "a", Num_float 1.0);
+                Assignment (Float, Variable "a", (Minus (Plus ((Num_float 1.0), (Num_float 2.0)), (Num_float 3.25))));
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -1478,7 +1481,7 @@ function main(): int
 
 (* TODO: *)
 (* Support for double/float. `+` won't type-cast automatically. *)
-(* $a = 1 + 2.0; int vs float *)
+(* $a = 1 + 2.0; int vs float should show error *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
 (* $b = [1, "Moo"];  Tuple *)
