@@ -9,6 +9,7 @@ let kind_to_pholyglot k = match k with
 (** Transpile from Pholly AST to Pholyglot AST *)
 let rec typ_to_pholyglot t = match t with
     | Ast.Int -> Pholyglot_ast.Int
+    | Ast.Float -> Pholyglot_ast.Float
     | Ast.String -> Pholyglot_ast.String
     | Ast.String_literal -> Pholyglot_ast.String_literal
     | Ast.Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
@@ -33,6 +34,7 @@ let rec lvalue_to_pholyglot lvalue = match lvalue with
 and expression_to_pholyglot exp = match exp with
     | Ast.String s -> Pholyglot_ast.String s
     | Ast.Num i -> Pholyglot_ast.Num i
+    | Ast.Num_float f -> Pholyglot_ast.Num_float f
     | Ast.Plus (i, j) -> Pholyglot_ast.Plus (expression_to_pholyglot i, expression_to_pholyglot j)
     | Ast.Minus (i, j) -> Pholyglot_ast.Minus (expression_to_pholyglot i, expression_to_pholyglot j)
     | Ast.Times (i, j) -> Pholyglot_ast.Times (expression_to_pholyglot i, expression_to_pholyglot j)

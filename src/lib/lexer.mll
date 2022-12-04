@@ -35,6 +35,16 @@ let var_identifier = '$' lowercase (nondigit|digit)*
 let class_name = uppercase (nondigit|digit)*
 let whitespace_char_no_newline = [' ' '\t' '\012' '\r']
 let integer_constant = decimal_constant
+let sign = ['-' '+']
+let digit_sequence = digit+
+let exponent_part =
+        ['e'] sign? digit_sequence
+let fractional_constant =
+      digit_sequence? '.' digit_sequence
+    | digit_sequence '.'
+let decimal_floating_constant =
+    fractional_constant exponent_part?
+    | digit_sequence exponent_part
 
 rule token = parse
   | whitespace_char_no_newline+   { token lexbuf }
@@ -44,6 +54,7 @@ rule token = parse
   | "//"                          { singleline_comment lexbuf; initial_linebegin lexbuf }
   | '\n'                          { new_line lexbuf; initial_linebegin lexbuf }
   | integer_constant as i         { INT (int_of_string i) }
+  | decimal_floating_constant as f { FLOAT (float_of_string f) }
   | "<?php // @pholyglot"         { START_SCRIPT }
   | "0"                           { INT 0 }
   | "="                           { EQ }

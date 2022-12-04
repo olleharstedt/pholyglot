@@ -22,6 +22,7 @@ and kind =
 
 and typ =
     | Int
+    | Float
     | String                (* Actually GString pointer *)
     | String_literal
     | Void
@@ -67,6 +68,7 @@ and lvalue =
 
 and expression =
     | Num of int
+    | Num_float of float
     | String of string
     | Plus of expression * expression
     | Minus of expression * expression

@@ -1407,6 +1407,28 @@ let%test_unit "transpile method" =
     let code = Pholyglot_ast.string_of_expression phast in
     [%test_eq: string] code {|printf("%d", $p->getX($p, $var1, moo(), $arr[0]))|}
 
+let%test_unit "float test" =
+    let source = "<?php // @pholyglot
+    function main(): int {
+        $a = 1.0;
+        return 0;
+    }
+    " in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    [%test_eq: Ast.program] ast (Ast.Declaration_list [
+        Function {
+            name= "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Infer_me, Variable "a", Num_float 1.0);
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
+    ])
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
@@ -1456,6 +1478,7 @@ function main(): int
 
 (* TODO: *)
 (* Support for double/float. `+` won't type-cast automatically. *)
+(* $a = 1 + 2.0; int vs float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
 (* $b = [1, "Moo"];  Tuple *)
@@ -1474,7 +1497,6 @@ function main(): int
 (* MySQL *)
 (* Curl *)
 (* ini file *)
-(* $a = 1 + 2.0; int vs float *)
 (* enum? *)
 (* array_map([1, 2, 3], fn (x) => x + 1); *)
 (* Nullable types *)

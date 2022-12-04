@@ -19,6 +19,7 @@ and kind =
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)
 and typ =
     | Int
+    | Float
     (*| GChar Static glib string*)
     (*| GString Glib string buffer *)
     | String
@@ -104,6 +105,7 @@ and lvalue =
 
 and expression =
     | Num of int
+    | Num_float of float
     (** TODO: GString *)
     | String of string
     | Plus of expression * expression

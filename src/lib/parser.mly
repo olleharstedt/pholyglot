@@ -25,6 +25,7 @@ let get_class_methods elems =
 %}
 
 %token <int> INT
+%token <float> FLOAT
 %token <string> NAME
 %token <string> VAR_NAME  (* This one with dollar-sign *)
 %token <string> STRING_LITERAL
@@ -55,6 +56,7 @@ let get_class_methods elems =
 %token ARROW "->"
 %token AMPERSAND "&"
 %token INT_TYPE "int"
+%token FLOAT_TYPE "float"
 %token VOID_TYPE "void"
 %token STRING_TYPE "string"
 %token ARRAY_TYPE "array"
@@ -151,6 +153,7 @@ arg_decl:
 
 typ:
   | "int"                       {Int : Ast.typ}
+  | "float"                     {Float : Ast.typ}
   | "string"                    {String : Ast.typ}
   | "void"                      {Void : Ast.typ}
   | "array"                     {Fixed_array (Infer_me, None) : Ast.typ}
@@ -165,6 +168,7 @@ lvalue:
 
 expr:
   | i=INT                                                        {Num i}
+  | f=FLOAT                                                      {Num_float f}
   | s=STRING_LITERAL                                             {String s}
   | e=expr "+" f=expr                                            {Plus (e, f)} 
   | e=expr "-" f=expr                                            {Minus (e, f)} 
