@@ -1432,6 +1432,21 @@ let%test_unit "float test" =
         }
     ])
 
+let%test "float int conflict test" =
+    let source = "<?php // @pholyglot
+    function main(): int {
+        $a = 1.0 + 2.0 - 3;
+        return 0;
+    }
+    " in
+    match
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    with
+    | exception Infer.Type_error _ -> true
+    | _ -> false
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
