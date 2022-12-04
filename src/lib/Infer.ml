@@ -157,13 +157,14 @@ let rec infer_expression ns expr =
 let infer_printf (s : string) : Ast.typ list =
     Log.debug "infer_printf";
     let s = Str.global_replace (Str.regexp "%%") "" s in
-    let regexp = Str.regexp "%[sd]" in
+    let regexp = Str.regexp "%[sdf]" in
     let rec get_all_matches i = match Str.search_forward regexp s i with
         | i -> 
             let m = Str.matched_string s in
             (match m with 
                 | "%s" -> String_literal
                 | "%d" -> Int
+                | "%f" -> Float
             ) :: get_all_matches (i + 1)
         | exception Not_found -> []
     in

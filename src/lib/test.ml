@@ -40,6 +40,7 @@ let rec string_of_token (token : Parser.token) : string =
         | LBRACK -> "LBRACK"
         | LBRACE -> "LBRACE"
         | INT i -> "INT" ^ string_of_int i
+        | FLOAT i -> "FLOAT" ^ string_of_float i
         | EQEQ -> "EQEQ"
         | EQ -> "EQ"
         | EOF -> "EOF"
@@ -56,6 +57,7 @@ let rec string_of_token (token : Parser.token) : string =
         | COMMA -> "COMMA"
         | ARROW -> "ARROW"
         | INT_TYPE -> "INT_TYPE"
+        | FLOAT_TYPE -> "FLOAT_TYPE"
         | STRING_TYPE -> "STRING_TYPE"
         | CLASS -> "CLASS"
         | PUBLIC -> "PUBLIC"
@@ -1446,6 +1448,61 @@ let%test "float int conflict test" =
     with
     | exception Infer.Type_error _ -> true
     | _ -> false
+
+let%test_unit "float to code test" =
+    let fn : Ast.declaration = 
+        Function {
+            name= "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Float, Variable "a", (Minus (Plus ((Num_float 1.0), (Num_float 2.0)), (Num_float 3.25))));
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []}
+        }
+    in
+    let phast = Transpile.declaration_to_pholyglot fn in
+    let code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] code {|#define function int
+function main()
+{
+    #__C__ float
+    $a 
+    = 1. + 2. - 3.25;
+    return 0;
+}
+#undef function
+|}
+
+let%test_unit "printf float" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $a = 1.0 + 2.5;
+        printf("%f", $a);
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Float, Variable "a", (Plus ((Num_float 1.0), (Num_float 2.5))));
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Float]},
+                    "printf",
+                    [Coerce (String_literal, String "\"%f\""); Variable ("a")];
+                );
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
 
     (*
 let%test "nbody benchmark" =

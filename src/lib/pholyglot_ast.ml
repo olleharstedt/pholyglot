@@ -110,6 +110,7 @@ let string_of_define (d : define) : string = match d with
 
 let rec string_of_typ (t : typ) : string = match t with
     | Int -> "int"
+    | Float -> "float"
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
@@ -136,6 +137,7 @@ let rec string_of_lvalue (l : lvalue) : string = match l with
 
 let rec string_of_expression = function
     | Num i -> Int.to_string i
+    | Num_float f -> Float.to_string f
 	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
     | String s -> sprintf "g_string_new(%s)" s
     | Coerce (String_literal, String s) -> s
