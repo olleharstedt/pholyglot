@@ -26,7 +26,7 @@ class Point {
 #if __PHP__
 public function getX(Point $self): int
 #endif
-int Point_getX (Point $self)
+int Point__getX (Point $self)
 {
      printf("Mooo");
     return $self->__object_property_x;
@@ -38,20 +38,17 @@ int Point_getX (Point $self)
 };
 #endif
 #if __PHP__
-define("Point", "Point");  // Needed to make new() work with C macro
+define("Point", "Point");
 #endif
 //?>
 // Function pointer init
 Point Point__constructor(Point $p)
 {
-    $p->getX = &Point_getX;
+    $p->getX = &Point__getX;
 
     return $p;
 }
 //<?php
-#if __PHP__
-function new_Point($p) { return $p; }
-#endif
 #define function int
 function main()
 {
@@ -59,7 +56,8 @@ function main()
     Point
     $p 
     = new(Point);
-    $p->__object_property_x = 10;
+    $p->__object_property_x 
+    = 10;
      printf("%d", $p->getX($p));
     return 0;
 }

@@ -1209,21 +1209,21 @@ let%test_unit "simple getter" =
          |> Pholyglot_ast.string_of_declare
     in
     [%test_eq: string] code {|
+#__C__ typedef struct Point* Point;
 class Point {
     #define public int
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
 
-    #__C__ int (*getX) (struct Point* $self);
-
+    #__C__ int (*getX) (Point $self);
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
 
 #if __PHP__
-public function getX(Point $self ): int
+public function getX(Point $self): int
 #endif
-#__C__ int Point_getX (struct Point* $self)
+#__C__ int Point__getX (Point $self)
 {
     return $self->__object_property_x;
 
@@ -1240,7 +1240,7 @@ define("Point", "Point");
 // Function pointer init
 Point Point__constructor(Point $p)
 {
-    $p->getX = &Point_getX;
+    $p->getX = &Point__getX;
 
     return $p;
 }

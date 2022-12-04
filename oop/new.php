@@ -2,4 +2,6 @@
 
 class Point { }
 define("Point", "Point");
-$p = new(Point . 'alloc');
+$a = 20;
+function foo() { return "Point"; }
+$o = new ($a = foo());
