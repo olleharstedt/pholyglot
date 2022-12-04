@@ -33,6 +33,7 @@
     // TODO: This won't deal with different mem strategies
     // BUT: Use _Generic to switch on it? Use same new() with different behaviour - alloca, malloc, Boehm etc.
     // BUT: Should be able to use one class with many diff allocation strats, /** @alloc stack */ etc
+    // NB: new (foo()) is valid in PHP when foo() returns string/class name
     #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 
 `g_printf` vs `printf`?

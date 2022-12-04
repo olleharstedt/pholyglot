@@ -781,6 +781,7 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 #endif//?>
 //<?php
 
+#__C__ typedef struct Point* Point;
 class Point {
     #define public int
 #define __object_property_x $__object_property_x
@@ -813,7 +814,7 @@ Point Point__constructor(Point $p)
 #define function int
 function main()
 {
-    #__C__ struct Point*
+    #__C__ Point
     $p 
     = new(Point);
     $p->__object_property_x 
