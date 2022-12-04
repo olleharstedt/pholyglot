@@ -181,6 +181,7 @@ expr:
   (*| n=VAR_NAME "->" e=expr                                       {Object_access (n, e)}*)
   | n=VAR_NAME "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Object_access (n, Method_call {return_type = Infer_me; method_name = m; args = args_list; object_name = n}) }
   | n=VAR_NAME "->" m=NAME                                       {Object_access (n, Property_access ("__object_property_" ^ m)) }
+  | e=expr "->" m=NAME                                           {Object_access (e, Property_access ("__object_property_" ^ m)) }
   (*| n=NAME                                                       {Property_access ("__object_property_" ^ n)}*)
 
   | n=VAR_NAME                                                   {Variable n}

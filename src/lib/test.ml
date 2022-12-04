@@ -1504,6 +1504,23 @@ let%test_unit "printf float" =
         }
     ])
 
+let%test_unit "printf float" =
+    let source = {|<?php // @pholyglot
+    class Body {public int $x}
+    function foo(): void {
+        $b = new Body();
+        $b->x = 10;
+        $arr = [$b];
+        $x = $arr[0]->x;
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [])
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
