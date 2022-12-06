@@ -1385,23 +1385,20 @@ let%test_unit "transpile method" =
             "printf",
             [
                 Coerce (String_literal, String "\"%d\"");
-                Object_access (
-                    Variable "p",
-                    Method_call {
-                        return_type = Int;
-                        method_name = "getX";
-                        args = [
-                            Variable "var1";
-                            Function_call (
-                                Function_type {return_type = Void; arguments = []},
-                                "moo",
-                                []
-                            );
-                            Array_access ("arr", Num 0);
-                        ];
-                        left_hand = Variable "p";
-                    }
-                )
+                Method_call {
+                    return_type = Int;
+                    method_name = "getX";
+                    args = [
+                        Variable "var1";
+                        Function_call (
+                            Function_type {return_type = Void; arguments = []},
+                            "moo",
+                            []
+                        );
+                        Array_access ("arr", Num 0);
+                    ];
+                    left_hand = Variable "p";
+                }
             ]
         )
     in
