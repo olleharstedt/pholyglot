@@ -1501,7 +1501,7 @@ let%test_unit "printf float" =
         }
     ])
 
-let%test_unit "printf float" =
+let%test_unit "object access inside array access" =
     let source = {|<?php // @pholyglot
     class Body {public int $x;}
     function foo(): void {
@@ -1531,11 +1531,29 @@ let%test_unit "printf float" =
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
                 Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init ([Variable "b"]));
-                Assignment (Class_type "Body", Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
+                Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
+
+let%test_unit "object access inside array access transpile" =
+    let fn : Ast.declaration = Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
+                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init ([Variable "b"]));
+                Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    in
+    let phast = Transpile.declaration_to_pholyglot fn in
+    let code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] code {||}
 
     (*
 let%test "nbody benchmark" =

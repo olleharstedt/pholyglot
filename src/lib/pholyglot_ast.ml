@@ -175,6 +175,8 @@ let rec string_of_expression = function
         (* TODO: Code duplication *)
         let id = if id = "this" then "self" else id in
         sprintf {|$%s->%s|} id prop_name
+    | Object_access (expr, Property_access prop_name) ->
+        sprintf {|%s->%s|} (string_of_expression expr) prop_name
     | Method_call {return_type; method_name; left_hand = Variable object_name; args} ->
         let args = (Variable object_name : expression ) :: args in
         sprintf {|$%s->%s(%s)|}

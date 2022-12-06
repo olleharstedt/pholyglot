@@ -84,6 +84,7 @@ function main()
 #endif
 }
     ;
+     printf("%f", $bodies[0]->__object_property_x);
     return 0;
 }
 #undef function
