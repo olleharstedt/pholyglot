@@ -1603,6 +1603,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* Unary operator for negative numbers *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
