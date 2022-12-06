@@ -117,12 +117,19 @@ and expression =
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
-    | Object_access of identifier * expression (* expression can be property, method, or nested object access *)
+    (*
+     * Examples:
+     *   $obj->x    - Object_access (Variable "obj", Property_access "x")
+     *   $arr[0]->x - Object_access (Array_access ("arr", Num 0), Property_access "x")
+     *
+     * "expression" can be property, method, or nested object access
+     *)
+    | Object_access of expression * expression
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Method_call of {
         return_type: typ;
         method_name: string;
-        object_name: string;
+        left_hand: expression; (* left side of arrow, $obj in $obj->foo() *)
         args: expression list;
     }
     | Function_call of typ * identifier * expression list

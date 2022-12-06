@@ -67,7 +67,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "not all element in array_init have the same type")
     | New (t, exprs) -> t
     (* $point->x *)
-    | Object_access (id, Property_access prop_name) -> begin
+    | Object_access (Variable id, Property_access prop_name) -> begin
         let class_type_name = match Namespace.find_identifier ns id with
             | Some (Class_type (c)) -> c
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" id))
@@ -81,8 +81,8 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
     end
     (* $point->getX() *)
-    | Method_call {return_type = Infer_me; method_name; object_name = class_name}
-    | Object_access (class_name, Method_call {return_type = Infer_me; method_name}) -> begin
+    | Method_call {return_type = Infer_me; method_name; left_hand = Variable class_name}
+    | Object_access (Variable class_name, Method_call {return_type = Infer_me; method_name}) -> begin
         let class_type_name = match Namespace.find_identifier ns class_name with
             | Some (Class_type (c)) -> c
             | None -> begin
@@ -135,9 +135,9 @@ let rec infer_expression ns expr =
         | Some t -> failwith ("not a function: " ^ show_typ t)
         | _ -> failwith ("infer_expression: found no function declared with name " ^ name)
     end
-    | Method_call {return_type = Infer_me; method_name; object_name; args} as e -> begin
+    | Method_call {return_type = Infer_me; method_name; left_hand = Variable object_name; args} as e -> begin
         let t = typ_of_expression ns e in
-        Method_call {return_type = t; method_name; object_name; args}
+        Method_call {return_type = t; method_name; left_hand = Variable object_name; args}
     end
     | Object_access (id, expr) -> Object_access (id, infer_expression ns expr)
     | e -> e

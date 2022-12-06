@@ -177,14 +177,11 @@ expr:
   | e=expr "." f=expr                                            {Concat (e, f)} 
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
   | n=VAR_NAME "[" e=expr "]"                                    {Array_access (n, e)}
+  | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Method_call {return_type = Infer_me; method_name = m; args = args_list; left_hand = e}}
 
-  (*| n=VAR_NAME "->" e=expr                                       {Object_access (n, e)}*)
-  | n=VAR_NAME "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Object_access (n, Method_call {return_type = Infer_me; method_name = m; args = args_list; object_name = n}) }
-  | n=VAR_NAME "->" m=NAME                                       {Object_access (n, Property_access ("__object_property_" ^ m)) }
-  | e=expr "->" m=NAME                                           {Object_access (e, Property_access ("__object_property_" ^ m)) }
-  (*| n=NAME                                                       {Property_access ("__object_property_" ^ n)}*)
-
+  | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__object_property_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
+  (* TODO "new" /** @alloc stack */ *)
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init array_init}

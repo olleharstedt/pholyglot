@@ -28,7 +28,7 @@ let rec lvalue_to_pholyglot lvalue = match lvalue with
     | Ast.Variable identifier -> Pholyglot_ast.Variable identifier
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
-    | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
+    | Ast.Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, lvalue_to_pholyglot lvalue)
     | _ -> failwith (sprintf "lvalue_to_pholyglot lvalue = %s" (Ast.show_expression lvalue))
 
 and expression_to_pholyglot exp = match exp with
@@ -45,14 +45,14 @@ and expression_to_pholyglot exp = match exp with
     | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
     | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
-    | Ast.Object_access (identifier, lvalue) -> Pholyglot_ast.Object_access (identifier, expression_to_pholyglot lvalue)
+    | Ast.Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, expression_to_pholyglot lvalue)
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
-    | Ast.Method_call {return_type; method_name; object_name; args} ->
+    | Ast.Method_call {return_type; method_name; left_hand; args} ->
         let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {
             return_type = typ_to_pholyglot return_type;
             method_name;
-            object_name;
+            left_hand = expression_to_pholyglot left_hand;
             args;
         }
     | Ast.New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)

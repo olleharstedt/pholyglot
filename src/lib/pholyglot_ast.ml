@@ -78,13 +78,13 @@ and expression =
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
-    | Object_access of identifier * expression
+    | Object_access of expression * expression
     | New of typ * expression list
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Method_call of {
         return_type: typ;
         method_name: string;
-        object_name: string;
+        left_hand: expression;
         args: expression list;
     }
     | Function_call of typ * identifier * expression list
@@ -171,11 +171,11 @@ let rec string_of_expression = function
     | Array_access (id, expr) ->
         (* TODO: It's assumed that expr has type Int here *)
         sprintf {|$%s[%s]|} id (string_of_expression expr)
-    | Object_access (id, Property_access prop_name) ->
+    | Object_access (Variable id, Property_access prop_name) ->
         (* TODO: Code duplication *)
         let id = if id = "this" then "self" else id in
         sprintf {|$%s->%s|} id prop_name
-    | Object_access (id, Method_call {return_type; method_name; object_name; args}) ->
+    | Object_access (Variable id, Method_call {return_type; method_name; left_hand = Variable object_name; args}) ->
         let args = (Variable object_name : expression ) :: args in
         sprintf {|$%s->%s(%s)|}
         object_name

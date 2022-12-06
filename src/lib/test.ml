@@ -675,7 +675,7 @@ let%test_unit "object object access in expression" =
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
                 Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
-                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "__object_property_x")]);
+                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "__object_property_x")]);
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -701,7 +701,7 @@ let%test_unit "infer object access" =
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
                 Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
-                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access ("p", Property_access "x")]);
+                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "x")]);
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -727,7 +727,7 @@ let%test_unit "infer object access" =
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
-                    [Coerce (String_literal, String "\"%d\""); Object_access ("p", Property_access "x")]
+                    [Coerce (String_literal, String "\"%d\""); Object_access (Variable "p", Property_access "x")]
                 );
                 Return (Num 0)
             ];
@@ -758,7 +758,7 @@ let%test_unit "output object access" =
                     "printf",
                     [
                         Coerce (String_literal, String "\"%d\"");
-                        Object_access ("p", Property_access "__object_property_x")
+                        Object_access (Variable "p", Property_access "__object_property_x")
                     ]
                 );
                 Return (Num 0)
@@ -857,7 +857,7 @@ function foo(Thing $t): void {
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},
                     "printf",
-                    [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access ("t", Property_access "__object_property_name"))]
+                    [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__object_property_name"))]
                 );
             ];
             function_type = Function_type {return_type = Void; arguments = [Class_type "Thing"]}
@@ -1183,7 +1183,7 @@ class Point
                     docblock = [];
                     params = [];
                     stmts = [
-                        Return (Object_access ("this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -1202,7 +1202,7 @@ let%test_unit "simple getter" =
                     docblock = [];
                     params = [];
                     stmts = [
-                        Return (Object_access ("this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -1283,7 +1283,7 @@ class Point
                             "printf",
                             [Coerce (String_literal, String "\"Hello\"")]
                         );
-                        Return (Object_access ("this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -1309,9 +1309,9 @@ let%test_unit "infer method call" =
     } in
     Namespace.add_class_type ns c;
     Namespace.add_identifier ns "p" (Class_type "Point");
-    let expr : Ast.expression = Object_access ("p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; object_name = "p"}) in
+    let expr : Ast.expression = Object_access (Variable "p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; left_hand = Variable "p"}) in
     let ast = Infer.infer_expression ns expr in
-    [%test_eq: Ast.expression] ast (Object_access ("p", Method_call {return_type = Int; method_name = "getX"; args = []; object_name = "p"}))
+    [%test_eq: Ast.expression] ast (Object_access (Variable "p", Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"}))
 
 let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
@@ -1352,7 +1352,7 @@ function main(): int
                             "printf",
                             [Coerce (String_literal, String "\"Hello\"")]
                         );
-                        Return (Object_access ("this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -1369,7 +1369,7 @@ function main(): int
                     "printf",
                     [
                         Coerce (String_literal, String "\"%d\"");
-                        Object_access ("p", Method_call {return_type = Int; method_name = "getX"; args = []; object_name = "p"})
+                        Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"};
                     ]
                 );
                 Return (Num 0)
@@ -1386,7 +1386,7 @@ let%test_unit "transpile method" =
             [
                 Coerce (String_literal, String "\"%d\"");
                 Object_access (
-                    "p",
+                    Variable "p",
                     Method_call {
                         return_type = Int;
                         method_name = "getX";
@@ -1399,7 +1399,7 @@ let%test_unit "transpile method" =
                             );
                             Array_access ("arr", Num 0);
                         ];
-                        object_name = "p";
+                        left_hand = Variable "p";
                     }
                 )
             ]
@@ -1504,6 +1504,7 @@ let%test_unit "printf float" =
         }
     ])
 
+    (*
 let%test_unit "printf float" =
     let source = {|<?php // @pholyglot
     class Body {public int $x}
@@ -1520,6 +1521,7 @@ let%test_unit "printf float" =
         Infer.run (Namespace.create ())
     in
     [%test_eq: Ast.program] ast (Declaration_list [])
+    *)
 
     (*
 let%test "nbody benchmark" =
