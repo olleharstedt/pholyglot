@@ -1501,10 +1501,9 @@ let%test_unit "printf float" =
         }
     ])
 
-    (*
 let%test_unit "printf float" =
     let source = {|<?php // @pholyglot
-    class Body {public int $x}
+    class Body {public int $x;}
     function foo(): void {
         $b = new Body();
         $b->x = 10;
@@ -1517,8 +1516,26 @@ let%test_unit "printf float" =
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    [%test_eq: Ast.program] ast (Declaration_list [])
-    *)
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name = "Body";
+            kind = Val;
+            properties = [("__object_property_x", Int)];
+            methods = []
+        };
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
+                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init ([Variable "b"]));
+                Assignment (Class_type "Body", Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
 
     (*
 let%test "nbody benchmark" =

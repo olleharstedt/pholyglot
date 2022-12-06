@@ -67,21 +67,24 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "not all element in array_init have the same type")
     | New (t, exprs) -> t
     (* $point->x *)
+    | Object_access (Array_access (id, _), Property_access prop_name)
     | Object_access (Variable id, Property_access prop_name) -> begin
-        let class_type_name = match Namespace.find_identifier ns id with
-            | Some (Class_type (c)) -> c
+        match Namespace.find_identifier ns id with
+            | Some (Fixed_array (c, _)) -> c
+            | Some (Class_type class_type_name) -> begin
+                let (k, props, methods) = match Namespace.find_class ns class_type_name with
+                    | Some p -> p
+                    | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
+                in
+                match List.find_opt (fun (name, t) -> prop_name = name) props with
+                    | Some (n, t) -> t
+                    | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
+            end
             | None -> raise (Type_error (sprintf "typ_of_expression: Could not find class type %s in namespace" id))
-        in
-        let (k, props, methods) = match Namespace.find_class ns class_type_name with
-            | Some p -> p
-            | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
-        in
-        match List.find_opt (fun (name, t) -> prop_name = name) props with
-            | Some (n, t) -> t
-            | None -> raise (Type_error (sprintf "typ_of_expression: Could not find propert with name %s in class %s" prop_name id))
     end
     (* $point->getX() *)
     | Method_call {return_type = Infer_me; method_name; left_hand = Variable class_name}
+    (*| Object_access (Array_access (class_name, _), Method_call {return_type = Infer_me; method_name})*)
     | Object_access (Variable class_name, Method_call {return_type = Infer_me; method_name}) -> begin
         let class_type_name = match Namespace.find_identifier ns class_name with
             | Some (Class_type (c)) -> c
