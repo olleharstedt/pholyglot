@@ -1583,6 +1583,32 @@ function foo()
 #undef function
 |}
 
+let%test_unit "negative int" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $x = -10 - -5;
+        $y = 10 * -10;
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Int, Variable "x", Minus (Num (-10), Num (-5)));
+                Assignment (Int, Variable "y", Times (Num 10, Num (-10)));
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
+
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot
