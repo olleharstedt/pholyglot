@@ -65,20 +65,109 @@ Body Body__constructor(Body $p)
 #define function int
 function main()
 {
+    float
+    $daysperyear 
+    = 365.24;
+    float
+    $pi 
+    = 3.1415926535897931;
+    float
+    $solarmass 
+    = 4. * $pi * $pi;
     Body
     $jupiter 
     = new(Body);
     $jupiter->__object_property_x 
-    = 10.;
+    = 4.8414314424647209;
+    $jupiter->__object_property_y 
+    = -1.1603200440274284;
+    $jupiter->__object_property_z 
+    = -0.10362204447112311;
+    $jupiter->__object_property_vx 
+    = 0.0016600766427440369 * $daysperyear;
+    $jupiter->__object_property_vy 
+    = 0.0076990111841974043 * $daysperyear;
+    $jupiter->__object_property_vz 
+    = -6.90460016972063e-05 * $daysperyear;
+    $jupiter->__object_property_mass 
+    = 0.00095479193842432661 * $solarmass;
+    Body
+    $saturn 
+    = new(Body);
+    $saturn->__object_property_x 
+    = 8.34336671824458;
+    $saturn->__object_property_y 
+    = 4.1247985641243048;
+    $saturn->__object_property_z 
+    = -0.40352341711432138;
+    $saturn->__object_property_vx 
+    = -0.0027674251072686241 * $daysperyear;
+    $saturn->__object_property_vy 
+    = 0.0049985280123491724 * $daysperyear;
+    $saturn->__object_property_vz 
+    = 2.3041729757376393e-05 * $daysperyear;
+    $saturn->__object_property_mass 
+    = 0.00028588598066613081 * $solarmass;
+    Body
+    $uranus 
+    = new(Body);
+    $uranus->__object_property_x 
+    = 12.894369562139131;
+    $uranus->__object_property_y 
+    = -15.111151401698631;
+    $uranus->__object_property_z 
+    = -0.22330757889265573;
+    $uranus->__object_property_vx 
+    = 0.0029646013756476162 * $daysperyear;
+    $uranus->__object_property_vy 
+    = 0.0023784717395948095 * $daysperyear;
+    $uranus->__object_property_vz 
+    = -2.9658956854023756e-05 * $daysperyear;
+    $uranus->__object_property_mass 
+    = 4.366244043351563e-05 * $solarmass;
+    Body
+    $neptune 
+    = new(Body);
+    $neptune->__object_property_x 
+    = 15.379697114850917;
+    $neptune->__object_property_y 
+    = -25.919314609987964;
+    $neptune->__object_property_z 
+    = 0.17925877295037118;
+    $neptune->__object_property_vx 
+    = 0.0026806777249038932 * $daysperyear;
+    $neptune->__object_property_vy 
+    = 0.001628241700382423 * $daysperyear;
+    $neptune->__object_property_vz 
+    = -9.5159225451971587e-05 * $daysperyear;
+    $neptune->__object_property_mass 
+    = 5.1513890204661145e-05 * $solarmass;
+    Body
+    $sun 
+    = new(Body);
+    $sun->__object_property_x 
+    = 0.;
+    $sun->__object_property_y 
+    = 0.;
+    $sun->__object_property_z 
+    = 0.;
+    $sun->__object_property_vx 
+    = 0.;
+    $sun->__object_property_vy 
+    = 0.;
+    $sun->__object_property_vz 
+    = 0.;
+    $sun->__object_property_mass 
+    = $solarmass;
     Body
     $bodies 
-    [1]
+    [5]
     = 
 {
 #if __PHP__
 [
 #endif
-    $jupiter
+    $sun, $jupiter, $saturn, $uranus, $neptune
 #if __PHP__
 ]
 #endif
