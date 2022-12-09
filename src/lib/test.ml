@@ -1553,7 +1553,35 @@ let%test_unit "object access inside array access transpile" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {||}
+	(* TODO: Check this code *)
+    [%test_eq: string] code {|#define function void
+function foo()
+{
+    #__C__ Body
+    $b 
+    = new(Body);
+    $b->__object_property_x 
+    = 10;
+    #__C__ Body
+    $arr 
+    #__C__ [1]
+    = 
+#__C__ {
+#if __PHP__
+[
+#endif
+    $b
+#if __PHP__
+]
+#endif
+#__C__ }
+    ;
+    #__C__ int
+    $x 
+    = $arr[0]->__object_property_x;
+    }
+#undef function
+|}
 
     (*
 let%test "nbody benchmark" =
