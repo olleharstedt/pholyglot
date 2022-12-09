@@ -167,8 +167,9 @@ lvalue:
   | n=VAR_NAME "->" v=lvalue    {Object_access (n, v)}
 
 expr:
-  | MINUS i=INT                                                 {Num (-i)}
+  | MINUS i=INT                                                  {Num (-i)}
   | i=INT                                                        {Num i}
+  | MINUS f=FLOAT                                                {Num_float (-. f)}
   | f=FLOAT                                                      {Num_float f}
   | s=STRING_LITERAL                                             {String s}
   | e=expr "+" f=expr                                            {Plus (e, f)} 

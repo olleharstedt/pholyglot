@@ -1588,6 +1588,7 @@ let%test_unit "negative int" =
     function foo(): void {
         $x = -10 - -5;
         $y = 10 * -10;
+        $f = -1.15 / -2.;
     }
     |} in
     let ast =
@@ -1603,6 +1604,7 @@ let%test_unit "negative int" =
             stmts = [
                 Assignment (Int, Variable "x", Minus (Num (-10), Num (-5)));
                 Assignment (Int, Variable "y", Times (Num 10, Num (-10)));
+                Assignment (Float, Variable "f", Div (Num_float (-1.15), Num_float (-2.)));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
