@@ -5,6 +5,7 @@
 %token ARRAY_TYPE "array"
 %token DOCBLOCK_PARAM "@param"
 %token INT_TYPE "int"
+%token FLOAT_TYPE "float"
 %token STRING_TYPE "string"
 %token LT "<"
 %token GT ">"
@@ -31,5 +32,6 @@ docblock_line:
 
 typ:
   | "int"      {Int : Ast.typ}
+  | "float"    {Float : Ast.typ}
   | "string"   {String : Ast.typ}
   | s=CLASS_NAME {Class_type s : Ast.typ}

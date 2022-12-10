@@ -1137,8 +1137,9 @@ let%test_unit "infer docblock object array" =
     class Body {}
     /**
      * @param array<Body> $bodies
+     * @param float $dt
      */
-    function foo(array &$bodies): void {
+    function foo(array &$bodies, float $dt): void {
     }
     " in
     let ast =
@@ -1155,10 +1156,16 @@ let%test_unit "infer docblock object array" =
         };
         Function {
             name = "foo";
-            docblock = [DocParam ("bodies", Dynamic_array (Class_type "Body"))];
-            params = [RefParam ("bodies", Dynamic_array (Class_type "Body"))];
+            docblock = [
+                DocParam ("bodies", Dynamic_array (Class_type "Body"));
+                DocParam ("dt", Float);
+            ];
+            params = [
+                RefParam ("bodies", Dynamic_array (Class_type "Body"));
+                Param ("dt", Float);
+            ];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body")]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body"); Float]}
         }
     ])
 

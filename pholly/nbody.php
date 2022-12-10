@@ -12,7 +12,7 @@ class Body
 }
 
 /**
- * @param array<int, Body> &$bodies
+ * @param array<Body> $bodies
  * @param float $dt
  */
 function advance(array &$bodies, float $dt): void
