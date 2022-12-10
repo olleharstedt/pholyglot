@@ -49,7 +49,6 @@ function main()
     #__C__ Body
     $b = new(Body);
     $b->__object_property_x = 10;
-    //?>
     #__C__ Body
     $bodies
     #__C__ [3]
@@ -69,5 +68,5 @@ function main()
     advance($bodies, 1.10);
     return 0;
 }
-// ?>
-// <?php ob_end_clean(); main();
+//?>
+//<?php ob_end_clean(); main();
