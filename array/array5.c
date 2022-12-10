@@ -6,6 +6,7 @@
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #define array(...) {__VA_ARGS__}
+#define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
 typedef struct array array;
@@ -30,6 +31,10 @@ function array_get($class, $arr, $i)
 {
     return $arr[$i];
 }
+function array_make($class, $length, ...$values)
+{
+    return $values;
+}
 #endif
 //?>
 Body Body__constructor(Body $this)
@@ -48,7 +53,7 @@ function foo(array $numbers)
     $i = 0;
     for ($i = 0; $i < count($numbers); $i++) {
         printf(
-            "%d \n",
+            "%d\n",
             array_get(Body, $numbers, $i)->__object_property_x
         );
     }
@@ -67,11 +72,7 @@ function main()
      */
 
     #__C__ array
-    $test =
-        #__C__ {.thing = (Body[])
-        array(new(Body), new(Body))
-        #__C__ , .length = 2}
-    ;
+    $test = array_make(Body, 2, new(Body), new(Body)) ;
     foo($test);
 
     return 0;
