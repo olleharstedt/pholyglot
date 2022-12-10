@@ -1,6 +1,7 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
+#include <alloca.h>
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
