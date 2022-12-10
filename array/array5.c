@@ -1,6 +1,9 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
+#define class struct
+#define __PHP__ 0
+#define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #define array(...) {__VA_ARGS__}
 #define count(x) x.length
 typedef struct array array;
@@ -10,6 +13,26 @@ struct array
     size_t length;
 };
 //<?php
+//?>
+typedef struct Body* Body;
+//<?php
+class Body {
+#define public int
+#define __object_property_x $__object_property_x
+   public $__object_property_x;
+#undef public
+};
+#if __PHP__
+define("Body", "Body");
+#endif
+//?>
+Body Body__constructor(Body $this)
+{
+    $this->__object_property_x = 10;
+    return $this;
+}
+//<?php
+
 
 #define function void
 function foo(array $numbers)
@@ -20,10 +43,10 @@ function foo(array $numbers)
         printf(
             "%d \n",
             (
-                #__C__ (int*)
+                #__C__ (Body*)
                 $numbers
                 #__C__ .thing
-            )[$i]
+            )[$i]->__object_property_x
         );
     }
 }
@@ -42,9 +65,9 @@ function main()
 
     #__C__ array
     $test =
-        #__C__ {.thing = (int[])
-        array(1, 2, 3)
-        #__C__ , .length = 3}
+        #__C__ {.thing = (Body[])
+        array(new(Body), new(Body))
+        #__C__ , .length = 2}
     ;
     foo($test);
 
