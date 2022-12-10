@@ -1,7 +1,7 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
-#define array(args...) {args}
+#define array(...) {__VA_ARGS__}
 #define count(x) x.length
 typedef struct array array;
 struct array
