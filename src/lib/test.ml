@@ -1132,6 +1132,37 @@ let%test_unit "infer docblock string array" =
         }
     ])
 
+let%test_unit "infer docblock object array" =
+    let source = "<?php // @pholyglot
+    class Body {}
+    /**
+     * @param array<Body> $bodies
+     */
+    function foo(array &$bodies): void {
+    }
+    " in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name = "Body";
+            kind = Val;
+            properties = [];
+            methods = [];
+        };
+        Function {
+            name = "foo";
+            docblock = [DocParam ("bodies", Dynamic_array (Class_type "Body"))];
+            params = [RefParam ("bodies", Dynamic_array (Class_type "Body"))];
+            stmts = [];
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body")]}
+        }
+    ])
+
+
 let%test_unit "infer docblock int and string" =
     let source = "<?php // @pholyglot
     /**
@@ -1659,7 +1690,7 @@ function main(): int
     *)
 
 (* TODO: *)
-(* Unary operator for negative numbers *)
+(* array<Body> notation *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)

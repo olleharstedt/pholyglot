@@ -16,10 +16,10 @@ let decimal_constant = nonzero_digit digit*
 let identifier = lowercase (nondigit|digit)*
 let var_identifier = '$' lowercase (nondigit|digit)*
 let whitespace_char_no_newline = [' ' '\t' '\012' '\r']
+let class_name = uppercase (nondigit|digit)*
 
 rule docblock = parse
     (*
-  | class_name as n     { CLASS_NAME n}
   (* TODO: Type regexp, like array<int>, so alphanumeric + <> + comma *)
   (* TODO: Class name with capital letter *)
   (* TODO: array<Point> *)
@@ -28,6 +28,7 @@ rule docblock = parse
   | ""                  { docblock lexbuf }
   *)
   | whitespace_char_no_newline+   { docblock lexbuf }
+  | class_name as n               { CLASS_NAME n}
   | '*'                  { docblock lexbuf }
   | "@param"             { DOCBLOCK_PARAM }
   | "array"              { ARRAY_TYPE }

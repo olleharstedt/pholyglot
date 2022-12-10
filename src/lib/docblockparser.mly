@@ -11,6 +11,7 @@
 %token COMMA ","
 %token <string> NAME
 %token <string> VAR_NAME
+%token <string> CLASS_NAME
 %token START_OF_COMMENT "/**"
 %token END_OF_COMMENT "*/"
 %token EOF
@@ -29,5 +30,6 @@ docblock_line:
   | START_OF_COMMENT { failwith "wrong" }
 
 typ:
-  | "int"    {Int : Ast.typ}
-  | "string" {String : Ast.typ}
+  | "int"      {Int : Ast.typ}
+  | "string"   {String : Ast.typ}
+  | s=CLASS_NAME {Class_type s : Ast.typ}
