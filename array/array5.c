@@ -28,22 +28,11 @@ class Body {
 };
 #if __PHP__
 define("Body", "Body");
-function array_get($class, $arr, $i)
-{
-    return $arr[$i];
-}
-function array_make($class, $length, ...$values)
-{
-    return $values;
-}
-function pprintf($format, ...$args)
-{
-    static $stdout;
-    if ($stdout === null) {
-        $stdout = fopen('php://stdout', 'w');
-    }
+function array_get($class, $arr, $i) { return $arr[$i]; }
+function array_make($class, $length, ...$values) { return $values; }
+function pprintf($format, ...$args) {
     fwrite(
-        $stdout,
+        STDOUT,
         sprintf(
             $format,
             ...$args
@@ -59,7 +48,6 @@ Body Body__constructor(Body $this)
 }
 //<?php
 
-
 #define function void
 function foo(array $numbers)
 #undef function
@@ -70,7 +58,7 @@ function foo(array $numbers)
     $i = 0;
     for ($i = 0; $i < count($numbers); $i++) {
         pprintf(
-            "%d \n",
+            "%d ",
             array_get(Body, $numbers, $i)->__object_property_x
         );
     }
