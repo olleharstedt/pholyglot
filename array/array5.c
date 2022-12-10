@@ -6,6 +6,7 @@
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #define array(...) {__VA_ARGS__}
+#define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
 typedef struct array array;
 struct array
@@ -25,6 +26,10 @@ class Body {
 };
 #if __PHP__
 define("Body", "Body");
+function array_get($class, $arr, $i)
+{
+    return $arr[$i];
+}
 #endif
 //?>
 Body Body__constructor(Body $this)
@@ -44,11 +49,7 @@ function foo(array $numbers)
     for ($i = 0; $i < count($numbers); $i++) {
         printf(
             "%d \n",
-            (
-                #__C__ (Body*)
-                $numbers
-                #__C__ .thing
-            )[$i]->__object_property_x
+            array_get(Body, $numbers, $i)->__object_property_x
         );
     }
 }
