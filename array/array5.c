@@ -9,6 +9,7 @@
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
+#define pprintf printf
 typedef struct array array;
 struct array
 {
@@ -35,6 +36,20 @@ function array_make($class, $length, ...$values)
 {
     return $values;
 }
+function pprintf($format, ...$args)
+{
+    static $stdout;
+    if ($stdout === null) {
+        $stdout = fopen('php://stdout', 'w');
+    }
+    fwrite(
+        $stdout,
+        sprintf(
+            $format,
+            ...$args
+        )
+    );
+}
 #endif
 //?>
 Body Body__constructor(Body $this)
@@ -49,11 +64,13 @@ Body Body__constructor(Body $this)
 function foo(array $numbers)
 #undef function
 {
-    #__C__ int
+    //?>
+    int
+    //<?php
     $i = 0;
     for ($i = 0; $i < count($numbers); $i++) {
-        printf(
-            "%d\n",
+        pprintf(
+            "%d \n",
             array_get(Body, $numbers, $i)->__object_property_x
         );
     }
@@ -63,19 +80,12 @@ function foo(array $numbers)
 function main()
 #undef function
 {
-    /*
-    #__C__ int 
-    $_nrs
-    #__C__ [5]
-    = array(1, 2, 3, 4);
-    array $nrs = {&$_nrs, 4};
-     */
-
-    #__C__ array
+    //?>
+    array
+    //<?php
     $test = array_make(Body, 2, new(Body), new(Body)) ;
     foo($test);
-
     return 0;
 }
 //?>
-//<?php ob_end_clean(); main();
+//<?php main(); ob_end_clean();
