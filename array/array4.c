@@ -28,7 +28,7 @@ Body Body__constructor(Body $body)
 
 #define function void
 function advance(
-#define array Body*
+#define array const Body*
     array $bodies,
 #undef array
     float $dt
