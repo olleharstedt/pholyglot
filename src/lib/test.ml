@@ -1169,6 +1169,25 @@ let%test_unit "infer docblock object array" =
         }
     ])
 
+let%test_unit "transpile docblock object array" =
+    let code =
+        Ast.Function {
+            name = "foo";
+            docblock = [
+                DocParam ("bodies", Dynamic_array (Class_type "Body"));
+                DocParam ("dt", Float);
+            ];
+            params = [
+                RefParam ("bodies", Dynamic_array (Class_type "Body"));
+                Param ("dt", Float);
+            ];
+            stmts = [];
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body"); Float]}
+        }
+         |> Transpile.declaration_to_pholyglot
+         |> Pholyglot_ast.string_of_declare
+    in
+    [%test_eq: string] code {||}
 
 let%test_unit "infer docblock int and string" =
     let source = "<?php // @pholyglot

@@ -28,11 +28,13 @@ and typ =
     | Void
     | Var_args
     | Fixed_array of typ * int
+    | Dynamic_array of typ
     | Function_type of {return_type: typ; arguments: typ list}
     | Class_type of class_name
 
 and param =
     | Param of identifier * typ
+    | RefParam of identifier * typ
 
 and docblock_comment =
     | DocParam of identifier * typ
@@ -114,6 +116,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> string_of_typ t
+    | Dynamic_array t -> string_of_typ t
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
     | Class_type (n) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
@@ -126,6 +129,7 @@ let string_of_typ_post = function
 
 let string_of_param (p: param) : string = match p with
     | Param (id, t) -> string_of_typ t ^ " $" ^ id
+    | RefParam (id, t) -> string_of_typ t ^ " &$" ^ id
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id

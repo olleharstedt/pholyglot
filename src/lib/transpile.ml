@@ -13,6 +13,7 @@ let rec typ_to_pholyglot t = match t with
     | Ast.String -> Pholyglot_ast.String
     | Ast.String_literal -> Pholyglot_ast.String_literal
     | Ast.Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
+    | Ast.Dynamic_array t -> Pholyglot_ast.Dynamic_array (typ_to_pholyglot t)
     | Ast.Fixed_array (_, None) -> failwith "typ_to_pholyglot: array has size None, not fully inferred"
     | Ast.Void -> Pholyglot_ast.Void
     | Ast.Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
@@ -23,6 +24,8 @@ let rec typ_to_pholyglot t = match t with
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | Param (id, typ) -> Pholyglot_ast.Param (id, typ_to_pholyglot typ)
+    | RefParam (id, typ) -> Pholyglot_ast.RefParam (id, typ_to_pholyglot typ)
+    | t -> raise (Transpile_error ("param_to_pholyglot: " ^ Ast.show_param t))
 
 let rec lvalue_to_pholyglot lvalue = match lvalue with
     | Ast.Variable identifier -> Pholyglot_ast.Variable identifier
