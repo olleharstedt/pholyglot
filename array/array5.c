@@ -1,25 +1,38 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define array(args...) {args}
+
+typedef struct array array;
 struct array
 {
     void* thing;
-    int length;
+    size_t length;
 };
 
-void foo(struct array numbers)
+void foo(array $numbers)
 {
-    for (int i = 0; i < numbers.length; i++) {
-        printf("%d", ((int*) numbers.thing)[i]);
+    #__C__ int
+    $i = 0;
+    for ($i = 0; $i < $numbers.length; $i++) {
+        printf("%d", (
+            #__C__ (int*)
+            $numbers.thing
+            )[$i]
+        );
     }
 }
 
-int main()
+#define function int
+function main()
 {
-    int _nrs[5] = {
+    #__C__ int 
+    $_nrs
+    #__C__ [5]
+    = array(
         1, 2, 3, 4
-    };
-    struct array nrs = {&_nrs, 4};
-    foo(nrs);
+    );
+    array $nrs = {&$_nrs, 4};
+    foo($nrs);
     return 0;
 }

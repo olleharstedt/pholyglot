@@ -47,6 +47,7 @@ https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-c
 * Class can be struct.
 * String can use smart strings from PHP core.
 * Array can use same array.
+** `#define array const Body*` but also need to pass length as an argument
 * Hashtable gonna be hard. Must use class for that?
 * GC with Boehm, no long-running scripts? Or glib slice/manual ref count
 * Need docblock for arrays - no collection class built-in in PHP

@@ -1717,6 +1717,7 @@ function main(): int
 
 (* TODO: *)
 (* array<Body> notation *)
+(* Always pass around length of array together with array. Extra variable or tuple? *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
