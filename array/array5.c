@@ -36,6 +36,7 @@ Body Body__constructor(Body $this)
 
 #define function void
 function foo(array $numbers)
+#undef function
 {
     #__C__ int
     $i = 0;
@@ -50,10 +51,10 @@ function foo(array $numbers)
         );
     }
 }
-#undef function
 
 #define function int
 function main()
+#undef function
 {
     /*
     #__C__ int 
@@ -73,6 +74,5 @@ function main()
 
     return 0;
 }
-#undef function
 //?>
 //<?php ob_end_clean(); main();
