@@ -313,9 +313,7 @@ let%test_unit "trivial array infer and print" =
     (* Location becomes ./_build/default/lib/debug.txt *)
     Log.set_output (open_out "debug.txt");
     Log.debug "trivial arith infer and print";
-    let ns = Namespace.create () in
-    let ast = Ast.Declaration_list [
-        Function {
+    let fn = Ast.Function {
             name = "main";
             docblock = [];
             params = [];
@@ -326,25 +324,14 @@ let%test_unit "trivial array infer and print" =
             ];
             function_type = Function_type {return_type = Int; arguments = []}
         }
-    ] |> Infer.run ns in
+    in
     Log.set_log_level Log.FATAL;
     Log.clear_prefix ();
     Log.debug "should not be visible";
-    let phast = Transpile.run ast in
-    let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
-#include <stdio.h>
-#include <glib.h>
-#define class struct
-#define __PHP__ 0
-#define new(x) x ## __constructor(alloca(sizeof(struct x)))
-#if __PHP__//<?php
-class GString { public $str; public function __construct($str) { $this->str = $str; } }
-function g_string_new(string $str) { return new GString($str); }
-function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
-#endif//?>
-//<?php
-#define function int
+    let fn = Infer.infer_declaration fn (Namespace.create ()) in
+    let phast = Transpile.declaration_to_pholyglot fn in
+    let pholyglot_code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] pholyglot_code {|#define function int
 function main()
 {
     #__C__ int
@@ -365,8 +352,7 @@ function main()
     return 0;
 }
 #undef function
-// ?>
-// <?php ob_end_clean(); main();|}
+|}
 
 let%test_unit "transpile concat" =
     let source = {|<?php // @pholyglot
