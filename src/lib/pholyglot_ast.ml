@@ -125,7 +125,10 @@ let rec string_of_typ (t : typ) : string = match t with
 (** Type notation that goes AFTER the variable name, as in array init *)
 let string_of_typ_post = function
     | Fixed_array (t, n) -> sprintf {|
-    #__C__ [%d]|} n
+    //?>
+    [%d]
+    //<?php
+|} n
     | _ -> ""
 
 let string_of_param (p: param) : string = match p with
@@ -201,7 +204,9 @@ let string_of_statement = function
             id
             (string_of_typ fun_type)
         )
-    | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
+    | Assignment (typ, Variable v, expr) -> sprintf {|//?>
+    %s
+    //<?php
     $%s %s
     = %s;
     |}
@@ -229,11 +234,14 @@ let string_of_prop (p : class_property) : string = match p with
     n
 
 (* Function pointers are defined BEFORE the typedef, so 'struct' needs to be written explicitly for class types *)
-(* #__C__ char* (*getName) (struct Point*); *)
+(* char* (*getName) (struct Point*); *)
 let string_of_function_pointer meth : string = match meth with
   (*| (name, params, stmts, Function_type {return_type; arguments}) ->*)
     | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
-    sprintf {|#__C__ %s (*%s) (%s);|}
+    sprintf {|//?>
+    %s (*%s) (%s);
+    //<?php
+    |}
     (* Return type *)
     (string_of_typ (Function_type {return_type; arguments}))
     (* Function name *)
@@ -251,10 +259,12 @@ let string_of_function_pointer meth : string = match meth with
 let string_of_method class_name meth = match meth with
     | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
         sprintf {|
+//?>
+%s %s__%s (%s)
+//<?php
 #if __PHP__
 public function %s(%s): %s
 #endif
-#__C__ %s %s__%s (%s)
 {
     %s
 }
@@ -307,12 +317,16 @@ function %s(%s)
         let methods = (concat (List.map ~f:string_of_method methods)) in
         (* TODO: Fix macro for sizeof *)
         [%string {|
-#__C__ typedef struct $class_name* $class_name;
+//?>
+typedef struct $class_name* $class_name;
+//<?php
 class $class_name {
     $props
     $function_pointers
 // End of C struct def. Class methods are outside the struct.
-#__C__ };
+//?>
+};
+//<?php
 $methods
 #if __PHP__
 // End of PHP class def.

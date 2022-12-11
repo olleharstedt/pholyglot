@@ -46,7 +46,15 @@ and expression_to_pholyglot exp = match exp with
     | Ast.Div (i, j) -> Pholyglot_ast.Div (expression_to_pholyglot i, expression_to_pholyglot j)
     | Ast.Concat (s, t) -> Pholyglot_ast.Concat (expression_to_pholyglot s, expression_to_pholyglot t)
     | Ast.Variable id -> Pholyglot_ast.Variable id
-    | Ast.Array_init (t, length, exprs) -> (* TODO: Function call to array_make *) Pholyglot_ast.Array_init (List.map expression_to_pholyglot exprs)
+    | Ast.Array_init (Infer_me, _, _) -> raise (Transpile_error "Array_init: Infer before transpiling")
+    | Ast.Array_init (_, None, _) -> raise (Transpile_error "Array_init: Array init has no inferred length")
+    | Ast.Array_init (Fixed_array (t, _), Some length, exprs) ->
+        let t = typ_to_pholyglot t in
+        Pholyglot_ast.Function_call (
+            Pholyglot_ast.Fixed_array (t, length),
+            "array_make",
+            String (Pholyglot_ast.show_typ t) :: Num length :: List.map expression_to_pholyglot exprs
+        )
     | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
     | Ast.Function_call (typ, id, exprs) ->
         let id = if id = "printf" then "pprintf" else id in
