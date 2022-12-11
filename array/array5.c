@@ -28,6 +28,7 @@ class Body {
 };
 #if __PHP__
 define("Body", "Body");
+define("int", "int");
 function array_get($class, $arr, $i) { return $arr[$i]; }
 function array_make($class, $length, ...$values) { return $values; }
 function pprintf($format, ...$args) {
@@ -49,7 +50,23 @@ Body Body__constructor(Body $this)
 //<?php
 
 #define function void
-function foo(array $numbers)
+function foo(array $bodies)
+#undef function
+{
+    //?>
+    int
+    //<?php
+    $i = 0;
+    for ($i = 0; $i < count($bodies); $i++) {
+        pprintf(
+            "%d ",
+            array_get(Body, $bodies, $i)->__object_property_x
+        );
+    }
+}
+
+#define function void
+function fii(array $numbers)
 #undef function
 {
     //?>
@@ -59,7 +76,7 @@ function foo(array $numbers)
     for ($i = 0; $i < count($numbers); $i++) {
         pprintf(
             "%d ",
-            array_get(Body, $numbers, $i)->__object_property_x
+            array_get(int, $numbers, $i)
         );
     }
 }
@@ -71,8 +88,13 @@ function main()
     //?>
     array
     //<?php
-    $test = array_make(Body, 2, new(Body), new(Body)) ;
-    foo($test);
+    $bodies = array_make(Body, 2, new(Body), new(Body)) ;
+    foo($bodies);
+    //?>
+    array
+    //<?php
+    $ints = array_make(int, 3, 1, 2, 3);
+    fii($ints);
     return 0;
 }
 //?>
