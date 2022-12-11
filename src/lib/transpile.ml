@@ -103,6 +103,9 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
             List.map fn methods
         )
 
+let declarations_to_pholyglot (ds : Ast.declaration list) : Pholyglot_ast.declaration list =
+    List.map declaration_to_pholyglot ds 
+
 (** Transpile from Pholly AST to Pholyglot AST *)
 let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
 | Declaration_list ds -> 
