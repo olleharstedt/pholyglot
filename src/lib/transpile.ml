@@ -115,14 +115,14 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             Include "stdio.h";
             Include "glib.h"
         ],
-        (* Define list *)
+        (* C macros *)
         [
             Define ("class", Some "struct");
             Define ("__PHP__", Some "0");
             (* TODO: new_stack and new_heap? new_pool? *)
             Define ("new(x)", Some "x ## __constructor(alloca(sizeof(struct x)))");
         ],
-        (* Stubs *)
+        (* PHP stubs *)
         [
             "class GString { public $str; public function __construct($str) { $this->str = $str; } }\n";
             "function g_string_new(string $str) { return new GString($str); }\n";

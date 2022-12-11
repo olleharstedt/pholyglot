@@ -172,8 +172,8 @@ function main()
 // <?php ob_end_clean(); main();|}
 
 let%test_unit "trivial arith transpile" =
-    let ast  = Ast.Declaration_list [
-        Function {
+    let fn  = 
+        Ast.Function {
             name = "main";
             docblock = [];
             params = [];
@@ -181,24 +181,12 @@ let%test_unit "trivial arith transpile" =
                 Assignment (Infer_me, Variable "a", Num 0);
                 Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
             ];
-            function_type = Function_type {return_type = Int; arguments = []}}
-    ] in
-    let ast = Infer.run (Namespace.create ()) ast in
-    let phast = Transpile.run ast in
-    let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
-#include <stdio.h>
-#include <glib.h>
-#define class struct
-#define __PHP__ 0
-#define new(x) x ## __constructor(alloca(sizeof(struct x)))
-#if __PHP__//<?php
-class GString { public $str; public function __construct($str) { $this->str = $str; } }
-function g_string_new(string $str) { return new GString($str); }
-function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
-#endif//?>
-//<?php
-#define function int
+            function_type = Function_type {return_type = Int; arguments = []}
+    } in
+    let ast = Infer.infer_declaration fn (Namespace.create ()) in
+    let phast = Transpile.declaration_to_pholyglot ast in
+    let pholyglot_code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] pholyglot_code {|#define function int
 function main()
 {
     #__C__ int
@@ -207,8 +195,7 @@ function main()
     return $a + 1 - 1 * 1 / 1;
 }
 #undef function
-// ?>
-// <?php ob_end_clean(); main();|}
+|}
 
 let%test_unit "trivial string" =
     let source = {|<?php // @pholyglot
