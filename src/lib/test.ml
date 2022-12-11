@@ -1147,7 +1147,12 @@ let%test_unit "transpile docblock object array" =
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
     in
-    [%test_eq: string] code {||}
+    [%test_eq: string] code {|#define function void
+function foo(Body &$bodies, float $dt)
+{
+    }
+#undef function
+|}
 
 let%test_unit "infer docblock int and string" =
     let source = "<?php // @pholyglot
@@ -1557,7 +1562,13 @@ let%test_unit "object access inside array access" =
             stmts = [
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
-                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init (Class_type "Body", Some 1, [Variable "b"]));
+                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"),
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Class_type "Body", Some 1); arguments = [Constant; Int; Class_type "Body"]},
+                        "array_make",
+                        [Constant "Body"; Num 1; Variable "b"];
+                    )
+                );
                 Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}

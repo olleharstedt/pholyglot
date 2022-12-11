@@ -131,7 +131,7 @@ let typ_to_constant (t : Ast.typ) : Ast.expression = match t with
     | String -> Constant "string"
     | Float -> Constant "float"
     | Class_type s -> Constant s
-    | _ -> raise (Type_error ("typ_to_constant: Not supported type"))
+    | _ -> raise (Type_error ("typ_to_constant: Not supported type: " ^ show_typ t))
 
 let rec infer_expression ns expr = 
     Log.debug "%s %s" "infer_expression" (show_expression expr);
@@ -151,18 +151,20 @@ let rec infer_expression ns expr =
         Method_call {return_type = t; method_name; left_hand = Variable object_name; args}
     end
     | Object_access (id, expr) -> Object_access (id, infer_expression ns expr)
-    | Array_init (Infer_me, Some length, exprs) as e ->
+    | Array_init (Infer_me, _, exprs) as e ->
+        let length = List.length exprs in
         let inf = fun e -> typ_of_expression ns e in
         let exprs_types = List.map inf exprs in
         let t = typ_of_expression ns e in
-        (*Array_init (Fixed_array (t, length), Some (List.length exprs), List.map inf exprs)*)
+        (* TODO: Why is this needed? *)
+        let tt = match t with Fixed_array (t, _) -> t in
         Function_call (
             Function_type {
-                return_type = Class_type "array";
+                return_type = t;
                 arguments = Constant :: Int :: exprs_types;
             },
             "array_make",
-            typ_to_constant t :: Num length :: exprs
+            typ_to_constant tt :: Num length :: exprs
         )
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)

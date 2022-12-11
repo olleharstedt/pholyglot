@@ -38,7 +38,13 @@ Body Body__constructor(Body $this)
 //<?php
 
 #define function void
-function foo(array $bodies)
+function foo(
+array
+#if __PHP__
+&
+#endif
+$bodies
+)
 #undef function
 {
     //?>
@@ -76,7 +82,12 @@ function main()
     //?>
     array
     //<?php
-    $bodies = array_make(Body, 2, new(Body), new(Body)) ;
+    $bodies = array_make(
+        Body,
+        2,
+        new (Body),
+        new (Body)
+    ) ;
     foo($bodies);
     //?>
     array
