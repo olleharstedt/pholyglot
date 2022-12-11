@@ -38,13 +38,7 @@ Body Body__constructor(Body $this)
 //<?php
 
 #define function void
-function foo(
-array
-#if __PHP__
-&
-#endif
-$bodies
-)
+function foo(array /*SED EATS THE AMPERSAND*/&$bodies)
 #undef function
 {
     //?>
