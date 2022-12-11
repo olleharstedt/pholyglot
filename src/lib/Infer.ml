@@ -144,6 +144,10 @@ let rec infer_expression ns expr =
         Method_call {return_type = t; method_name; left_hand = Variable object_name; args}
     end
     | Object_access (id, expr) -> Object_access (id, infer_expression ns expr)
+    | Array_init (Infer_me, length, exprs) as e ->
+        let inf = fun e -> infer_expression ns e in
+        let t = typ_of_expression ns e in
+        Array_init (t, Some (List.length exprs), List.map inf exprs)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 

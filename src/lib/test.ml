@@ -258,7 +258,7 @@ let%test_unit "trivial array" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+                Assignment (Infer_me, Variable "arr", Array_init (Infer_me, None, [Num 1; Num 2; Num 3]));
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -282,7 +282,7 @@ let%test_unit "trivial array infer" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Fixed_array (Int, Some 3), Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+                Assignment (Fixed_array (Int, Some 3), Variable "arr", Array_init (Int, Some 3, [Num 1; Num 2; Num 3]));
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
@@ -304,7 +304,7 @@ let%test_unit "trivial array infer and print" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "arr", Array_init ([Num 1; Num 2; Num 3]));
+                Assignment (Infer_me, Variable "arr", Array_init (Infer_me, None, [Num 1; Num 2; Num 3]));
                 Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
                 Return (Num 0);
             ];
@@ -1541,7 +1541,7 @@ let%test_unit "object access inside array access" =
             stmts = [
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
-                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init ([Variable "b"]));
+                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init (Class_type "Body", Some 1, [Variable "b"]));
                 Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
@@ -1556,7 +1556,7 @@ let%test_unit "object access inside array access transpile" =
             stmts = [
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
-                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init ([Variable "b"]));
+                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init (Class_type "Body", Some 1, [Variable "b"]));
                 Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
