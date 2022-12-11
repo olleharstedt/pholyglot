@@ -161,17 +161,7 @@ let rec string_of_expression = function
         (*let t_text = show_typ t in*)
         sprintf {|new(%s)|}
         ct
-    | Array_init exprs -> sprintf {|
-#__C__ {
-#if __PHP__
-[
-#endif
-    %s
-#if __PHP__
-]
-#endif
-#__C__ }
-    |}
+    | Array_init exprs -> sprintf {|array_make(%s)|}
         (concat ~sep:", " (List.map exprs ~f:string_of_expression))
     | Array_access (id, expr) ->
         (* TODO: It's assumed that expr has type Int here *)

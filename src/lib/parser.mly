@@ -185,4 +185,4 @@ expr:
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
   (* TODO "new" /** @alloc stack */ *)
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
-  | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init array_init}
+  | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init (Infer_me, None, array_init)}

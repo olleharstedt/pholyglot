@@ -115,7 +115,7 @@ and expression =
     | Concat of expression * expression
     | New of typ * expression list
     | Variable of identifier
-    | Array_init of expression list
+    | Array_init of typ * int option * expression list
     | Array_access of identifier * expression
     (*
      * Examples:

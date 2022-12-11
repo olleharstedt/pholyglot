@@ -56,7 +56,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         check e;
         check f;
         String
-    | Array_init (exprs) ->
+    | Array_init (Infer_me, length, exprs) ->
         if List.length exprs = 0 then raise (Type_error "array_init cannot be empty list");
         let first_elem = List.nth exprs 0 in
         if List.for_all (fun x -> typ_of_expression ns x = typ_of_expression ns first_elem) exprs then
@@ -65,6 +65,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         else
             (* TODO: Tuple here *)
             raise (Type_error "not all element in array_init have the same type")
+    | Array_init (t, _, _) -> t
     | New (t, exprs) -> t
     (* $point->x *)
     | Object_access (Array_access (id, _), Property_access prop_name)
