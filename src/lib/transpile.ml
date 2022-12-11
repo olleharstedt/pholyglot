@@ -7,20 +7,28 @@ let kind_to_pholyglot k = match k with
     | Ast.Val -> Pholyglot_ast.Val
 
 (** Transpile from Pholly AST to Pholyglot AST *)
-let rec typ_to_pholyglot t = match t with
-    | Ast.Int -> Pholyglot_ast.Int
-    | Ast.Float -> Pholyglot_ast.Float
-    | Ast.String -> Pholyglot_ast.String
-    | Ast.String_literal -> Pholyglot_ast.String_literal
-    | Ast.Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
-    | Ast.Dynamic_array t -> Pholyglot_ast.Dynamic_array (typ_to_pholyglot t)
-    | Ast.Fixed_array (_, None) -> failwith "typ_to_pholyglot: array has size None, not fully inferred"
-    | Ast.Void -> Pholyglot_ast.Void
-    | Ast.Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
+let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
+    | Int -> Pholyglot_ast.Int
+    | Float -> Pholyglot_ast.Float
+    | String -> Pholyglot_ast.String
+    | String_literal -> Pholyglot_ast.String_literal
+    | Constant -> Pholyglot_ast.Constant
+    | Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
+    | Dynamic_array t -> Pholyglot_ast.Dynamic_array (typ_to_pholyglot t)
+    | Fixed_array (_, None) -> failwith "typ_to_pholyglot: array has size None, not fully inferred"
+    | Void -> Pholyglot_ast.Void
+    | Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
-    | Ast.Infer_me -> failwith "Infer before transpiling"
-    | Ast.Class_type (n) -> Pholyglot_ast.Class_type (n)
+    | Infer_me -> failwith "Infer before transpiling"
+    | Class_type (n) -> Pholyglot_ast.Class_type (n)
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
+
+let typ_to_pholyglot_constant (t : Ast.typ) : Pholyglot_ast.expression = match t with
+    | Int -> Constant "int"
+    | String -> Constant "string"
+    | Float -> Constant "float"
+    | Class_type s -> Constant s
+    | _ -> raise (Transpile_error ("typ_to_pholyglot_constant: Not supported type"))
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | Param (id, typ) -> Pholyglot_ast.Param (id, typ_to_pholyglot typ)
@@ -36,33 +44,40 @@ let rec lvalue_to_pholyglot lvalue = match lvalue with
     | Ast.Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, lvalue_to_pholyglot lvalue)
     | _ -> failwith (sprintf "lvalue_to_pholyglot lvalue = %s" (Ast.show_expression lvalue))
 
-and expression_to_pholyglot exp = match exp with
-    | Ast.String s -> Pholyglot_ast.String s
-    | Ast.Num i -> Pholyglot_ast.Num i
-    | Ast.Num_float f -> Pholyglot_ast.Num_float f
-    | Ast.Plus (i, j) -> Pholyglot_ast.Plus (expression_to_pholyglot i, expression_to_pholyglot j)
-    | Ast.Minus (i, j) -> Pholyglot_ast.Minus (expression_to_pholyglot i, expression_to_pholyglot j)
-    | Ast.Times (i, j) -> Pholyglot_ast.Times (expression_to_pholyglot i, expression_to_pholyglot j)
-    | Ast.Div (i, j) -> Pholyglot_ast.Div (expression_to_pholyglot i, expression_to_pholyglot j)
-    | Ast.Concat (s, t) -> Pholyglot_ast.Concat (expression_to_pholyglot s, expression_to_pholyglot t)
-    | Ast.Variable id -> Pholyglot_ast.Variable id
-    | Ast.Array_init (Infer_me, _, _) -> raise (Transpile_error "Array_init: Infer before transpiling")
-    | Ast.Array_init (_, None, _) -> raise (Transpile_error "Array_init: Array init has no inferred length")
-    | Ast.Array_init (Fixed_array (t, _), Some length, exprs) ->
-        let t = typ_to_pholyglot t in
+and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = match exp with
+    | String s -> Pholyglot_ast.String s
+    | Constant s -> Pholyglot_ast.Constant s
+    | Num i -> Pholyglot_ast.Num i
+    | Num_float f -> Pholyglot_ast.Num_float f
+    | Plus (i, j) -> Pholyglot_ast.Plus (expression_to_pholyglot i, expression_to_pholyglot j)
+    | Minus (i, j) -> Pholyglot_ast.Minus (expression_to_pholyglot i, expression_to_pholyglot j)
+    | Times (i, j) -> Pholyglot_ast.Times (expression_to_pholyglot i, expression_to_pholyglot j)
+    | Div (i, j) -> Pholyglot_ast.Div (expression_to_pholyglot i, expression_to_pholyglot j)
+    | Concat (s, t) -> Pholyglot_ast.Concat (expression_to_pholyglot s, expression_to_pholyglot t)
+    | Variable id -> Pholyglot_ast.Variable id
+    | Array_init (Infer_me, _, _) -> raise (Transpile_error "Array_init: Infer before transpiling")
+    | Array_init (_, None, _) -> raise (Transpile_error "Array_init: Array init has no inferred length")
+    (* Array init should be converted to Function_call already during infer *)
+    (*
+    | Ast.Array_init (Fixed_array (typ, _), Some length, exprs) ->
+        let t = typ_to_pholyglot typ in
         Pholyglot_ast.Function_call (
-            Pholyglot_ast.Fixed_array (t, length),
+            Function_type {
+                return_type = Fixed_array (t, length);
+                arguments = List.map Infer.typ_of_expression exprs;
+            },
             "array_make",
-            String (Pholyglot_ast.show_typ t) :: Num length :: List.map expression_to_pholyglot exprs
+            typ_to_pholyglot_constant typ :: Num length :: List.map expression_to_pholyglot exprs
         )
-    | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
-    | Ast.Function_call (typ, id, exprs) ->
+        *)
+    | Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
+    | Function_call (typ, id, exprs) ->
         let id = if id = "printf" then "pprintf" else id in
         Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
-    | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
-    | Ast.Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, expression_to_pholyglot lvalue)
-    | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
-    | Ast.Method_call {return_type; method_name; left_hand; args} ->
+    | Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
+    | Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, expression_to_pholyglot lvalue)
+    | Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
+    | Method_call {return_type; method_name; left_hand; args} ->
         let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {
             return_type = typ_to_pholyglot return_type;
@@ -70,7 +85,7 @@ and expression_to_pholyglot exp = match exp with
             left_hand = expression_to_pholyglot left_hand;
             args;
         }
-    | Ast.New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
+    | New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
 
 let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l with

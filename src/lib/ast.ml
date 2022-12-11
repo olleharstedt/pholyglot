@@ -24,6 +24,7 @@ and typ =
     (*| GString Glib string buffer *)
     | String
     | String_literal            (* For library code *)
+    | Constant
     | Class_type of class_name
     (* Fixed array can have Infer_me * None, when size is not yet known *)
     | Fixed_array of typ * int option
@@ -108,6 +109,7 @@ and expression =
     | Num_float of float
     (** TODO: GString *)
     | String of string
+    | Constant of string
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression

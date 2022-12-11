@@ -26,6 +26,7 @@ and typ =
     | Float
     | String                (* Actually GString pointer *)
     | String_literal
+    | Constant
     | Void
     | Var_args
     | Fixed_array of typ * int
@@ -73,6 +74,7 @@ and expression =
     | Num of int
     | Num_float of float
     | String of string
+    | Constant of string (* Used in array_make(int, 2, 1, 2) *)
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression
@@ -116,7 +118,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | Float -> "float"
     | String -> "GString*"
     | Void -> "void"
-    | Fixed_array (t, n) -> string_of_typ t
+    | Fixed_array (t, n) -> (*string_of_typ t*) "array"
     | Dynamic_array t -> string_of_typ t
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
     | Class_type (n) -> n
@@ -148,6 +150,7 @@ let rec string_of_expression = function
     | Num_float f -> Float.to_string f
 	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
     | String s -> sprintf "g_string_new(%s)" s
+    | Constant s -> s
     | Coerce (String_literal, String s) -> s
     | Coerce (_, _) -> failwith "string_of_expression: Coerce: Do not know what to coerce"
     | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)

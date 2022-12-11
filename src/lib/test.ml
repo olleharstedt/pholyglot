@@ -175,7 +175,9 @@ let%test_unit "trivial arith transpile" =
     [%test_eq: string] pholyglot_code {|#define function int
 function main()
 {
-    #__C__ int
+    //?>
+    int
+    //<?php
     $a 
     = 0;
     return $a + 1 - 1 * 1 / 1;
@@ -320,20 +322,14 @@ let%test_unit "trivial array infer and print" =
     [%test_eq: string] pholyglot_code {|#define function int
 function main()
 {
-    #__C__ int
+    //?>
+    array
+    //<?php
     $arr 
-    #__C__ [3]
-    = 
-#__C__ {
-#if __PHP__
-[
-#endif
-    1, 2, 3
-#if __PHP__
-]
-#endif
-#__C__ }
-    ;
+    //?>
+    [3]
+    //<?php
+    = array_make(int, 3, 1, 2, 3);
      printf("%d", $arr[0]);
     return 0;
 }
@@ -381,7 +377,9 @@ function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args
 #define function int
 function main()
 {
-    #__C__ GString*
+    //?>
+    GString*
+    //<?php
     $str 
     = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
@@ -451,7 +449,9 @@ function foo(int $c)
 #define function int
 function main()
 {
-    #__C__ int
+    //?>
+    int
+    //<?php
     $b 
     = foo(10 + 20);
     return $b + 30;
@@ -738,7 +738,9 @@ let%test_unit "output object access" =
          |> Pholyglot_ast.string_of_declares
     in
     [%test_eq: string] code {|
-#__C__ typedef struct Point* Point;
+//?>
+typedef struct Point* Point;
+//<?php
 class Point {
     #define public int
 #define __object_property_x $__object_property_x
@@ -751,7 +753,9 @@ class Point {
 
     
 // End of C struct def. Class methods are outside the struct.
-#__C__ };
+//?>
+};
+//<?php
 
 #if __PHP__
 // End of PHP class def.
@@ -771,7 +775,9 @@ Point Point__constructor(Point $p)
 #define function int
 function main()
 {
-    #__C__ Point
+    //?>
+    Point
+    //<?php
     $p 
     = new(Point);
     $p->__object_property_x 
@@ -1223,21 +1229,29 @@ let%test_unit "simple getter" =
          |> Pholyglot_ast.string_of_declare
     in
     [%test_eq: string] code {|
-#__C__ typedef struct Point* Point;
+//?>
+typedef struct Point* Point;
+//<?php
 class Point {
     #define public int
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
 
-    #__C__ int (*getX) (Point $self);
+    //?>
+    int (*getX) (Point $self);
+    //<?php
 // End of C struct def. Class methods are outside the struct.
-#__C__ };
+//?>
+};
+//<?php
 
 #if __PHP__
 public function getX(Point $self): int
 #endif
-#__C__ int Point__getX (Point $self)
+//?>
+int Point__getX (Point $self)
+//<?php
 {
     return $self->__object_property_x;
 
@@ -1475,7 +1489,9 @@ let%test_unit "float to code test" =
     [%test_eq: string] code {|#define function int
 function main()
 {
-    #__C__ float
+    //?>
+    float
+    //<?php
     $a 
     = 1. + 2. - 3.25;
     return 0;
@@ -1556,7 +1572,13 @@ let%test_unit "object access inside array access transpile" =
             stmts = [
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
-                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"), Array_init (Class_type "Body", Some 1, [Variable "b"]));
+                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"),
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Class_type "Body", Some 1); arguments = [Constant; Int; Class_type "Body"]},
+                        "array_make",
+                        [Constant "Body"; Num 1; Variable "b"];
+                    )
+                );
                 Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
@@ -1568,26 +1590,25 @@ let%test_unit "object access inside array access transpile" =
     [%test_eq: string] code {|#define function void
 function foo()
 {
-    #__C__ Body
+    //?>
+    Body
+    //<?php
     $b 
     = new(Body);
     $b->__object_property_x 
     = 10;
-    #__C__ Body
+    //?>
+    array
+    //<?php
     $arr 
-    #__C__ [1]
-    = 
-#__C__ {
-#if __PHP__
-[
-#endif
-    $b
-#if __PHP__
-]
-#endif
-#__C__ }
-    ;
-    #__C__ int
+    //?>
+    [1]
+    //<?php
+
+    = array_make(Body, 1, $b);
+    //?>
+    int
+    //<?php
     $x 
     = $arr[0]->__object_property_x;
     }
