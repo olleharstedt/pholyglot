@@ -8,6 +8,7 @@ type program =
     start_line * 
     includes list * 
     define list * 
+    string list * (* C stubs *)
     php_stubs list * 
     declaration list * 
     end_line
@@ -347,14 +348,15 @@ let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
 
 let string_of_program (p : program) : string = match p with
-    | (s, is, ds, stubs, decs, e) ->
+    | (s, is, ds, c_stubs, php_stubs, decs, e) ->
         concat
         [
             string_of_start_line s;
             concat (List.map is ~f:string_of_include);
             concat (List.map ds ~f:string_of_define);
+            concat c_stubs;
             "#if __PHP__//<?php\n";
-            concat stubs;
+            concat php_stubs;
             "#endif//?>\n";
             "//<?php\n";
             concat (List.map decs ~f:string_of_declare);

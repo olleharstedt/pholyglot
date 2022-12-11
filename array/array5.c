@@ -11,11 +11,7 @@
 #define count(x) x.length
 #define pprintf printf
 typedef struct array array;
-struct array
-{
-    void* thing;
-    size_t length;
-};
+struct array { void* thing; size_t length; };
 //<?php
 //?>
 typedef struct Body* Body;
@@ -31,15 +27,7 @@ define("Body", "Body");
 define("int", "int");
 function array_get($class, $arr, $i) { return $arr[$i]; }
 function array_make($class, $length, ...$values) { return $values; }
-function pprintf($format, ...$args) {
-    fwrite(
-        STDOUT,
-        sprintf(
-            $format,
-            ...$args
-        )
-    );
-}
+function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }
 #endif
 //?>
 Body Body__constructor(Body $this)

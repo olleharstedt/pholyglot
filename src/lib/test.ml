@@ -359,10 +359,23 @@ let%test_unit "transpile concat" =
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
+#define array(...) {__VA_ARGS__}
+#define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
+#define array_get(type, arr, i) ((type*) arr.thing)[i]
+#define count(x) x.length
+#define pprintf printf
+typedef struct array array;
+struct array { void* thing; size_t length; };
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
 function g_string_new(string $str) { return new GString($str); }
 function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
+define("int", "int");
+define("float", "float");
+define("string", "string");
+function array_get($type, $arr, $i) { return $arr[$i]; }
+function array_make($type, $length, ...$values) { return $values; }
+function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }
 #endif//?>
 //<?php
 #define function int
@@ -1402,7 +1415,7 @@ let%test_unit "transpile method" =
     in
     let phast = Transpile.expression_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_expression phast in
-    [%test_eq: string] code {|printf("%d", $p->getX($p, $var1, moo(), $arr[0]))|}
+    [%test_eq: string] code {|pprintf("%d", $p->getX($p, $var1, moo(), $arr[0]))|}
 
 let%test_unit "float test" =
     let source = "<?php // @pholyglot

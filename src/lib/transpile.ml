@@ -28,9 +28,11 @@ let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | t -> raise (Transpile_error ("param_to_pholyglot: " ^ Ast.show_param t))
 
 let rec lvalue_to_pholyglot lvalue = match lvalue with
-    | Ast.Variable identifier -> Pholyglot_ast.Variable identifier
+    | Ast.Variable id -> Pholyglot_ast.Variable id
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
-    | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
+    | Ast.Function_call (typ, id, exprs) ->
+        let id = if id = "printf" then "pprintf" else id in
+        Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, lvalue_to_pholyglot lvalue)
     | _ -> failwith (sprintf "lvalue_to_pholyglot lvalue = %s" (Ast.show_expression lvalue))
 
@@ -46,7 +48,9 @@ and expression_to_pholyglot exp = match exp with
     | Ast.Variable id -> Pholyglot_ast.Variable id
     | Ast.Array_init (exprs) -> Pholyglot_ast.Array_init (List.map expression_to_pholyglot exprs)
     | Ast.Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
-    | Ast.Function_call (typ, id, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
+    | Ast.Function_call (typ, id, exprs) ->
+        let id = if id = "printf" then "pprintf" else id in
+        Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)
     | Ast.Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
     | Ast.Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, expression_to_pholyglot lvalue)
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
@@ -124,12 +128,29 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             Define ("__PHP__", Some "0");
             (* TODO: new_stack and new_heap? new_pool? Branch on _Generic: Point__stack, Point__boehm etc. *)
             Define ("new(x)", Some "x ## __constructor(alloca(sizeof(struct x)))");
+            Define ("array(...)", Some "{__VA_ARGS__}");
+            Define ("array_make(type, i, ...)", Some "{.thing = (type[]) array(__VA_ARGS__), .length = i}");
+            Define ("array_get(type, arr, i)", Some "((type*) arr.thing)[i]");
+            Define ("count(x)", Some "x.length");
+            Define ("pprintf", Some "printf");
+        ],
+        (* C stubs *)
+        [
+            "typedef struct array array;\n";
+            "struct array { void* thing; size_t length; };\n";
         ],
         (* PHP stubs *)
         [
             "class GString { public $str; public function __construct($str) { $this->str = $str; } }\n";
             "function g_string_new(string $str) { return new GString($str); }\n";
             "function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }\n";
+            (* The following constants are needed for the $type in array_get/array_make *)
+            {|define("int", "int");|} ^ "\n";
+            {|define("float", "float");|} ^ "\n";
+            {|define("string", "string");|} ^ "\n";
+            "function array_get($type, $arr, $i) { return $arr[$i]; }\n";
+            "function array_make($type, $length, ...$values) { return $values; }\n";
+            "function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }\n";
         ],
         (* Declarations *)
         declares,
