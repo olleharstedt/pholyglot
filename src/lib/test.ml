@@ -153,7 +153,6 @@ let%test_unit "trivial transpile" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define $ 
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
@@ -190,7 +189,6 @@ let%test_unit "trivial arith transpile" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define $ 
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
@@ -350,7 +348,6 @@ let%test_unit "trivial array infer and print" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define $ 
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
@@ -400,7 +397,6 @@ let%test_unit "transpile concat" =
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define $ 
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
@@ -772,7 +768,6 @@ let%test_unit "output object access" =
     [%test_eq: string] code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <glib.h>
-#define $ 
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
