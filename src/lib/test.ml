@@ -1246,17 +1246,18 @@ class Point {
     //?>
     int (*getX) (Point $self);
     //<?php
+    
 // End of C struct def. Class methods are outside the struct.
 //?>
 };
 //<?php
 
-#if __PHP__
-public function getX(Point $self): int
-#endif
 //?>
 int Point__getX (Point $self)
 //<?php
+#if __PHP__
+public function getX(Point $self): int
+#endif
 {
     return $self->__object_property_x;
 

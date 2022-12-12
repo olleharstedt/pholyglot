@@ -260,31 +260,21 @@ let string_of_function_pointer meth : string = match meth with
  * @return string
  *)
 let string_of_method class_name meth = match meth with
-    | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
-        sprintf {|
+    | {name = method_name; params; stmts; function_type = Function_type {return_type; arguments}} ->
+        let return_type_s = string_of_typ (Function_type {return_type; arguments}) in
+        let params_s = concat ~sep:", " (List.map params ~f:string_of_param) in
+        let stmts_s  = (concat (List.map stmts ~f:string_of_statement)) in
+        [%string {|
 //?>
-%s %s__%s (%s)
+$return_type_s $(class_name)__$(method_name) ($params_s)
 //<?php
 #if __PHP__
-public function %s(%s): %s
+public function $method_name($params_s): $return_type_s
 #endif
 {
-    %s
+    $stmts_s
 }
-|}
-    (* PHP function name *)
-    name
-    (* Params for PHP *)
-    (concat ~sep:", " (List.map params ~f:string_of_param))
-    (* PHP return type *)
-    (string_of_typ (Function_type {return_type; arguments}))
-    (* C Return type *)
-    (string_of_typ (Function_type {return_type; arguments}))
-    class_name
-    name
-    (* Params for C *)
-    (concat ~sep:", " (List.map params ~f:string_of_param))
-    (concat (List.map stmts ~f:string_of_statement))
+|}]
 
 let string_of_function_pointer_init class_name meth = match meth with
     | { name; } ->
