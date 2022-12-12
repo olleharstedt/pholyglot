@@ -11,7 +11,7 @@
 #define count(x) x.length
 #define pprintf printf
 typedef struct array array;
-struct array { void* thing; size_t length; };
+struct array {void* thing; size_t length; };
 //<?php
 //?>
 typedef struct Body* Body;
@@ -37,10 +37,16 @@ Body Body__constructor(Body $this)
 }
 //<?php
 
-#define function void
-function foo(array /*SED EATS THE AMPERSAND*/&$bodies)
-#undef function
+//?>
+void foo(array $bodies)
+//<?php
+#if __PHP__
+function foo(array &$bodies)
+#endif
 {
+    //?>
+    //Body* $bodies = $__bodies.thing;
+    //<?php
     //?>
     int
     //<?php
@@ -49,6 +55,7 @@ function foo(array /*SED EATS THE AMPERSAND*/&$bodies)
         pprintf(
             "%d ",
             array_get(Body, $bodies, $i)->__object_property_x
+            //$bodies[$i]->__object_property_x
         );
     }
 }
