@@ -320,10 +320,10 @@ function $function_name($params_s)
         end else begin
             let params_without_ref_s = concat ~sep:", " (List.map params ~f:string_of_param_without_ref) in
             [%string {|//?>
-$typ_s foo($params_without_ref_s)
+$typ_s $function_name($params_without_ref_s)
 //<?php
 #if __PHP__
-function foo($params_s): $typ_s
+function $function_name($params_s): $typ_s
 #endif
 {
     $stmts_s}
