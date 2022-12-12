@@ -151,10 +151,10 @@ let%test_unit "trivial transpile" =
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
     [%test_eq: string] pholyglot_code {|#define function int
 function main()
+#undef function
 {
     return 0;
 }
-#undef function
 |}
 
 let%test_unit "trivial arith transpile" =
@@ -174,6 +174,7 @@ let%test_unit "trivial arith transpile" =
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
     [%test_eq: string] pholyglot_code {|#define function int
 function main()
+#undef function
 {
     //?>
     int
@@ -182,7 +183,6 @@ function main()
     = 0;
     return $a + 1 - 1 * 1 / 1;
 }
-#undef function
 |}
 
 let%test_unit "trivial string" =
@@ -329,6 +329,7 @@ let%test_unit "trivial array infer and print" =
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
     [%test_eq: string] pholyglot_code {|#define function int
 function main()
+#undef function
 {
     //?>
     array
@@ -342,7 +343,6 @@ function main()
      printf("%d", $arr[0]);
     return 0;
 }
-#undef function
 |}
 
 let%test_unit "transpile concat" =
@@ -385,6 +385,7 @@ function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args
 //<?php
 #define function int
 function main()
+#undef function
 {
     //?>
     GString*
@@ -393,7 +394,6 @@ function main()
     = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
 }
-#undef function
 // ?>
 // <?php ob_end_clean(); main();|}
 
@@ -451,12 +451,13 @@ let%test_unit "two functions to pholyglot" =
     in
     [%test_eq: string] code {|#define function int
 function foo(int $c)
+#undef function
 {
     return $c + 20;
 }
-#undef function
 #define function int
 function main()
+#undef function
 {
     //?>
     int
@@ -465,7 +466,6 @@ function main()
     = foo(10 + 20);
     return $b + 30;
 }
-#undef function
 |}
 
 let%test_unit "infer_printf 1" =
@@ -783,6 +783,7 @@ Point Point__constructor(Point $p)
 //<?php
 #define function int
 function main()
+#undef function
 {
     //?>
     Point
@@ -794,7 +795,6 @@ function main()
      printf("%d", $p->__object_property_x);
     return 0;
 }
-#undef function
 |}
 
 let%test_unit "string class property" =
@@ -1150,17 +1150,27 @@ let%test_unit "transpile docblock object array" =
                 RefParam ("bodies", Dynamic_array (Class_type "Body"));
                 Param ("dt", Float);
             ];
-            stmts = [];
+            stmts = [
+                Assignment (Int, Variable "a", Num 123);
+            ];
             function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body"); Float]}
         }
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
     in
-    [%test_eq: string] code {|#define function void
-function foo(Body &$bodies, float $dt)
+    [%test_eq: string] code {|//?>
+void foo(array $bodies, float $dt)
+//<?php
+#if __PHP__
+function foo(array &$bodies, float $dt): void
+#endif
 {
+    //?>
+    int
+    //<?php
+    $a 
+    = 123;
     }
-#undef function
 |}
 
 let%test_unit "infer docblock int and string" =
@@ -1503,6 +1513,7 @@ let%test_unit "float to code test" =
     let code = Pholyglot_ast.string_of_declare phast in
     [%test_eq: string] code {|#define function int
 function main()
+#undef function
 {
     //?>
     float
@@ -1511,7 +1522,6 @@ function main()
     = 1. + 2. - 3.25;
     return 0;
 }
-#undef function
 |}
 
 let%test_unit "printf float" =
@@ -1610,6 +1620,7 @@ let%test_unit "object access inside array access transpile" =
 	(* TODO: Check this code *)
     [%test_eq: string] code {|#define function void
 function foo()
+#undef function
 {
     //?>
     Body
@@ -1633,7 +1644,6 @@ function foo()
     $x 
     = $arr[0]->__object_property_x;
     }
-#undef function
 |}
 
 let%test_unit "negative int" =

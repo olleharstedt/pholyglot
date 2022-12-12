@@ -119,7 +119,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> (*string_of_typ t*) "array"
-    | Dynamic_array t -> string_of_typ t
+    | Dynamic_array t -> (* string_of_typ t *) "array"
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
     | Class_type (n) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
@@ -133,9 +133,16 @@ let string_of_typ_post = function
 |} n
     | _ -> ""
 
-let string_of_param (p: param) : string = match p with
+let string_of_param (p : param) : string = match p with
     | Param (id, t) -> string_of_typ t ^ " $" ^ id
     | RefParam (id, t) -> string_of_typ t ^ " &$" ^ id
+
+(**
+ * Needed because of '&' and array value semantics in PHP.
+ *)
+let string_of_param_without_ref (p : param) : string = match p with
+    | Param (id, t)
+    | RefParam (id, t) -> string_of_typ t ^ " $" ^ id
 
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
@@ -253,6 +260,15 @@ let string_of_function_pointer meth : string = match meth with
     (concat ~sep:", " (List.map params ~f:string_of_param))
 
 (**
+ * Returns true if any param is a RefParam
+ * Reason is that we can't hide the PHP ampersand and this notation is by asterisk pointer in C.
+ * So this function decides if we need to split function signature in two or not.
+ *)
+let params_has_ref (params : param list ) : bool =
+    let refparams = List.filter params ~f:(fun p -> match p with RefParam _ -> true | Param _ -> false) in
+    match refparams with [] -> true | _ -> false
+
+(**
  * A method must be valid both as C function and PHP class method
  *
  * @param name : string Class name, used by self
@@ -286,21 +302,33 @@ let string_of_function_pointer_init class_name meth = match meth with
 
 let string_of_declare (d : declaration) : string = match d with
     | Function {
-        name;
+        name = function_name;
         params;
         stmts;
         function_type = typ
     } ->
-        sprintf {|#define function %s
-function %s(%s)
-{
-    %s}
+        let typ_s = string_of_typ typ in
+        let params_s = concat ~sep:", " (List.map params ~f:string_of_param) in
+        let stmts_s = (concat (List.map stmts ~f:string_of_statement)) in
+        if params_has_ref params then begin
+            [%string {|#define function $typ_s
+function $function_name($params_s)
 #undef function
-|}
-        (string_of_typ typ)
-        name
-        (concat ~sep:", " (List.map params ~f:string_of_param))
-        (concat (List.map stmts ~f:string_of_statement))
+{
+    $stmts_s}
+|}]
+        end else begin
+            let params_without_ref_s = concat ~sep:", " (List.map params ~f:string_of_param_without_ref) in
+            [%string {|//?>
+$typ_s foo($params_without_ref_s)
+//<?php
+#if __PHP__
+function foo($params_s): $typ_s
+#endif
+{
+    $stmts_s}
+|}]
+        end
     | Class (class_name, kind, props, methods) ->
         let string_of_method = fun (m) -> string_of_method class_name m in
         let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init class_name m in
