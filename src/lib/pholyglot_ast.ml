@@ -125,12 +125,9 @@ let rec string_of_typ (t : typ) : string = match t with
     | Function_type {return_type; arguments} -> string_of_typ return_type
 
 (** Type notation that goes AFTER the variable name, as in array init *)
+(* TODO: No longer needed with array struct {.thing void*, .length int} *)
 let string_of_typ_post = function
-    | Fixed_array (t, n) -> sprintf {|
-    //?>
-    [%d]
-    //<?php
-|} n
+    | Fixed_array (t, n) -> sprintf {||}
     | _ -> ""
 
 let string_of_param (p : param) : string = match p with

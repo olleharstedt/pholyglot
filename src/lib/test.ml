@@ -335,10 +335,6 @@ function main()
     array
     //<?php
     $arr 
-    //?>
-    [3]
-    //<?php
-
     = array_make(int, 3, 1, 2, 3);
      printf("%d", $arr[0]);
     return 0;
@@ -1633,10 +1629,6 @@ function foo()
     array
     //<?php
     $arr 
-    //?>
-    [1]
-    //<?php
-
     = array_make(Body, 1, $b);
     //?>
     int
