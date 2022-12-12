@@ -284,7 +284,15 @@ let%test_unit "trivial array infer" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Fixed_array (Int, Some 3), Variable "arr", Array_init (Int, Some 3, [Num 1; Num 2; Num 3]));
+                Assignment (
+                    Fixed_array (Int, Some 3),
+                    Variable "arr",
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        "array_make",
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3;]
+                    )
+                );
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
@@ -329,6 +337,7 @@ function main()
     //?>
     [3]
     //<?php
+
     = array_make(int, 3, 1, 2, 3);
      printf("%d", $arr[0]);
     return 0;
