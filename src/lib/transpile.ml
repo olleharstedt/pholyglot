@@ -57,7 +57,8 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Variable id -> Pholyglot_ast.Variable id
     | Array_init (Infer_me, _, _) -> raise (Transpile_error "Array_init: Infer before transpiling")
     | Array_init (_, None, _) -> raise (Transpile_error "Array_init: Array init has no inferred length")
-    (* Array init should be converted to Function_call already during infer *)
+    | Array_init _ -> raise (Transpile_error "Array_init: This should be a function call to array_make")
+    (* Array init must be converted to Function_call already during infer to carry length *)
     (*
     | Ast.Array_init (Fixed_array (typ, _), Some length, exprs) ->
         let t = typ_to_pholyglot typ in
@@ -70,7 +71,8 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
             typ_to_pholyglot_constant typ :: Num length :: List.map expression_to_pholyglot exprs
         )
         *)
-    | Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)
+    (*| Array_access (id, expr) -> Pholyglot_ast.Array_access (id, expression_to_pholyglot expr)*)
+    | Array_access _ -> raise (Transpile_error "Array_access: This should be a function call to array_get")
     | Function_call (typ, id, exprs) ->
         let id = if id = "printf" then "pprintf" else id in
         Pholyglot_ast.Function_call (typ_to_pholyglot typ, id, List.map expression_to_pholyglot exprs)

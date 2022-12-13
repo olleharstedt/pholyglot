@@ -296,7 +296,14 @@ let%test_unit "trivial array infer" =
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
-                    [Coerce (String_literal, String "\"%d\""); Array_access ("arr", Num 0)]
+                    [
+                        Coerce (String_literal, String "\"%d\"");
+                        Function_call (
+                            Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
+                            "array_get",
+                            [Constant "int"; Variable "arr"; Num 0]
+                        );
+                    ]
                 );
                 Return (Num 0);
             ];
@@ -336,7 +343,7 @@ function main()
     //<?php
     $arr 
     = array_make(int, 3, 1, 2, 3);
-     printf("%d", $arr[0]);
+     printf("%d", array_get(int, $arr, 0));
     return 0;
 }
 |}

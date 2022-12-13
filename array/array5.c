@@ -2,13 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <alloca.h>
+#define __same_type(a, b) __builtin_types_compatible_p(typeof(a), typeof(b))
+#define __must_be_array(a) BUILD_BUG_ON_ZERO(__same_type((a), &(a)[0]))
+#define ARRAYSIZE(arr) (sizeof(arr) / sizeof((arr)[0]) + __must_be_array(arr))
+
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #define array(...) {__VA_ARGS__}
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
-#define count(x) x.length
 #define pprintf printf
 typedef struct array array;
 struct array {void* thing; size_t length; };
@@ -51,13 +54,15 @@ function foo(array &$bodies)
     int
     //<?php
     $i = 0;
-    for ($i = 0; $i < count($bodies); $i++) {
+    //for ($i = 0; $i < count($bodies); $i++) {
+    for ($i = 0; $i < 3; $i++) {
         pprintf(
             "%d ",
             array_get(Body, $bodies, $i)->__object_property_x
             //$bodies[$i]->__object_property_x
         );
     }
+    array_get(Body, $bodies, 0)->__object_property_x = 99;
 }
 
 #define function void
@@ -90,6 +95,7 @@ function main()
         new (Body)
     ) ;
     foo($bodies);
+    printf("%d ", array_get(Body, $bodies, 0)->__object_property_x);
     //?>
     array
     //<?php

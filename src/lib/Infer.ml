@@ -67,8 +67,9 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "not all element in array_init have the same type")
     | Array_init (t, _, _) -> t
     | New (t, exprs) -> t
-    (* $point->x *)
+    (* $point->[0] ? *)
     | Object_access (Array_access (id, _), Property_access prop_name)
+    (* $point->x *)
     | Object_access (Variable id, Property_access prop_name) -> begin
         match Namespace.find_identifier ns id with
             | Some (Fixed_array (Class_type class_type_name, _))
@@ -166,8 +167,22 @@ let rec infer_expression ns expr =
             "array_make",
             typ_to_constant tt :: Num length :: exprs
         )
+    | Array_access (id, expr) as e ->
+        let t = typ_of_expression ns e in
+        Function_call (
+            Function_type {
+                return_type = t;
+                arguments = Constant :: Dynamic_array t :: Int :: [];
+            },
+            "array_get",
+            typ_to_constant t :: Variable id :: expr :: [];
+        )
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
+
+let infer_expressions ns exprs =
+    let inf = fun e -> infer_expression ns e in
+    List.map inf exprs
 
 (** Parse format string from printf etc *)
 let infer_printf (s : string) : Ast.typ list =
@@ -249,7 +264,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, exprs) ->
         begin match Namespace.find_identifier ns id with
-        | Some fun_type -> Function_call (fun_type, id, exprs)
+        | Some fun_type -> Function_call (fun_type, id, infer_expressions ns exprs)
         | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
     | s -> s
