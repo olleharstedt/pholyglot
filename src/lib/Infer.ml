@@ -18,6 +18,7 @@ let rec typ_of_lvalue ns lv : typ =
         | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find function type %s in namespace" id))
         end
     (* TODO: Access chain like $a->b->c *)
+    (* TODO: id is expression? *)
     | Object_access (id, Property_access prop_name) ->
         let class_type_name = match Namespace.find_identifier ns id with
             | Some (Class_type (c)) -> c
@@ -91,7 +92,6 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         let class_type_name = match Namespace.find_identifier ns class_name with
             | Some (Class_type (c)) -> c
             | None -> begin
-                print_endline "moo";
                 raise (Type_error (sprintf "typ_of_expression method call: Could not find identifier %s in namespace" class_name))
             end
         in
@@ -151,7 +151,7 @@ let rec infer_expression ns expr =
         let t = typ_of_expression ns e in
         Method_call {return_type = t; method_name; left_hand = Variable object_name; args}
     end
-    | Object_access (id, expr) -> Object_access (id, infer_expression ns expr)
+    | Object_access (leftside_expr, expr) -> Object_access (infer_expression ns leftside_expr, infer_expression ns expr)
     | Array_init (Infer_me, _, exprs) as e ->
         let length = List.length exprs in
         let inf = fun e -> typ_of_expression ns e in
@@ -213,6 +213,7 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, infer_expression ns expr)
     (* TODO: Generalize this with lvalue *)
+    (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
         let t = typ_of_expression ns expr in
         (* Check if class def has property with name and type *)
@@ -237,16 +238,18 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
                 (show_typ prop_type)
             )
         );
-        Assignment (typ_of_expression ns expr, Object_access (variable_name, Property_access prop_name), expr)
+        (* TODO: variable_name is expression? *)
+        Assignment (typ_of_expression ns expr, Object_access (variable_name, Property_access prop_name), infer_expression ns expr)
     (* printf is hard-coded *)
     (* Head of expressions is always a format string to printf *)
     | Function_call (Infer_me, "printf", String s :: xs) ->
         let expected_types = infer_printf s in
         let exprs : expression list = Coerce (String_literal, String s) :: List.map2 (fun e t -> match e, t with
+            (* Match on xs and expected_types to check that it matches *)
             | String s, String_literal -> Coerce (String_literal, e)
             | e, t -> begin
                 match typ_of_expression ns e with
-                | String -> Coerce (String_literal, e)
+                | String -> Coerce (String_literal, infer_expression ns e)
                 | expr_typ when expr_typ <> t -> raise (
                     Type_error (
                         sprintf

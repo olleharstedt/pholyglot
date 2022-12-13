@@ -1448,7 +1448,11 @@ let%test_unit "transpile method" =
                             "moo",
                             []
                         );
-                        Array_access ("arr", Num 0);
+                        Function_call (
+                            Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
+                            "array_get",
+                            [Constant "int"; Variable "arr"; Num 0]
+                        );
                     ];
                     left_hand = Variable "p";
                 }
@@ -1457,7 +1461,8 @@ let%test_unit "transpile method" =
     in
     let phast = Transpile.expression_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_expression phast in
-    [%test_eq: string] code {|pprintf("%d", $p->getX($p, $var1, moo(), $arr[0]))|}
+    [%test_eq: string] code {|pprintf("%d", $p->getX($p, $var1, moo(), array_get(int, $arr, 0)))|}
+
 
 let%test_unit "float test" =
     let source = "<?php // @pholyglot
@@ -1564,6 +1569,7 @@ let%test_unit "object access inside array access" =
         $b->x = 10;
         $arr = [$b];
         $x = $arr[0]->x;
+        printf("%d", $arr[0]->x);
     }
     |} in
     let ast =
@@ -1592,7 +1598,29 @@ let%test_unit "object access inside array access" =
                         [Constant "Body"; Num 1; Variable "b"];
                     )
                 );
-                Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
+                Assignment (Int, Variable "x", Object_access (
+                    Function_call (
+                        Function_type {return_type = Class_type "Body"; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
+                        "array_get",
+                        [Constant "Body"; Variable "arr"; Num 0]
+                    ),
+                    Property_access "__object_property_x")
+                );
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    "printf",
+                    [
+                        Coerce (String_literal, String "\"%d\"");
+                        Object_access(
+                            Function_call (
+                                Function_type {return_type = Class_type "Body"; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
+                                "array_get",
+                                [Constant "Body"; Variable "arr"; Num 0]
+                            ),
+                            Property_access "__object_property_x"
+                        )
+                    ]
+                );
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
@@ -1613,7 +1641,13 @@ let%test_unit "object access inside array access transpile" =
                         [Constant "Body"; Num 1; Variable "b"];
                     )
                 );
-                Assignment (Int, Variable "x", Object_access (Array_access ("arr", Num 0), Property_access "__object_property_x"));
+                Assignment (Int, Variable "x", Object_access (
+                    Function_call (
+                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
+                        "array_get",
+                        [Constant "Body"; Variable "arr"; Num 0]
+                    ),
+                    Property_access "__object_property_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
@@ -1641,7 +1675,7 @@ function foo()
     int
     //<?php
     $x 
-    = $arr[0]->__object_property_x;
+    = array_get(Body, $arr, 0)->__object_property_x;
     }
 |}
 
@@ -1721,7 +1755,6 @@ function main(): int
     *)
 
 (* TODO: *)
-(* array_get - or extra variable? *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)
