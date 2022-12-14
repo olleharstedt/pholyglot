@@ -1706,6 +1706,35 @@ let%test_unit "negative int" =
         }
     ])
 
+let%test_unit "negative int" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $arr = [1, 2, 3];
+        foreach ($arr as $val) {
+            printf("%d", $val);
+        }
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Int, Variable "x", Minus (Num (-10), Num (-5)));
+                Assignment (Int, Variable "y", Times (Num 10, Num (-10)));
+                Assignment (Float, Variable "f", Div (Num_float (-1.15), Num_float (-2.)));
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
+
+
 
     (*
 let%test "nbody benchmark" =
@@ -1755,6 +1784,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* foreach *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)

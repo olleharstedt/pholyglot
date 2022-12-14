@@ -92,6 +92,12 @@ and statement =
     (* return ...; *)
     | Return of expression
     | Function_call of typ * identifier * expression list
+    | Foreach of {
+        arr:   expression; (* Must be Variable expression *)
+        key:   expression option; (* Must be Variable if it exists *)
+        value: expression; (* Must be Variable *)
+        body:  statement list;
+    }
     (* If-statement, or only if-expression *)
     (* While-loop *)
 
