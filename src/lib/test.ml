@@ -1706,7 +1706,7 @@ let%test_unit "negative int" =
         }
     ])
 
-let%test_unit "negative int" =
+let%test_unit "foreach" =
     let source = {|<?php // @pholyglot
     function foo(): void {
         $arr = [1, 2, 3];
@@ -1726,9 +1726,28 @@ let%test_unit "negative int" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Int, Variable "x", Minus (Num (-10), Num (-5)));
-                Assignment (Int, Variable "y", Times (Num 10, Num (-10)));
-                Assignment (Float, Variable "f", Div (Num_float (-1.15), Num_float (-2.)));
+                Assignment (Fixed_array (Int, Some 3), Variable "arr", 
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        "array_make",
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                    )
+                );
+                Foreach {
+                    arr = Variable "arr";
+                    key = None; 
+                    value = Variable "val";
+                    body = [
+                        Function_call (
+                            Function_type {return_type = Void; arguments = [String_literal; Int]},
+                            "printf",
+                            [
+                                Coerce (String_literal, String "\"%d\"");
+                                Variable "val";
+                            ]
+                        );
+                    ];
+                };
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }

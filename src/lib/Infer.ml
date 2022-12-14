@@ -204,7 +204,7 @@ let infer_printf (s : string) : Ast.typ list =
 (**
  * Infer types inside Ast.statement
  *)
-let infer_stmt (s : statement) (ns : Namespace.t) : statement = 
+let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
@@ -270,6 +270,22 @@ let infer_stmt (s : statement) (ns : Namespace.t) : statement =
         | Some fun_type -> Function_call (fun_type, id, infer_expressions ns exprs)
         | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
+    | Foreach {arr (* Array expression *) ; key = None; value = Variable value_name; body = stmts} as e -> begin
+        let t = typ_of_expression ns arr in
+        begin match t with 
+            | Fixed_array _
+            | Dynamic_array _ -> ()
+            | _ -> raise (Type_error ("Array given to foreach does not have an array type, but instead " ^ show_typ t))
+        end;
+        let array_internal_type = match t with 
+            | Fixed_array (t, _) -> t
+            | Dynamic_array t -> t
+        in
+        (* NB: Since PHP lack block scope, we don't have to clone the namespace or remove variable after *)
+        Namespace.add_identifier ns value_name array_internal_type;
+        let f = fun s -> infer_stmt s ns in
+        Foreach {arr; key = None; value = Variable value_name; body = List.map f stmts}
+    end
     | s -> s
 
 let rec kind_of_typ ns t : kind = match t with
