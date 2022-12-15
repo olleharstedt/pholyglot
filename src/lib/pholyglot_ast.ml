@@ -64,6 +64,12 @@ and statement =
     | Return of expression
     | Assignment of typ * lvalue * expression
     | Function_call of typ * identifier * expression list
+    | For of {
+        init:      statement;       (* Init happens outside the for-statement *)
+        condition: expression;
+        incr:      statement;
+        stmts:     statement list;
+    }
 
 and lvalue =
     | Variable of identifier
@@ -80,6 +86,8 @@ and expression =
     | Times of expression * expression
     | Div of expression * expression
     | Concat of expression * expression
+    | Lessthan of expression * expression
+    | Greaterthan of expression * expression
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
@@ -162,6 +170,9 @@ let rec string_of_expression = function
     | Times (i, j) -> (string_of_expression i) ^ " * " ^ (string_of_expression j)
     | Div (i, j) -> (string_of_expression i) ^ " / " ^ (string_of_expression j)
     | Concat (s, t) -> sprintf "g_string_append(%s, %s->str)" (string_of_expression s) (string_of_expression t)
+    | Lessthan (s, t) -> sprintf "%s < %s" (string_of_expression s) (string_of_expression t)
+    | Greaterthan (s, t) -> sprintf "%s > %s" (string_of_expression s) (string_of_expression t)
+    | Equal (s, t) -> sprintf "%s = %s" (string_of_expression s) (string_of_expression t)
     | Variable id ->
         let id = if id = "this" then "self" else id in
         "$" ^ id
@@ -197,7 +208,7 @@ let rec string_of_expression = function
     (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 
-let string_of_statement = function
+let rec string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
     | Function_call (Function_type {return_type = Void; arguments}, id, exprs) ->
         sprintf {| %s(%s);
@@ -227,6 +238,16 @@ let string_of_statement = function
     (string_of_lvalue lvalue)
     (string_of_typ_post typ)
     (string_of_expression expr)
+    | For {init; condition; incr; stmts;} ->
+        let init_s = string_of_statement init in
+        let stmts_s = (concat (List.map stmts ~f:string_of_statement)) in
+        let condition_s = string_of_expression condition in
+        let incr_s = string_of_statement incr in
+        [%string {|$init_s
+        for (; $condition_s; $incr_s) {
+            $stmts_s
+        }
+    |}]
 
 
 let string_of_prop (p : class_property) : string = match p with

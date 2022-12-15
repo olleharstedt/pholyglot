@@ -180,6 +180,8 @@ expr:
   | e=expr "*" f=expr                                            {Times (e, f)} 
   | e=expr "/" f=expr                                            {Div (e, f)} 
   | e=expr "." f=expr                                            {Concat (e, f)} 
+  | e=expr "<" f=expr                                            {Lessthan (e, f)} 
+  | e=expr ">" f=expr                                            {Greaterthan (e, f)} 
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
   | n=VAR_NAME "[" e=expr "]"                                    {Array_access (n, e)}
   | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Method_call {return_type = Infer_me; method_name = m; args = args_list; left_hand = e}}

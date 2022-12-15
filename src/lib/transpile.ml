@@ -95,10 +95,17 @@ let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l wi
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
     | Ast.Object_access (identifier,  lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
 
-let statement_to_pholyglot s = match s with
+let rec statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
+    | Ast.Foreach {arr; key; value; body;} ->
+        Pholyglot_ast.For {
+            init      = Pholyglot_ast.Assignment (Int, Variable "i", Num 0);
+            condition = Pholyglot_ast.Lessthan (Variable "i", Num 10);
+            incr      = Pholyglot_ast.Assignment (Int, Variable "i", Plus (Variable "i", Num 1));
+            stmts     = List.map statement_to_pholyglot body;
+        }
 
 let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with
     | (name, t) -> (name, typ_to_pholyglot t)

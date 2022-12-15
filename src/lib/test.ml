@@ -1706,7 +1706,7 @@ let%test_unit "negative int" =
         }
     ])
 
-let%test_unit "foreach" =
+let%test_unit "infer foreach" =
     let source = {|<?php // @pholyglot
     function foo(): void {
         $arr = [1, 2, 3];
@@ -1753,6 +1753,26 @@ let%test_unit "foreach" =
         }
     ])
 
+let%test_unit "foreach to pholyglot" =
+    let ast = Ast.Foreach {
+        arr = Variable "arr";
+        key = None; 
+        value = Variable "val";
+        body = [
+            Function_call (
+                Function_type {return_type = Void; arguments = [String_literal; Int]},
+                "printf",
+                [
+                    Coerce (String_literal, String "\"%d\"");
+                    Variable "val";
+                ]
+            );
+        ];
+    } in
+    let phast = Transpile.statement_to_pholyglot ast in
+    let code = Pholyglot_ast.string_of_statement phast in
+	(* TODO: Check this code *)
+    [%test_eq: string] code {||}
 
 
     (*

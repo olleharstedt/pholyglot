@@ -121,6 +121,8 @@ and expression =
     | Times of expression * expression
     | Div of expression * expression
     | Concat of expression * expression
+    | Lessthan of expression * expression
+    | Greaterthan of expression * expression
     | New of typ * expression list
     | Variable of identifier
     | Array_init of typ * int option * expression list
