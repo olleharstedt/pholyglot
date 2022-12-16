@@ -102,6 +102,8 @@ function main()
     //<?php
     $ints = array_make(int, 4, 1, 2, 3, 5);
     fii($ints);
+    fprintf(stderr, "hello");
+    abort();
     return 0;
 }
 //?>

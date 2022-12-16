@@ -19,6 +19,32 @@ function advance(array &$bodies, float $dt): void
 {
 }
 
+/**
+ * @param array<Body> $bodies
+ */
+function energy(array &$bodies): float
+{
+    /*
+    $e = 0.0;
+    foreach ($bodies as $body) {
+        $e = $e + 0.5 * $body->mass * 
+            ( $body->vx * $body->vx 
+            + $body->vy * $body->vy 
+            + $body->vz * $body->vz);
+
+        for (int j=i+1; j < bodies.length; ++j) {
+            dx = bodies[i].x - bodies[j].x;
+            dy = bodies[i].y - bodies[j].y;
+            dz = bodies[i].z - bodies[j].z;
+
+            distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
+            e -= (bodies[i].mass * bodies[j].mass) / distance;
+        }
+    }
+    return e;
+     */
+}
+
 function main(): int
 {
     $daysperyear = 365.24;
@@ -71,9 +97,12 @@ function main(): int
     $sun->mass = $solarmass;
 
     $bodies = [$sun, $jupiter, $saturn, $uranus, $neptune];
-    //for (int i=0; i<n; ++i) {
-        //bodies.advance(0.01);
-    //}
+    foreach ($bodies as $body) {
+        printf("%f\n", $body->x);
+    }
+    foreach ([1, 2, 3] as $j) {
+        printf("%d ", $j);
+    }
     printf("%f", $bodies[0]->x);
     return 0;
 }

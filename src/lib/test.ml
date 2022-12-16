@@ -1778,15 +1778,15 @@ let%test_unit "foreach to pholyglot" =
     [%test_eq: string] code {|//?>
     int
     //<?php
-    $i 
+    $__i 
     = 0;
     
-        for (; $i < count($arr); $i = $i + 1) {
+        for (; $__i < count($arr); $__i = $__i + 1) {
             //?>
     int
     //<?php
     $val 
-    = array_get(int, $arr, $i);
+    = array_get(int, $arr, $__i);
      printf("%d", $val);
     
         }

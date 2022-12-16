@@ -102,9 +102,9 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->
         Pholyglot_ast.For {
             (* TODO: Generate 'i' variable *)
-            init      = Pholyglot_ast.Assignment (Int, Variable "i", Num 0);
+            init      = Pholyglot_ast.Assignment (Int, Variable "__i", Num 0);
             condition = Pholyglot_ast.Lessthan (
-                Variable "i",
+                Variable "__i",
                 Function_call (
                         Function_type {return_type = Int;
                         arguments = [Fixed_array (Int, 0)]
@@ -113,7 +113,7 @@ let rec statement_to_pholyglot s = match s with
                     [expression_to_pholyglot (Variable arr_)]
                 )
             );
-            incr      = Equal (Variable "i", Plus (Variable "i", Num 1));
+            incr      = Equal (Variable "__i", Plus (Variable "__i", Num 1));
             stmts     =
                 Pholyglot_ast.Assignment (
                     typ_to_pholyglot value_typ,
@@ -121,7 +121,7 @@ let rec statement_to_pholyglot s = match s with
                     Function_call (
                         Function_type {return_type = typ_to_pholyglot value_typ; arguments = [Fixed_array (Int, 0)]},
                         "array_get",
-                        [expression_to_pholyglot value_typ_constant; expression_to_pholyglot (Variable arr_); Variable "i"]
+                        [expression_to_pholyglot value_typ_constant; expression_to_pholyglot (Variable arr_); Variable "__i"]
                     )
                 )
                 :: List.map statement_to_pholyglot body;
