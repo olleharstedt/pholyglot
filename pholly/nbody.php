@@ -100,9 +100,9 @@ function main(): int
     foreach ($bodies as $body) {
         printf("%f\n", $body->x);
     }
-    foreach ([1, 2, 3] as $j) {
-        printf("%d ", $j);
-    }
+    //foreach ([1, 2, 3] as $j) {
+        //printf("%d ", $j);
+    //}
     printf("%f", $bodies[0]->x);
     return 0;
 }
