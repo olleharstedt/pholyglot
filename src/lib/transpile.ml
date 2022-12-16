@@ -100,6 +100,7 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     (* TODO: foreach ([1, 2, 3] as $i) { ... } *)
+    (* TODO: foreach ($arr as $key => $val) *)
     | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->
         Pholyglot_ast.For {
             (* TODO: Generate 'i' variable *)
