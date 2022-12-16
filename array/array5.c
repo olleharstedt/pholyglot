@@ -6,7 +6,7 @@
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #define array(...) {__VA_ARGS__}
-#define array_make(type, i, ...) {.thing = array(__VA_ARGS__), .length = i}
+#define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
 #define pprintf printf
@@ -65,16 +65,21 @@ function foo(array &$bodies)
 function fii(array $numbers)
 #undef function
 {
-    //?>
-    int
-    //<?php
-    $i = 0;
-    for ($i = 0; $i < count($numbers); $i++) {
-        pprintf(
-            "%d ",
-            array_get(int, $numbers, $i)
-        );
-    }
+
+   int
+   //<?php
+   $i 
+   = 0;
+   
+       for (; $i < count($numbers); $i = $i + 1) {
+           //?>
+   int
+   //<?php
+   $val 
+   = array_get(int, $numbers, $i);
+    printf("%d ", $val);
+   
+       }
 }
 
 #define function int
@@ -95,7 +100,7 @@ function main()
     //?>
     array
     //<?php
-    $ints = array_make(int, 3, 1, 2, 3);
+    $ints = array_make(int, 4, 1, 2, 3, 5);
     fii($ints);
     return 0;
 }

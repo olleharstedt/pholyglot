@@ -1737,6 +1737,8 @@ let%test_unit "infer foreach" =
                     arr = Variable "arr";
                     key = None; 
                     value = Variable "val";
+                    value_typ = Int;
+                    value_typ_constant = Constant "int";
                     body = [
                         Function_call (
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1758,6 +1760,8 @@ let%test_unit "foreach to pholyglot" =
         arr = Variable "arr";
         key = None; 
         value = Variable "val";
+        value_typ = Int;
+        value_typ_constant = Constant "int";
         body = [
             Function_call (
                 Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1771,8 +1775,22 @@ let%test_unit "foreach to pholyglot" =
     } in
     let phast = Transpile.statement_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_statement phast in
-	(* TODO: Check this code *)
-    [%test_eq: string] code {||}
+    [%test_eq: string] code {|//?>
+    int
+    //<?php
+    $i 
+    = 0;
+    
+        for (; $i < count($arr); $i = $i + 1) {
+            //?>
+    int
+    //<?php
+    $val 
+    = array_get(int, $arr, $i);
+     printf("%d", $val);
+    
+        }
+    |}
 
 
     (*

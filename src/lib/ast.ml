@@ -93,10 +93,12 @@ and statement =
     | Return of expression
     | Function_call of typ * identifier * expression list
     | Foreach of {
-        arr:   expression; (* Must be Variable expression *)
-        key:   expression option; (* Must be Variable if it exists *)
-        value: expression; (* Must be Variable *)
-        body:  statement list;
+        arr:       expression; (* Must be Variable expression *)
+        key:       expression option; (* Must be Variable if it exists *)
+        value:     expression; (* Must be Variable *)
+        value_typ: typ;
+        value_typ_constant: expression;
+        body:      statement list;
     }
     (* If-statement, or only if-expression *)
     (* While-loop *)
@@ -111,6 +113,7 @@ and lvalue =
     | Object_access of identifier * lvalue
 
 and expression =
+    | Nil (* Empty expression for internal use in foreach *)
     | Num of int
     | Num_float of float
     (** TODO: GString *)

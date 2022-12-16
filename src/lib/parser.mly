@@ -114,7 +114,7 @@ statement:
   | "return" e=expr ";"                                      {Return e}
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
-  | FOREACH "(" n=VAR_NAME AS m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = None; value = Variable m; body = stmts} }
+  | FOREACH "(" n=VAR_NAME AS m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = None; value = Variable m; value_typ = Infer_me; value_typ_constant = Nil; body = stmts} }
 
 (* TODO: Must use property and method in same rule to avoid reduce/reduce ? *)
 class_element: 

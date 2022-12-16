@@ -99,12 +99,32 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
-    | Ast.Foreach {arr; key; value; body;} ->
+    | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->
         Pholyglot_ast.For {
+            (* TODO: Generate 'i' variable *)
             init      = Pholyglot_ast.Assignment (Int, Variable "i", Num 0);
-            condition = Pholyglot_ast.Lessthan (Variable "i", Num 10);
-            incr      = Pholyglot_ast.Assignment (Int, Variable "i", Plus (Variable "i", Num 1));
-            stmts     = List.map statement_to_pholyglot body;
+            condition = Pholyglot_ast.Lessthan (
+                Variable "i",
+                Function_call (
+                        Function_type {return_type = Int;
+                        arguments = [Fixed_array (Int, 0)]
+                    },
+                    "count",
+                    [expression_to_pholyglot (Variable arr_)]
+                )
+            );
+            incr      = Equal (Variable "i", Plus (Variable "i", Num 1));
+            stmts     =
+                Pholyglot_ast.Assignment (
+                    typ_to_pholyglot value_typ,
+                    Variable value_var,
+                    Function_call (
+                        Function_type {return_type = typ_to_pholyglot value_typ; arguments = [Fixed_array (Int, 0)]},
+                        "array_get",
+                        [expression_to_pholyglot value_typ_constant; expression_to_pholyglot (Variable arr_); Variable "i"]
+                    )
+                )
+                :: List.map statement_to_pholyglot body;
         }
 
 let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with

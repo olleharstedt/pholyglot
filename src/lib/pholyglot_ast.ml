@@ -31,7 +31,11 @@ and typ =
     | Var_args
     | Fixed_array of typ * int
     | Dynamic_array of typ
-    | Function_type of {return_type: typ; arguments: typ list}
+    | Function_type of {
+		return_type: typ;
+        (* TODO: Not needed in Pholyglot_ast? *)
+        arguments: typ list
+    }
     | Class_type of class_name
 
 and param =
@@ -67,7 +71,7 @@ and statement =
     | For of {
         init:      statement;       (* Init happens outside the for-statement *)
         condition: expression;
-        incr:      statement;
+        incr:      expression;
         stmts:     statement list;
     }
 
@@ -88,6 +92,7 @@ and expression =
     | Concat of expression * expression
     | Lessthan of expression * expression
     | Greaterthan of expression * expression
+    | Equal of expression * expression
     | Variable of identifier
     | Array_init of expression list
     | Array_access of identifier * expression
@@ -242,7 +247,7 @@ let rec string_of_statement = function
         let init_s = string_of_statement init in
         let stmts_s = (concat (List.map stmts ~f:string_of_statement)) in
         let condition_s = string_of_expression condition in
-        let incr_s = string_of_statement incr in
+        let incr_s = string_of_expression incr in
         [%string {|$init_s
         for (; $condition_s; $incr_s) {
             $stmts_s
