@@ -25,32 +25,23 @@ struct array {
 
 array array_slice(array old, int offset)
 {
-    //printf("%p\n", (void*) ((Body*) old.thing)[0]);
-    //printf("%p\n", (void*) ((Body*) old.thing)[1]);
-    printf("%d\n", (int) old.length - offset);
-    array new = array_make(old.length - offset, 0);
-    printf("new length %d\n", (int) new.length);
+    // TODO: Must have correct length
+    array new = array_make(old.length - offset, 0, 0, 0, 0);
     int j = 0;
     for (int i = offset; i < old.length; i++) {
-        printf("i = %d\n", i);
-        //((Body*) new.thing)[j] = ((Body*) old.thing)[i];
-        ((Body*) new.thing)[j] = (Body) array_get(Body, old, i);
+        new.thing[j] = (uintptr_t) old.thing[i];
         j++;
-        //memcpy(&((Body*) new.thing)[i], &((Body*) old.thing)[i], sizeof(Body));
-        //((Body*) new.thing)[i] = array_get(Body, old, i);
-        //new.thing[i] = old.thing[i];
     }
-    //printf("%d\n", new.thing[0]->x);
-    //printf("%p\n", (void*) ((Body*)new.thing)[0]);
     return new;
 }
 
 /**
  * gcc -Wall -Werror -pedantic-errors -g slice.c
+ * gcc -Wall -Werror -pedantic-errors -Wno-int-conversion -g slice.c
  */
 int main()
 {
-    array a = array_make(2, new(Body), (uintptr_t) new(Body));
+    array a = array_make(2, new(Body), new(Body));
     //array a = {.thing = (Body[]) {new(Body), new(Body)}, .length = 2};
     //printf("%p\n", (void*) ((Body*) a.thing)[0]);
     //printf("%p\n", (void*) ((Body*) a.thing)[1]);
@@ -65,5 +56,10 @@ int main()
     */
     array b = array_slice(a, 1);
     printf("slice b[0]->x = %d\n", array_get(Body, b, 0)->x);
+
+    array ints = array_make(3, 11, 22, 33);
+    array ints_slice = array_slice(ints, 1);
+    // TODO: float doesn't work
+    printf("ints slice = %d\n", array_get(int, ints_slice, 0));
     return 0;
 }
