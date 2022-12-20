@@ -29,10 +29,10 @@ array array_slice(array old, int offset)
     array new = {
         .length = new_length,
         // TODO: Can't make stack alloc here? Or can, but then it would be copied?
-        .thing = (uintptr_t*) malloc(sizeof(uintptr_t) * new_length)
+        .thing = malloc(sizeof(uintptr_t) * new_length)
     };
-    int j = 0;
-    for (int i = offset; i < old.length; i++) {
+    size_t j = 0;
+    for (size_t i = offset; i < old.length; i++) {
         new.thing[j] = old.thing[i];
         j++;
     }
