@@ -24,8 +24,8 @@ struct array {
 
 array array_slice(array old, int offset)
 {
-    printf("%p\n", (void*) ((Body*) old.thing)[0]);
-    printf("%p\n", (void*) ((Body*) old.thing)[1]);
+    //printf("%p\n", (void*) ((Body*) old.thing)[0]);
+    //printf("%p\n", (void*) ((Body*) old.thing)[1]);
     printf("%d\n", (int) old.length - offset);
     array new = array_make(Body, old.length - offset, NULL);
     printf("new length %d\n", (int) new.length);
@@ -44,13 +44,16 @@ array array_slice(array old, int offset)
     return new;
 }
 
+/**
+ * gcc -Wall -Werror -pedantic-errors -g slice.c
+ */
 int main()
 {
     array a = array_make(Body, 2, new(Body), new(Body));
     //array a = {.thing = (Body[]) {new(Body), new(Body)}, .length = 2};
-    printf("%p\n", (void*) ((Body*) a.thing)[0]);
-    printf("%p\n", (void*) ((Body*) a.thing)[1]);
-    printf("%p\n", (void*) ((Body*) a.thing)[2]);
+    //printf("%p\n", (void*) ((Body*) a.thing)[0]);
+    //printf("%p\n", (void*) ((Body*) a.thing)[1]);
+    //printf("%p\n", (void*) ((Body*) a.thing)[2]);
     //Body body1 = new(Body);
     //Body body2 = new(Body);
     /*
