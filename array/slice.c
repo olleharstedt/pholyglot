@@ -2,9 +2,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#define array(...) {__VA_ARGS__}
-#define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
-#define array_get(type, arr, i) ((type*) arr.thing)[i]
+#include <stdint.h>
+#define array(...) {(uintptr_t) __VA_ARGS__}
+#define array_make(type, i, ...) {.thing = (uintptr_t[]) array(__VA_ARGS__), .length = i}
+#define array_get(type, arr, i) ((uintptr_t*) arr.thing)[i]
 #define new(x) x ## __constructor(malloc(sizeof(struct x)))
 
 typedef struct Body* Body;
@@ -19,7 +20,7 @@ Body Body__constructor(Body this)
 typedef struct array array;
 struct array {
     size_t length;
-    void* thing;
+    uintptr_t* thing;
 };
 
 array array_slice(array old, int offset)
@@ -27,20 +28,20 @@ array array_slice(array old, int offset)
     //printf("%p\n", (void*) ((Body*) old.thing)[0]);
     //printf("%p\n", (void*) ((Body*) old.thing)[1]);
     printf("%d\n", (int) old.length - offset);
-    array new = array_make(Body, old.length - offset, NULL);
+    array new = array_make(Body, old.length - offset, 0);
     printf("new length %d\n", (int) new.length);
     int j = 0;
     for (int i = offset; i < old.length; i++) {
         printf("i = %d\n", i);
         //((Body*) new.thing)[j] = ((Body*) old.thing)[i];
-        ((Body*) new.thing)[j] = array_get(Body, old, i);
+        ((Body*) new.thing)[j] = (Body) array_get(Body, old, i);
         j++;
         //memcpy(&((Body*) new.thing)[i], &((Body*) old.thing)[i], sizeof(Body));
         //((Body*) new.thing)[i] = array_get(Body, old, i);
         //new.thing[i] = old.thing[i];
     }
     //printf("%d\n", new.thing[0]->x);
-    printf("%p\n", (void*) ((Body*)new.thing)[0]);
+    //printf("%p\n", (void*) ((Body*)new.thing)[0]);
     return new;
 }
 
@@ -49,7 +50,7 @@ array array_slice(array old, int offset)
  */
 int main()
 {
-    array a = array_make(Body, 2, new(Body), new(Body));
+    array a = array_make(Body, 2, new(Body), (uintptr_t) new(Body));
     //array a = {.thing = (Body[]) {new(Body), new(Body)}, .length = 2};
     //printf("%p\n", (void*) ((Body*) a.thing)[0]);
     //printf("%p\n", (void*) ((Body*) a.thing)[1]);
@@ -63,6 +64,6 @@ int main()
     };
     */
     array b = array_slice(a, 1);
-    printf("slice b[0]->x = %d\n", array_get(Body, b, 0)->x);
+    printf("slice b[0]->x = %d\n", ((Body) array_get(Body, b, 0))->x);
     return 0;
 }
