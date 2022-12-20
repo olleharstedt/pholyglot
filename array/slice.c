@@ -6,7 +6,7 @@
 #define array(...) {__VA_ARGS__}
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
-#define new(x) x ## __constructor(malloc(sizeof(struct x)))
+#define new(x) x ## __constructor(alloca(sizeof(struct x)))
 
 typedef struct Body* Body;
 struct Body {
@@ -23,13 +23,14 @@ struct array {
     uintptr_t* thing;
 };
 
-array array_slice(array old, int offset)
+array array_slice(array old, int offset, uintptr_t* mem)
 {
     size_t new_length = old.length - offset;
     array new = {
         .length = new_length,
         // TODO: Can't make stack alloc here? Or can, but then it would be copied?
-        .thing = malloc(sizeof(uintptr_t) * new_length)
+        // Can pass new memory as argument with alloca
+        .thing = mem
     };
     size_t j = 0;
     for (size_t i = offset; i < old.length; i++) {
@@ -50,6 +51,7 @@ int main()
     printf("%ld\n", sizeof(int));
     printf("%ld\n", sizeof(uintptr_t));
     printf("%ld\n", sizeof(Body));
+    printf("%ld\n", sizeof(size_t));
     Body body1 = new(Body);
     body1->x = 123;
     array a = array_make(Body, 3, new(Body), new(Body), body1);
@@ -64,15 +66,15 @@ int main()
         .thing = malloc(2 * sizeof(Body))
     };
     */
-    array b = array_slice(a, 2);
+    array b = array_slice(a, 2, alloca(sizeof(uintptr_t) * 2));
     printf("slice b[0]->x = %d\n", array_get(Body, b, 0)->x);
 
     array ints = array_make(long, 5, 11, 22, 33, 44, 55);
-    array ints_slice = array_slice(ints, 3);
-    printf("ints slice = %ld\n", array_get(long, ints_slice, 0));
+    array ints_slice = array_slice(ints, 3, alloca(-1));
+    printf("ints slice = %ld\n", array_get(long, ints_slice, 1));
 
     array floats = array_make(double, 3, 1.1, 2.2, 3.3);
-    array floats_slice = array_slice(floats, 2);
+    array floats_slice = array_slice(floats, 2, alloca(sizeof(uintptr_t) * 3));
     printf("floats slice = %f\n", array_get(double, floats_slice, 0));
     return 0;
 }
