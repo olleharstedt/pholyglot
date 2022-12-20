@@ -78,6 +78,7 @@ To include PHP which is ignored in C:
 * Read/write from/to database
 * Curl call somewhere
 * Some mathematical thing (n-body problem?)
+* Export something big to CSV
 
 ## Open questions
 

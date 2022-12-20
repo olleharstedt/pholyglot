@@ -28,7 +28,7 @@ array array_slice(array old, int offset)
     size_t new_length = old.length - offset;
     array new = {
         .length = new_length,
-        // TODO: Can't make stack alloc here?
+        // TODO: Can't make stack alloc here? Or can, but then it would be copied?
         .thing = (uintptr_t*) malloc(sizeof(uintptr_t) * new_length)
     };
     int j = 0;
@@ -42,7 +42,7 @@ array array_slice(array old, int offset)
 /**
  * gcc -Wall -Werror -pedantic-errors -g slice.c
  * gcc -Wall -Werror -pedantic-errors -Wno-int-conversion -g slice.c
- * gcc -Wno-incompatible-pointer-types -Wno-int-conversion -g slice.c
+ * gcc -Wno-incompatible-pointer-types -g slice.c
  */
 int main()
 {
@@ -50,12 +50,13 @@ int main()
     printf("%ld\n", sizeof(int));
     printf("%ld\n", sizeof(uintptr_t));
     printf("%ld\n", sizeof(Body));
-    array a = array_make(Body, 2, new(Body), new(Body));
+    Body body1 = new(Body);
+    body1->x = 123;
+    array a = array_make(Body, 3, new(Body), new(Body), body1);
     //array a = {.thing = (Body[]) {new(Body), new(Body)}, .length = 2};
     //printf("%p\n", (void*) ((Body*) a.thing)[0]);
     //printf("%p\n", (void*) ((Body*) a.thing)[1]);
     //printf("%p\n", (void*) ((Body*) a.thing)[2]);
-    //Body body1 = new(Body);
     //Body body2 = new(Body);
     /*
     array a = {
@@ -63,7 +64,7 @@ int main()
         .thing = malloc(2 * sizeof(Body))
     };
     */
-    array b = array_slice(a, 1);
+    array b = array_slice(a, 2);
     printf("slice b[0]->x = %d\n", array_get(Body, b, 0)->x);
 
     array ints = array_make(long, 5, 11, 22, 33, 44, 55);
