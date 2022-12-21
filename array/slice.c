@@ -15,7 +15,7 @@
 #define AS ,
 #define FIRST_ARG_(N, ...) N
 #define FIRST_ARG(args) FIRST_ARG_ args
-#define foreach(...) for(int i = 0;i < count(FIRST_ARG((__VA_ARGS__))); i++)
+#define foreach(...) for(int i = 0, $f; i < count(FIRST_ARG((__VA_ARGS__))); i++, $f = array_get(double, $floats, i));
 
 typedef struct Body* Body;
 //<?php
@@ -104,7 +104,6 @@ function main()
 
     foreach ($floats AS $f) {
         //?>
-        double $f = array_get(double, $floats, i);//<?php
         _printf("f = %f\n", $f);
     }
 

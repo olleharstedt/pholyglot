@@ -1,5 +1,7 @@
 //<?php echo "\x08\x08"; ob_start(); ?>
 
+#include <stdio.h>
+
 #define AS ,
 #define FIRST_ARG_(N, ...) N
 #define FIRST_ARG(args) FIRST_ARG_ args
@@ -17,11 +19,16 @@ function main()
     for (; $i < 10; $i++) {
     }
 
-    int x[] = {1, 2, 3};
+    double x[] = {1.1, 2.2, 3.3};
     int y;
-    foreach(x AS y) {
-        int y = x[i];
+
+    for (double i = 0, f = 0; i < 3; i++, f = x[(int) i]) {
+        printf("%f\n", f);
     }
+
+    //foreach(x AS y) {
+        //int y = x[i];
+    //}
 
     return 0;
 }
