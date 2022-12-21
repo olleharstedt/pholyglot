@@ -6,10 +6,17 @@
 #define array(...) {__VA_ARGS__}
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
+#define count(x) x.length
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
 #define malloc_size(x) alloca(sizeof(uintptr_t) * x)
 #define class struct
 #define _printf printf
+
+#define AS ,
+#define FIRST_ARG_(N, ...) N
+#define FIRST_ARG(args) FIRST_ARG_ args
+#define foreach(...) for(int i = 0;i < count(FIRST_ARG((__VA_ARGS__))); i++)
+
 typedef struct Body* Body;
 //<?php
 class Body {
@@ -94,6 +101,13 @@ function main()
     array//<?php
     $floats_slice = array_slice($floats, 2, malloc_size(1));
     _printf("floats slice = %f\n", array_get(double, $floats_slice, 0));
+
+    foreach ($floats AS $f) {
+        //?>
+        double $f = array_get(double, $floats, i);//<?php
+        _printf("f = %f\n", $f);
+    }
+
     return 0;
 }
 //?>
