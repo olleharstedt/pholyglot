@@ -210,3 +210,9 @@ if (([$result, $error] = bar()) === [$result, null]) {
     echo $error;
 }
 ```
+
+## gcc
+
+    __cleanup__
+
+    http://echorand.me/site/notes/articles/c_cleanup/cleanup_attribute_c.html
