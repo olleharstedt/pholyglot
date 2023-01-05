@@ -61,6 +61,7 @@ FORCE_INLINE array array_slice(array old, int offset)
         // TODO: Never use stack alloc but rather pools with similar semantics (free at end of function).
         // But "free at end of function" doesn't allow value types?
         // TODO: With pool you also need to pass around the pool. Can be part of variable header?
+        // Start each function with a "stack pool" used by stack alloc?
         .thing = alloca(sizeof(uintptr_t) * new_length)
     };
     size_t j = 0;

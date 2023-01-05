@@ -216,3 +216,34 @@ if (([$result, $error] = bar()) === [$result, null]) {
     __cleanup__
 
     http://echorand.me/site/notes/articles/c_cleanup/cleanup_attribute_c.html
+
+Stack alloc vs value types:
+
+    /**
+     * @return Point@stack
+     */
+    function makePoint() {
+        $p = /** @alloc stack */ new Point();
+        ...
+        return $p;           // Break;
+        return new Point();  // Works with value types...?
+    }
+
+    /**
+     * @param SplDoublyLinkedList $points
+     */
+    function addPointToList(SplDoublyLinkedList $points) {
+        // Pool, Boehm, ref count
+        $points->push(new Point());
+    }
+
+    // Can be done with both pool, boehm, ref count?
+    // Polymorph on alloc kind?
+    array_slice($arr, 0, 1);
+
+Pool:
+
+    $foos = /** @mem pool */ [new Foo(), new Foo(), new Foo()];
+    $slice = array_slice($foos, 0, 1);
+    return $slice;  // Pool can't escape, same as stack?
+
