@@ -46,12 +46,12 @@ struct array {
     size_t length;
     uintptr_t* thing;
 };
-FORCE_INLINE array array_slice(array old, int offset, uintptr_t* mem) 
+FORCE_INLINE array array_slice(array old, int offset)
 {
     size_t new_length = old.length - offset;
     array new = {
         .length = new_length,
-        .thing = mem
+        .thing = alloca(sizeof(uintptr_t) * new_length)
     };
     size_t j = 0;
     for (size_t i = offset; i < old.length; i++) {
@@ -86,21 +86,21 @@ function main()
     $a = array_make(Body, 3, new(Body), new(Body), $body1);
     //?>
     array //<?php
-    $b = array_slice($a, 2, malloc_size(1));
+    $b = array_slice($a, 2);
     _printf("slice b[0]->x = %d\n", array_get(Body, $b, 0)->Body__x);
     //?>
     array//<?php
     $ints = array_make(long, 5, 11, 22, 33, 44, 55);
     //?>
     array//<?php
-    $ints_slice = array_slice($ints, 3, malloc_size(2));
+    $ints_slice = array_slice($ints, 3);
     _printf("ints slice = %ld\n", array_get(long, $ints_slice, 1));
     //?>
     array//<?php
     $floats = array_make(double, 3, 1.1, 2.2, 3.3);
     //?>
     array//<?php
-    $floats_slice = array_slice($floats, 2, malloc_size(1));
+    $floats_slice = array_slice($floats, 2);
     _printf("floats slice = %f\n", array_get(double, $floats_slice, 0));
 
     //foreach ($floats AS $f) {
