@@ -11,6 +11,7 @@
 #define malloc_size(x) alloca(sizeof(uintptr_t) * x)
 #define class struct
 #define _printf printf
+#define FORCE_INLINE __attribute__((always_inline)) inline
 
 #define AS ,
 #define FIRST_ARG_(N, ...) N
@@ -45,7 +46,7 @@ struct array {
     size_t length;
     uintptr_t* thing;
 };
-array array_slice(array old, int offset, uintptr_t* mem)
+FORCE_INLINE array array_slice(array old, int offset, uintptr_t* mem) 
 {
     size_t new_length = old.length - offset;
     array new = {
@@ -102,10 +103,10 @@ function main()
     $floats_slice = array_slice($floats, 2, malloc_size(1));
     _printf("floats slice = %f\n", array_get(double, $floats_slice, 0));
 
-    foreach ($floats AS $f) {
+    //foreach ($floats AS $f) {
         //?>
-        _printf("f = %f\n", $f);
-    }
+        //_printf("f = %f\n", $f);
+    //}
 
     return 0;
 }
