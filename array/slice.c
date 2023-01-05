@@ -45,12 +45,22 @@ typedef struct array array;
 struct array {
     size_t length;
     uintptr_t* thing;
+    // TODO: ref count?
+    // TODO: pool pointer?
+    // TODO: alloc strategy enum? union?
 };
 FORCE_INLINE array array_slice(array old, int offset)
 {
     size_t new_length = old.length - offset;
     array new = {
         .length = new_length,
+        // TODO: How to allow both alloca and malloc/Boehm here?
+        // Inline only way? But can't inline very big functions.
+        // How to know if a function will allocate? Only certain expressions will allocate
+        // TODO: Use same alloc strat as "old" variable.
+        // TODO: Never use stack alloc but rather pools with similar semantics (free at end of function).
+        // But "free at end of function" doesn't allow value types?
+        // TODO: With pool you also need to pass around the pool. Can be part of variable header?
         .thing = alloca(sizeof(uintptr_t) * new_length)
     };
     size_t j = 0;
