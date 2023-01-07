@@ -7,7 +7,8 @@
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
-#define new(x) x ## __constructor(alloca(sizeof(struct x)))
+#define MALLOC(x, y) _Generic((x), array: malloc(y))
+#define new(x) x ## __constructor(MALLOC(x, sizeof(struct x)))
 #define malloc_size(x) alloca(sizeof(uintptr_t) * x)
 #define class struct
 #define _printf printf
@@ -47,9 +48,26 @@ struct array {
     uintptr_t* thing;
     // TODO: ref count?
     // TODO: pool pointer?
-    // TODO: alloc strategy enum? union?
+    // TODO: alloc strategy enum? union? or function pointer to malloc?
 };
-FORCE_INLINE array array_slice(array old, int offset)
+typedef struct Pool Pool;
+struct Pool {
+};
+struct array__pool {
+    size_t length;
+    uintptr_t* thing;
+    Pool* pool;
+};
+struct array__boehm {
+    size_t length;
+    uintptr_t* thing;
+};
+struct array__refcount {
+    size_t length;
+    uintptr_t* thing;
+    size_t count;
+};
+array array_slice(array old, int offset)
 {
     size_t new_length = old.length - offset;
     array new = {
@@ -62,7 +80,10 @@ FORCE_INLINE array array_slice(array old, int offset)
         // But "free at end of function" doesn't allow value types?
         // TODO: With pool you also need to pass around the pool. Can be part of variable header?
         // Start each function with a "stack pool" used by stack alloc?
-        .thing = alloca(sizeof(uintptr_t) * new_length)
+        // TODO: malloc comes from function pointer in "old" array struct?
+        .thing = MALLOC(old, sizeof(uintptr_t) * new_length)
+        //.thing = alloca(sizeof(uintptr_t) * new_length)
+        // .thing = old.malloc(sizeof(uintptr_t) * new_length)
     };
     size_t j = 0;
     for (size_t i = offset; i < old.length; i++) {
@@ -75,6 +96,9 @@ FORCE_INLINE array array_slice(array old, int offset)
  * gcc -Wall -Werror -pedantic-errors -g slice.c
  * gcc -Wall -Werror -pedantic-errors -Wno-int-conversion -g slice.c
  * gcc -Wno-incompatible-pointer-types -g slice.c
+ *
+ * To see macro expansions:
+ *   gcc -E slice.c
  */
 //<?php
 #define function int
