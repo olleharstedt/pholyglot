@@ -7,8 +7,7 @@
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
-#define MALLOC(x, y) _Generic((x), array: malloc(y))
-#define new(x) x ## __constructor(MALLOC(x, sizeof(struct x)))
+#define new(x) x ## __constructor(malloc(x, sizeof(struct x)))
 #define malloc_size(x) alloca(sizeof(uintptr_t) * x)
 #define class struct
 #define _printf printf
