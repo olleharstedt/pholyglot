@@ -2,8 +2,6 @@
 
 class Point {}
 define("Point", "Point");
-$p = new(Point
-    //?>
-    , POOL
-    //<?php
-);
+define("POOL", 0);
+function __new($class) { return new $class; }
+$p = __new(Point, POOL);

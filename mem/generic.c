@@ -4,16 +4,19 @@
 #include <stdint.h>
 #define EVALUATE(X) _Generic((X), _Bool : "boolean", default : "not boolean")
 // #define new(x) x ## __constructor(x ## __malloc(sizeof(struct x)))
-#define __new(x) x ## __constructor(malloc(sizeof(struct x)))
+#define __new(x, y, z) x ## __constructor(malloc__ ## y(sizeof(struct x), z))
 
 typedef struct Point* Point;
-struct Point {};
+struct Point {
+    long x;
+    long y;
+};
 Point Point__constructor(Point $this)
 {
     return $this;
 }
 
-typedef struct Pool Pool;
+typedef struct Pool* Pool;
 struct Pool {
 };
 
@@ -42,17 +45,22 @@ struct array {
     Mem mem;
 };
 
+uintptr_t* malloc__POOL(size_t size, Pool* p) {}
+
 /**
  * gcc -Wno-incompatible-pointer-types -g generic.c
  */
 int main()
 {
+    // TODO: Always add a pool at top of each function?
+    Pool pool;
+
     // TODO: Pool needs the pool object as argument
     // Always in scope? Like region? Only one region? Can't pass it around?
     // Can abuse clone?
     // Need wrapping function like __make? Point p = __make(old_point, Point)
     //Point p = /** @mem pool */ new(Point__pool);
-    Point p = /** @mem pool */ __new(Point);
+    Point p = /** @mem pool */ __new(Point, POOL, pool);
     printf("%s\n", EVALUATE(p));
     return 0;
 }
