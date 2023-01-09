@@ -58,8 +58,6 @@ int main()
     // TODO: Pool needs the pool object as argument
     // Always in scope? Like region? Only one region? Can't pass it around?
     // Can abuse clone?
-    // Need wrapping function like __make? Point p = __make(old_point, Point)
-    //Point p = /** @mem pool */ new(Point__pool);
     Point p = /** @mem pool */ __new(Point, POOL, pool);
     printf("%s\n", EVALUATE(p));
     return 0;
