@@ -1817,9 +1817,9 @@ let%test_unit "array slice test" =
                         [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
-                Assignment (Dynamic_array Infer_me, Variable "arr2",
+                Assignment (Dynamic_array Int, Variable "arr2",
                     Function_call (
-                        Function_type {return_type = Dynamic_array Infer_me; arguments = [Fixed_array (Infer_me, None); Int]},
+                        Function_type {return_type = Dynamic_array Int; arguments = [Fixed_array (Int, None); Int]},
                         "array_slice",
                         [
                             Variable "arr";

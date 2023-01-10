@@ -18,6 +18,7 @@ and kind =
 
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)
 and typ =
+    | Type_variable of string
     | Int
     | Float
     (*| GChar Static glib string*)
