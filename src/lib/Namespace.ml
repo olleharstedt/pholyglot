@@ -75,7 +75,7 @@ let add_assignments t func = match func with
  * Return namespace to do a pipe
  *)
 let populate (t : t) : t=
-    add_identifier t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
+    add_function_type t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
     add_function_type t "array_slice" (Function_type {return_type = Fixed_array (Infer_me, None); arguments = [Fixed_array (Infer_me, None); Int]});
     t
 
