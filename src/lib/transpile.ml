@@ -97,6 +97,8 @@ let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l wi
 
 let rec statement_to_pholyglot s = match s with
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
+    | Ast.Plusplus v -> Pholyglot_ast.Plusplus (lvalue_to_pholyglot v)
+    | Ast.Minusminus v -> Pholyglot_ast.Minusminus (lvalue_to_pholyglot v)
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     (* TODO: foreach ([1, 2, 3] as $i) { ... } *)

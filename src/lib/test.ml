@@ -1860,8 +1860,7 @@ let%test_unit "plusplus and minusminus" =
     ])
 
 let%test_unit "plusplus and minusminus pholyglot" =
-    let ast : Ast.declaration =
-        Function {
+    let ast : Ast.declaration = Function {
             name = "foo";
             docblock = [];
             params = [];
@@ -1873,9 +1872,21 @@ let%test_unit "plusplus and minusminus pholyglot" =
             ]
         }
     in
-    let phast = Transpile.declaration_to_pholyglot fn in
+    let phast = Transpile.declaration_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|//?>
+    [%test_eq: string] code {|#define function void
+function foo()
+#undef function
+{
+    //?>
+    int
+    //<?php
+    $a 
+    = 10;
+    $a++;
+$a--;
+}
+|}
 
     (*
 let%test "nbody benchmark" =
@@ -1957,7 +1968,7 @@ function main(): int
 (* class Foo extends Bar; *)
 (* Class name must start with capital letter *)
 (* function foo(): int { return "moo"; } Invalid return type *)
-(* Only one return statement per function allowed? Must be last statement? Unless void type *)
+(* Only one return statement per function allowed, must be last statement. Unless void type? *)
 (* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
 (* $foo = /** @stack */ new Foo(); *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
@@ -1970,9 +1981,7 @@ function main(): int
 (* All props must have default values. That's not null? *)
 (* Parse class property docblock *)
 (* Ban $self variable name, since it's used internally instead of $this *)
-(* inline "new" but must init function pointers? *)
-(* typedef to get rid of struct Point* $self C-only code *)
 (* Infer return type for methods *)
 (* Object access method call *)
 (* Method pointer init *)
-(* Property defaults *)
+(* Infer ++ and -- only on int and float *)

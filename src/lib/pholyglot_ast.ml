@@ -66,6 +66,8 @@ and class_property = class_property_name * typ
 
 and statement =
     | Return of expression
+    | Plusplus of lvalue
+    | Minusminus of lvalue
     | Assignment of typ * lvalue * expression
     | Function_call of typ * identifier * expression list
     | For of {
@@ -215,6 +217,8 @@ let rec string_of_expression = function
 
 let rec string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
+    | Plusplus (Variable v) -> string_of_expression (Variable v) ^ "++;\n"
+    | Minusminus (Variable v) -> string_of_expression (Variable v) ^ "--;\n"
     | Function_call (Function_type {return_type = Void; arguments}, id, exprs) ->
         sprintf {| %s(%s);
     |}
