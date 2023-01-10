@@ -1859,6 +1859,23 @@ let%test_unit "plusplus and minusminus" =
         }
     ])
 
+let%test_unit "plusplus and minusminus pholyglot" =
+    let ast : Ast.declaration =
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            function_type = Function_type {return_type = Void; arguments = []};
+            stmts = [
+                Assignment (Int, Variable "a", Num 10);
+                Plusplus (Variable "a");
+                Minusminus (Variable "a");
+            ]
+        }
+    in
+    let phast = Transpile.declaration_to_pholyglot fn in
+    let code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] code {|//?>
 
     (*
 let%test "nbody benchmark" =
