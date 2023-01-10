@@ -1792,6 +1792,19 @@ let%test_unit "foreach to pholyglot" =
         }
     |}
 
+let%test_unit "array slice test" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $arr = [1, 2, 3];
+        $arr2 = array_slice($arr, 1);
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [])
 
     (*
 let%test "nbody benchmark" =
@@ -1841,7 +1854,6 @@ function main(): int
     *)
 
 (* TODO: *)
-(* array_slice must be hard-coded to give memory area? true for many functions? *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)

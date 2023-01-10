@@ -76,6 +76,7 @@ let add_assignments t func = match func with
  *)
 let populate (t : t) : t=
     add_identifier t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
+    add_function_type t "array_slice" (Function_type {return_type = Fixed_array (Infer_me, None); arguments = [Fixed_array (Infer_me, None); Int]});
     t
 
 (* Call this before passing namespace to another function to resetthe local namespace while keeping classes and functions types *)
