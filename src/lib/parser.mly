@@ -34,7 +34,9 @@ let get_class_methods elems =
 %token <string> DOCBLOCK_AS_STR
 %token START_SCRIPT "<?php // @pholyglot"
 %token PLUS "+"
+%token PLUSPLUS "++"
 %token MINUS "-"
+%token MINUSMINUS "--"
 %token TIMES "*"
 %token DIV "/"
 %token COLON ":"
@@ -113,6 +115,8 @@ declaration:
 statement: 
   | "return" e=expr ";"                                      {Return e}
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
+  | v=lvalue "++" ";"                                        {Plusplus v}
+  | v=lvalue "--" ";"                                        {Minusminus v}
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
   | FOREACH "(" n=VAR_NAME AS m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = None; value = Variable m; value_typ = Infer_me; value_typ_constant = Nil; body = stmts} }
 

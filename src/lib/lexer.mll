@@ -65,7 +65,9 @@ rule token = parse
   | ';'                           { SEMICOLON }
   | ':'                           { COLON }
   | '+'                           { PLUS }
+  | "++"                          { PLUSPLUS }
   | '-'                           { MINUS }
+  | "--"                          { MINUSMINUS }
   | '*'                           { TIMES }
   | '/'                           { DIV }
   | "{"                           { LBRACE }

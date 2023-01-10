@@ -91,6 +91,8 @@ and statement =
     | Assignment of typ * lvalue * expression
     (* return ...; *)
     | Return of expression
+    | Plusplus of lvalue
+    | Minusminus of lvalue
     | Function_call of typ * identifier * expression list
     | Foreach of {
         arr:       expression; (* Must be Variable expression *)
