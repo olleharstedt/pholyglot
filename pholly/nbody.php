@@ -100,7 +100,7 @@ function main(): int
     $j = 0;
     foreach ($bodies as $body) {
         printf("%f\n", $body->x);
-        $j = $j + 1;
+        $j++;
         $arr2 = array_slice($arr, $i);
     }
     //foreach ([1, 2, 3] as $j) {
