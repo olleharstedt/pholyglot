@@ -1804,7 +1804,33 @@ let%test_unit "array slice test" =
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    [%test_eq: Ast.program] ast (Declaration_list [])
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Fixed_array (Int, Some 3), Variable "arr", 
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        "array_make",
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                    )
+                );
+                Assignment (Fixed_array (Infer_me, None), Variable "arr2",
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Infer_me, None); arguments = [Fixed_array (Infer_me, None); Int]},
+                        "array_slice",
+                        [
+                            Variable "arr";
+                            Num 1;
+                    ]
+                    )
+                );
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
 
     (*
 let%test "nbody benchmark" =
@@ -1854,6 +1880,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* array_slice is polymorph on both memory and input type *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
 (* $b = [];  Empty list, expect error *)

@@ -45,6 +45,11 @@ let add_function_type t name (typ : Ast.typ) =
     else
         Hashtbl.add t.functions name typ
 
+(** As add_function_type but does nothing if the function already exists *)
+let add_function_type_ignore t name (typ : Ast.typ) =
+    if Hashtbl.mem t.functions name then ()
+    else Hashtbl.add t.functions name typ
+
 let find_identifier t key : typ option =
     Hashtbl.find_opt t.identifiers key
 
@@ -75,8 +80,9 @@ let add_assignments t func = match func with
  * Return namespace to do a pipe
  *)
 let populate (t : t) : t=
-    add_function_type t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
-    add_function_type t "array_slice" (Function_type {return_type = Fixed_array (Infer_me, None); arguments = [Fixed_array (Infer_me, None); Int]});
+    (* TODO: Add another populate for global lib functions? *)
+    add_function_type_ignore t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
+    add_function_type_ignore t "array_slice" (Function_type {return_type = Fixed_array (Infer_me, None); arguments = [Fixed_array (Infer_me, None); Int]});
     t
 
 (* Call this before passing namespace to another function to resetthe local namespace while keeping classes and functions types *)
