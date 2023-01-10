@@ -2,7 +2,10 @@
 #include <stdlib.h>
 #include <stdint.h>
 typedef struct array array;
-struct array { uintptr_t* thing; size_t length; };
+struct array {
+    uintptr_t* thing;
+    size_t length;
+};
 array array_slice(array old, int offset)
 {
     size_t new_length = old.length - offset;

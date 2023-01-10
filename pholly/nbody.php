@@ -97,10 +97,8 @@ function main(): int
     $sun->mass = $solarmass;
 
     $bodies = [$sun, $jupiter, $saturn, $uranus, $neptune];
-    $i = 0;
-    foreach ($bodies as $body) {
-        $i++;
-        $slice = array_slice($bodies, $i);
+    foreach ($bodies as $i => $body) {
+        $slice = array_slice($bodies, $i + 1);
         foreach ($slice as $body) {
         }
     }

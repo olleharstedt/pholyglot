@@ -1936,6 +1936,8 @@ function main(): int
     *)
 
 (* TODO: *)
+(* foreach ([1, 2, 3] as $i) *)
+(* foreach ($bodies as $i => $body) *)
 (* array_slice is polymorph on both memory and input type *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
@@ -1950,7 +1952,6 @@ function main(): int
 (* When type-infer array, refine it as much as possible: Start conservative with C array, the degrade when needed during inference *)
 (*   Degrade order: C array, dynamic array (glib), linked list?, tuple OR hash table with string keys, or exception *)
 (* $arr["moo"] = 4 Hash table *)
-(* foreach ([1, 2, 3] as $i) *)
 (* function foo(mixed $a): array *)
 (* new Foo() *)
 (* MySQL *)
