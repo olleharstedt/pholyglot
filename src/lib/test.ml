@@ -1797,6 +1797,7 @@ let%test_unit "infer foreach with key" =
     function foo(): void {
         $arr = [2, 3, 4];
         foreach ($arr as $i => $val) {
+            printf("%d", $i);
         }
     }
     |} in

@@ -283,6 +283,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         in
         (* NB: Since PHP lack block scope, we don't have to clone the namespace or remove variable after *)
         Namespace.add_identifier ns value_name array_internal_type;
+        begin match key with Some (Variable s) -> Namespace.add_identifier ns s Int | _ -> () end;
         let f = fun s -> infer_stmt s ns in
         let value_typ = typ_of_expression ns (Variable value_name) in
         Foreach {arr; key; value = Variable value_name; value_typ; value_typ_constant = typ_to_constant value_typ; body = List.map f stmts}

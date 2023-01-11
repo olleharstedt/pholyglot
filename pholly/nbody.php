@@ -98,6 +98,7 @@ function main(): int
 
     $bodies = [$sun, $jupiter, $saturn, $uranus, $neptune];
     foreach ($bodies as $i => $body) {
+        printf("%d \n", $i);
     }
     //foreach ([1, 2, 3] as $j) {
         //printf("%d ", $j);
