@@ -79,6 +79,7 @@ rule token = parse
   | ','                           { COMMA }
   | '.'                           { DOT }
   | "->"                          { ARROW }
+  | "=>"                          { FATARROW }
   | "return"                      { RETURN }
   | "new"                         { NEW }
   | "function"                    { FUNCTION }
