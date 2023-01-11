@@ -1755,6 +1755,7 @@ let%test_unit "infer foreach" =
         }
     ])
 
+(* TODO: Also do for $key => $val *)
 let%test_unit "foreach to pholyglot" =
     let ast = Ast.Foreach {
         arr = Variable "arr";
@@ -1831,7 +1832,6 @@ let%test_unit "infer foreach with key" =
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
-
 
 (* TODO: Requires type variable to compile properly
 let%test_unit "array slice test" =
