@@ -98,9 +98,6 @@ function main(): int
 
     $bodies = [$sun, $jupiter, $saturn, $uranus, $neptune];
     foreach ($bodies as $i => $body) {
-        $slice = array_slice($bodies, $i + 1);
-        foreach ($slice as $body) {
-        }
     }
     //foreach ([1, 2, 3] as $j) {
         //printf("%d ", $j);

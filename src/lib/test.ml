@@ -1792,6 +1792,46 @@ let%test_unit "foreach to pholyglot" =
         }
     |}
 
+let%test_unit "infer foreach with key" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $arr = [2, 3, 4];
+        foreach ($arr as $i => $val) {
+        }
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Fixed_array (Int, Some 3), Variable "arr", 
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        "array_make",
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                    )
+                );
+                Foreach {
+                    arr = Variable "arr";
+                    key = Some (Variable "i");
+                    value = Variable "val";
+                    value_typ = Int;
+                    value_typ_constant = Constant "int";
+                    body = [];
+                };
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
+
+
 (* TODO: Requires type variable to compile properly
 let%test_unit "array slice test" =
     let source = {|<?php // @pholyglot
