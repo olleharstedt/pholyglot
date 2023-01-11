@@ -102,13 +102,13 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     (* TODO: foreach ([1, 2, 3] as $i) { ... } *)
-    (* TODO: foreach ($arr as $key => $val) *)
     | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->
+        let key_name = match key with Some (Variable s) -> s | None -> "__i" in
         Pholyglot_ast.For {
             (* TODO: Generate 'i' variable *)
-            init      = Pholyglot_ast.Assignment (Int, Variable "__i", Num 0);
+            init      = Pholyglot_ast.Assignment (Int, Variable key_name, Num 0);
             condition = Pholyglot_ast.Lessthan (
-                Variable "__i",
+                Variable key_name,
                 Function_call (
                         Function_type {return_type = Int;
                         arguments = [Fixed_array (Int, 0)]
@@ -117,7 +117,7 @@ let rec statement_to_pholyglot s = match s with
                     [expression_to_pholyglot (Variable arr_)]
                 )
             );
-            incr      = Equal (Variable "__i", Plus (Variable "__i", Num 1));
+            incr      = Equal (Variable key_name, Plus (Variable key_name, Num 1));
             stmts     =
                 Pholyglot_ast.Assignment (
                     typ_to_pholyglot value_typ,
@@ -125,7 +125,7 @@ let rec statement_to_pholyglot s = match s with
                     Function_call (
                         Function_type {return_type = typ_to_pholyglot value_typ; arguments = [Fixed_array (Int, 0)]},
                         "array_get",
-                        [expression_to_pholyglot value_typ_constant; expression_to_pholyglot (Variable arr_); Variable "__i"]
+                        [expression_to_pholyglot value_typ_constant; expression_to_pholyglot (Variable arr_); Variable key_name]
                     )
                 )
                 :: List.map statement_to_pholyglot body;
