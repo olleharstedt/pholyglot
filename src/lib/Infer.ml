@@ -270,7 +270,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         | Some fun_type -> Function_call (fun_type, id, infer_expressions ns exprs)
         | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
-    | Foreach {arr (* Array expression *) ; key = None; value = Variable value_name; body = stmts} as e -> begin
+    | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 
             | Fixed_array _
@@ -285,7 +285,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Namespace.add_identifier ns value_name array_internal_type;
         let f = fun s -> infer_stmt s ns in
         let value_typ = typ_of_expression ns (Variable value_name) in
-        Foreach {arr; key = None; value = Variable value_name; value_typ; value_typ_constant = typ_to_constant value_typ; body = List.map f stmts}
+        Foreach {arr; key; value = Variable value_name; value_typ; value_typ_constant = typ_to_constant value_typ; body = List.map f stmts}
     end
     | s -> s
 

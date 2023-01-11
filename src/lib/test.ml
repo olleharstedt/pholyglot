@@ -1815,7 +1815,7 @@ let%test_unit "infer foreach with key" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "int"; Num 3; Num 2; Num 3; Num 4]
                     )
                 );
                 Foreach {
