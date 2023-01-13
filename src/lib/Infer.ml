@@ -295,6 +295,11 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
          *   What's type of current input?
          *   Replace all type variable "A" with current input at this call site.
          *   Repeat for each type variable.
+         *
+         * or
+         *   Find all type variables in input args
+         *   Replace with what you find in exr
+         *   Replace output if it's using a type variable
          *)
         f
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
