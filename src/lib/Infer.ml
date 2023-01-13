@@ -201,6 +201,23 @@ let infer_printf (s : string) : Ast.typ list =
     in
     get_all_matches 0
 
+let rec typ_contains_type_variable (t : typ): bool = match t with
+    | Function_type {return_type; arguments} ->
+        typ_contains_type_variable return_type or List.exists (fun t -> typ_contains_type_variable t) arguments
+    | Type_variable _ -> true
+    | _ -> false
+
+(**
+ * Returns string list of all type variables in t
+ *)
+(*
+let rec find_all_type_variables t : string list = match t with
+    | Function_type {return_type; arguments} ->
+        find_all_type_variables return_type @ List.map (fun x -> find_all_type_variables x) arguments
+    | Type_variable tv -> [tv]
+    | _ -> []
+*)
+
 (**
  * Infer types inside Ast.statement
  *)
@@ -270,6 +287,16 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         | Some fun_type -> Function_call (fun_type, id, infer_expressions ns exprs)
         | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
+    | Function_call (fun_t, id, exprs) as f when typ_contains_type_variable fun_t ->
+        (*
+         * resolve_type_variable
+         *   Find all type variables in typ
+         *   Match type variable with current input
+         *   What's type of current input?
+         *   Replace all type variable "A" with current input at this call site.
+         *   Repeat for each type variable.
+         *)
+        f
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 

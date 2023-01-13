@@ -1842,7 +1842,6 @@ let%test_unit "infer foreach with key" =
         }
     ])
 
-    (*
 let%test_unit "array slice test" =
     let source = {|<?php // @pholyglot
     function foo(): void {
@@ -1856,33 +1855,7 @@ let%test_unit "array slice test" =
         Infer.run (Namespace.create ())
     in
     [%test_eq: Ast.program] ast (Declaration_list [
-        Function {
-            name = "foo";
-            docblock = [];
-            params = [];
-            stmts = [
-                Assignment (Fixed_array (Int, Some 3), Variable "arr", 
-                    Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
-                        "array_make",
-                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
-                    )
-                );
-                Assignment (Dynamic_array Int, Variable "arr2",
-                    Function_call (
-                        Function_type {return_type = Dynamic_array Int; arguments = [Fixed_array (Int, None); Int]},
-                        "array_slice",
-                        [
-                            Variable "arr";
-                            Num 1;
-                    ]
-                    )
-                );
-            ];
-            function_type = Function_type {return_type = Void; arguments = []}
-        }
     ])
-*)
 
 let%test_unit "plusplus and minusminus" =
     let source = {|<?php // @pholyglot
