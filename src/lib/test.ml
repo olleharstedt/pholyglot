@@ -1826,14 +1826,23 @@ let%test_unit "infer foreach with key" =
                     value = Variable "val";
                     value_typ = Int;
                     value_typ_constant = Constant "int";
-                    body = [];
+                    body = [
+                        Function_call (
+                            Function_type {return_type = Void; arguments = [String_literal; Int]},
+                            "printf",
+                            [
+                                Coerce (String_literal, String "\"%d\"");
+                                Variable "i";
+                            ]
+                        );
+                    ];
                 };
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
 
-(* TODO: Requires type variable to compile properly
+    (*
 let%test_unit "array slice test" =
     let source = {|<?php // @pholyglot
     function foo(): void {
@@ -1873,7 +1882,7 @@ let%test_unit "array slice test" =
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
-    *)
+*)
 
 let%test_unit "plusplus and minusminus" =
     let source = {|<?php // @pholyglot
