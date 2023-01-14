@@ -1896,6 +1896,48 @@ let%test_unit "array slice test" =
         }
     ])
 
+let%test_unit "array slice pholyglot code" =
+    let ast : Ast.declaration = Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Fixed_array (Int, Some 3), Variable "arr", 
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        "array_make",
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                    )
+                );
+                Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
+                    Function_call (
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Fixed_array (Int, Some 3); Int]},
+                        "array_slice",
+                        [Variable "arr"; Num 1]
+                    )
+                );
+                Assignment (Int, Variable "i",
+                    Function_call (
+                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
+                        "array_get",
+                        [Constant "int"; Variable "arr2"; Num 0]
+                    )
+                );
+                Function_call (
+                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    "printf",
+                    [
+                        Coerce (String_literal, String "\"%d\"");
+                        Variable "i";
+                    ]
+                );
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    let phast = Transpile.declaration_to_pholyglot ast in
+    let code = Pholyglot_ast.string_of_statement phast in
+    [%test_eq: string] code {| |}
+
 let%test_unit "plusplus and minusminus" =
     let source = {|<?php // @pholyglot
     function foo(): void {
