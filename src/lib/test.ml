@@ -172,12 +172,12 @@ let%test_unit "trivial arith transpile" =
     let ast = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function int
+    [%test_eq: string] pholyglot_code {|#define function long
 function main()
 #undef function
 {
     //?>
-    int
+    long
     //<?php
     $a 
     = 0;
@@ -327,7 +327,7 @@ let%test_unit "trivial array infer and print" =
     let fn = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot fn in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function int
+    [%test_eq: string] pholyglot_code {|#define function long
 function main()
 #undef function
 {
@@ -335,8 +335,8 @@ function main()
     array
     //<?php
     $arr 
-    = array_make(int, 3, 1, 2, 3);
-     printf("%d", array_get(int, $arr, 0));
+    = array_make(long, 3, 1, 2, 3);
+     printf("%d", array_get(long, $arr, 0));
     return 0;
 }
 |}
@@ -445,18 +445,18 @@ let%test_unit "two functions to pholyglot" =
         }
     ] |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: string] code {|#define function int
-function foo(int $c)
+    [%test_eq: string] code {|#define function long
+function foo(long $c)
 #undef function
 {
     return $c + 20;
 }
-#define function int
+#define function long
 function main()
 #undef function
 {
     //?>
-    int
+    long
     //<?php
     $b 
     = foo(10 + 20);
@@ -747,11 +747,11 @@ let%test_unit "output object access" =
 typedef struct Point* Point;
 //<?php
 class Point {
-    #define public int
+    #define public long
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
-#define public int
+#define public long
 #define __object_property_y $__object_property_y
     public $__object_property_y;
 #undef public
@@ -777,7 +777,7 @@ Point Point__constructor(Point $p)
     return $p;
 }
 //<?php
-#define function int
+#define function long
 function main()
 #undef function
 {
@@ -1155,14 +1155,14 @@ let%test_unit "transpile docblock object array" =
          |> Pholyglot_ast.string_of_declare
     in
     [%test_eq: string] code {|//?>
-void foo(array $bodies, float $dt)
+void foo(array $bodies, double $dt)
 //<?php
 #if __PHP__
-function foo(array &$bodies, float $dt): void
+function foo(array &$bodies, double $dt): void
 #endif
 {
     //?>
-    int
+    long
     //<?php
     $a 
     = 123;
@@ -1253,13 +1253,13 @@ let%test_unit "simple getter" =
 typedef struct Point* Point;
 //<?php
 class Point {
-    #define public int
+    #define public long
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
 
     //?>
-    int (*getX) (Point $self);
+    long (*getX) (Point $self);
     //<?php
     
 // End of C struct def. Class methods are outside the struct.
@@ -1268,10 +1268,10 @@ class Point {
 //<?php
 
 //?>
-int Point__getX (Point $self)
+long Point__getX (Point $self)
 //<?php
 #if __PHP__
-public function getX(Point $self): int
+public function getX(Point $self): long
 #endif
 {
     return $self->__object_property_x;
@@ -1512,12 +1512,12 @@ let%test_unit "float to code test" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function int
+    [%test_eq: string] code {|#define function long
 function main()
 #undef function
 {
     //?>
-    float
+    double
     //<?php
     $a 
     = 1. + 2. - 3.25;
@@ -1665,7 +1665,7 @@ function foo()
     $arr 
     = array_make(Body, 1, $b);
     //?>
-    int
+    long
     //<?php
     $x 
     = array_get(Body, $arr, 0)->__object_property_x;
@@ -1770,17 +1770,17 @@ let%test_unit "foreach to pholyglot" =
     let phast = Transpile.statement_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_statement phast in
     [%test_eq: string] code {|//?>
-    int
+    long
     //<?php
     $__i 
     = 0;
     
         for (; $__i < count($arr); $__i = $__i + 1) {
             //?>
-    int
+    long
     //<?php
     $val 
-    = array_get(int, $arr, $__i);
+    = array_get(long, $arr, $__i);
      printf("%d", $val);
     
         }
@@ -1986,7 +1986,7 @@ function foo()
 #undef function
 {
     //?>
-    int
+    long
     //<?php
     $a 
     = 10;

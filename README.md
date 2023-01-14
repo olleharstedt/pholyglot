@@ -252,3 +252,15 @@ Arena is not the same as a pool.
 Make long == double == uintptr_t same size
 
     21:46 size_t a = sizeof(long), b = sizeof(double), c = sizeof(uintptr_t); if (a == b && b == c) {}
+    22:01 static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
+
+    $ gcc -E -dM - < /dev/null | egrep 'UINTPTR_TYPE|SIZEOF_LONG'
+    #define __SIZEOF_LONG__ 8
+    #define __SIZEOF_LONG_DOUBLE__ 16
+    #define __UINTPTR_TYPE__ long unsigned int
+    #define __SIZEOF_LONG_LONG__ 8
+    $ x86_64-w64-mingw32-gcc -E -dM - < /dev/null | egrep 'UINTPTR_TYPE|SIZEOF_LONG'
+    #define __SIZEOF_LONG__ 4
+    #define __SIZEOF_LONG_DOUBLE__ 16
+    #define __UINTPTR_TYPE__ long long unsigned int
+    #define __SIZEOF_LONG_LONG__ 8

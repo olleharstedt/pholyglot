@@ -24,9 +24,9 @@ let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 
 let typ_to_pholyglot_constant (t : Ast.typ) : Pholyglot_ast.expression = match t with
-    | Int -> Constant "int"
+    | Int -> Constant "long"
+    | Float -> Constant "double"
     | String -> Constant "string"
-    | Float -> Constant "float"
     | Class_type s -> Constant s
     | _ -> raise (Transpile_error ("typ_to_pholyglot_constant: Not supported type"))
 
@@ -202,7 +202,9 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             "function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }\n";
             (* The following constants are needed for the $type in array_get/array_make *)
             {|define("int", "int");|} ^ "\n";
+            {|define("long", "long");|} ^ "\n";
             {|define("float", "float");|} ^ "\n";
+            {|define("double", "double");|} ^ "\n";
             {|define("string", "string");|} ^ "\n";
             "function array_get($type, $arr, $i) { return $arr[$i]; }\n";
             "function array_make($type, $length, ...$values) { return $values; }\n";
