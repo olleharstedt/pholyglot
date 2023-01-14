@@ -134,6 +134,63 @@ let typ_to_constant (t : Ast.typ) : Ast.expression = match t with
     | Class_type s -> Constant s
     | _ -> raise (Type_error ("typ_to_constant: Not supported type: " ^ show_typ t))
 
+let rec typ_contains_type_variable (t : typ): bool =
+    Log.debug "typ_contains_type_variable";
+    match t with
+    | Function_type {return_type; arguments} ->
+        typ_contains_type_variable return_type || List.exists (fun t -> typ_contains_type_variable t) arguments
+    | Type_variable _ -> true
+    | Dynamic_array t -> typ_contains_type_variable t
+    | Fixed_array (t, _) -> typ_contains_type_variable t
+    | _ -> false
+
+let rec get_type_variable (t : typ): string option = match t with
+    | Function_type {return_type; arguments} -> failwith "get_type_variable: not supported: Function_type"
+    | Type_variable s -> Some s
+    | Dynamic_array t -> get_type_variable t
+    | Fixed_array (t, _) -> get_type_variable t
+    | _ -> None
+
+(* Takes a typ and a type variable hashtable and replaces type variables in typ *)
+let rec replace_type_variables t_vars_tbl t : typ =
+    Log.debug "replace_type_variables";
+    match t with
+    | Function_type {return_type; arguments} ->
+        Function_type {
+            return_type = replace_type_variables t_vars_tbl return_type;
+            arguments   = List.map (fun a -> replace_type_variables t_vars_tbl a) arguments;
+        }
+    | Type_variable s -> begin
+        match Hashtbl.find_opt t_vars_tbl s with
+        | Some t -> t
+        | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
+    end
+    | Dynamic_array t -> Dynamic_array (replace_type_variables t_vars_tbl t)
+    | t -> t
+    (*| t -> raise (Type_error ("replace_type_variables: Can only replace type variables in Function_type but got " ^ (show_typ t)))*)
+
+(**
+ * Figure out the typ of type variables using namespace, typ and expression list
+ * Used for Function_type
+ *)
+let resolve_type_variable ns t exprs : typ =
+    Log.debug "resolve_type_variable";
+    match t with
+    | Function_type {return_type; arguments} ->
+        let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10 in
+        let populate_type_variables = fun arg_t expr ->
+            match get_type_variable arg_t with 
+            | Some t_var_name -> begin
+                let t = typ_of_expression ns expr in
+                Hashtbl.add t_vars_tbl t_var_name t
+            end
+            | None -> ()
+        in
+        List.iter2 populate_type_variables arguments exprs;
+        replace_type_variables t_vars_tbl t
+    | _ -> raise (Type_error "resolve_type_variable: No Function_type")
+
+
 let rec infer_expression ns expr = 
     Log.debug "%s %s" "infer_expression" (show_expression expr);
     match expr with
@@ -143,7 +200,13 @@ let rec infer_expression ns expr =
         let inf = fun e -> infer_expression ns e in
         let params = List.map inf params in
         match Namespace.find_function ns name with
-        | Some (Function_type {return_type; arguments}) -> Function_call (Function_type {return_type; arguments}, name, params)
+        | Some (Function_type {return_type; arguments} as fun_t) ->
+            if typ_contains_type_variable fun_t then
+                Function_call (resolve_type_variable ns fun_t params, name, params)
+            else
+                Function_call (fun_t, name, params)
+            (* TODO: Type variable here *)
+            (*Function_call (Function_type {return_type; arguments}, name, params)*)
         | Some t -> failwith ("not a function: " ^ show_typ t)
         | _ -> failwith ("infer_expression: found no function declared with name " ^ name)
     end
@@ -201,23 +264,6 @@ let infer_printf (s : string) : Ast.typ list =
     in
     get_all_matches 0
 
-let rec typ_contains_type_variable (t : typ): bool =
-    Log.debug "typ_contains_type_variable";
-    match t with
-    | Function_type {return_type; arguments} ->
-        typ_contains_type_variable return_type || List.exists (fun t -> typ_contains_type_variable t) arguments
-    | Type_variable _ -> true
-    | Dynamic_array t -> typ_contains_type_variable t
-    | Fixed_array (t, _) -> typ_contains_type_variable t
-    | _ -> false
-
-let rec get_type_variable (t : typ): string option = match t with
-    | Function_type {return_type; arguments} -> failwith "get_type_variable: not supported: Function_type"
-    | Type_variable s -> Some s
-    | Dynamic_array t -> get_type_variable t
-    | Fixed_array (t, _) -> get_type_variable t
-    | _ -> None
-
 (**
  * Returns string list of all type variables in t
  *)
@@ -229,44 +275,6 @@ let rec find_all_type_variables t : string list = match t with
     | _ -> []
 *)
 
-(* Takes a typ and a type variable hashtable and replaces type variables in typ *)
-let rec replace_type_variables t_vars_tbl t : typ =
-    Log.debug "replace_type_variables";
-    match t with
-    | Function_type {return_type; arguments} ->
-        Function_type {
-            return_type = replace_type_variables t_vars_tbl return_type;
-            arguments   = List.map (fun a -> replace_type_variables t_vars_tbl a) arguments;
-        }
-    | Type_variable s -> begin
-        match Hashtbl.find_opt t_vars_tbl s with
-        | Some t -> t
-        | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
-    end
-    | Dynamic_array t -> Dynamic_array (replace_type_variables t_vars_tbl t)
-    | _ -> raise (Type_error "replace_type_variables: Can only replace type variables in Function_type")
-
-(**
- * Figure out the typ of type variables using namespace, typ and expression list
- * Used for Function_type
- *)
-let resolve_type_variable ns t exprs : typ =
-    Log.debug "resolve_type_variable";
-    match t with
-    | Function_type {return_type; arguments} ->
-        let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10 in
-        let populate_type_variables = fun arg_t expr ->
-            match get_type_variable arg_t with 
-            | Some t_var_name -> begin
-                let t = typ_of_expression ns expr in
-                Hashtbl.add t_vars_tbl t_var_name t
-            end
-            | None -> ()
-        in
-        List.iter2 populate_type_variables arguments exprs;
-        replace_type_variables t_vars_tbl t
-    | _ -> raise (Type_error "resolve_type_variable: No Function_type")
-
 (**
  * Infer types inside Ast.statement
  *)
@@ -274,7 +282,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     (* TODO: How to generalize this? *)
-    | Assignment (Infer_me, Variable id, Function_call (fun_t, fun_name, exprs)) as e ->
+    (* Infer_me *)
+    (*
+    | Assignment (t, Variable id, Function_call (Infer_me, fun_name, exprs)) as e ->
+        Log.debug "hello1";
         (*
          *
          *)
@@ -282,8 +293,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             Log.debug "hello";
             let exprs = infer_expressions ns exprs in
             let new_fun_t = resolve_type_variable ns fun_t exprs in
-            Assignment (new_fun_t.return_type, Variable id, Function_call (new_fun_t, id, exprs))
+            let new_ret_t = match new_fun_t with Function_type {return_type; arguments} -> return_type in
+            Assignment (new_ret_t, Variable id, Function_call (new_fun_t, id, exprs))
         end else e
+        *)
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "%s %s" "infer_stmt: assignment " id;
         let t = typ_of_expression ns expr in
