@@ -247,3 +247,8 @@ Pool:
     $slice = array_slice($foos, 0, 1);
     return $slice;  // Pool can't escape, same as stack?
 
+Arena is not the same as a pool.
+
+Make long == double == uintptr_t same size
+
+    21:46 size_t a = sizeof(long), b = sizeof(double), c = sizeof(uintptr_t); if (a == b && b == c) {}

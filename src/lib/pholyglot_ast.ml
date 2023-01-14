@@ -129,8 +129,9 @@ let string_of_define (d : define) : string = match d with
     | Define (id, None) -> sprintf "#define %s \n" id
 
 let rec string_of_typ (t : typ) : string = match t with
-    | Int -> "int"
-    | Float -> "float"
+    (* We need to use long and double here to keep same size as uintptr_t *)
+    | Int -> "long"
+    | Float -> "double"
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> (*string_of_typ t*) "array"

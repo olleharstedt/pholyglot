@@ -123,18 +123,18 @@ function main()
     array
         //<?php
         $arr 
-        = array_make(int, 3, 1, 2, 3);
+        = array_make(long, 3, 2, 3, 4);
     //?>
     array
         //<?php
         $arr2 
         = array_slice($arr, 1);
     //?>
-    int
+    long
         //<?php
         $i 
-        = array_get(int, $arr2, 0);
-        printf("\nshould be 2: %d\n", $i);
+        = array_get(long, $arr2, 0);
+        printf("\nshould be 2: %ld\n", $i);
 
 
     return 0;
