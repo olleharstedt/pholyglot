@@ -1848,7 +1848,6 @@ let%test_unit "array slice test" =
         $arr3 = [new Body(), new Body()];
         $arr4 = array_slice($arr3, 1);
         $b = $arr4[0];
-        printf("%d", $b->x);
     }
     |} in
     let ast =
