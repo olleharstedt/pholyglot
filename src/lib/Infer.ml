@@ -130,7 +130,8 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         Log.debug "%s %s" "Array_access " id;
         match Namespace.find_identifier ns id with
         | Some (Fixed_array (t, length)) -> t
-        | _ -> raise (Type_error (sprintf "typ_of_expression: Found no array with id %s, or could not infer type" id))
+        | Some (Dynamic_array t) -> t
+        | _ -> raise (Type_error (sprintf "typ_of_expression: Found no array with id %s in namespace, or could not infer type" id))
     end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
@@ -172,7 +173,7 @@ let rec replace_type_variables t : typ =
         | Some t -> t
         | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
     end
-    | Dynamic_array t -> Dynamic_array (replace_type_variables t)
+    | Dynamic_array t -> replace_type_variables t
     | t -> t
     (*| t -> raise (Type_error ("replace_type_variables: Can only replace type variables in Function_type but got " ^ (show_typ t)))*)
 
