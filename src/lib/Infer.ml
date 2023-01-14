@@ -12,6 +12,7 @@ exception Type_error of string
 (**
  * Global variable
  * Should only be used by Function_call expression to replace type variables in Function_type
+ * TODO: Would this work when wrapping multiple generic functions in one call?
  *)
 let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10
 
