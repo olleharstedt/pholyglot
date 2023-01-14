@@ -268,15 +268,11 @@ let resolve_type_variable ns t exprs : typ =
 let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
+    (* TODO: How to generalize this? *)
+    | Assignment (Infer_me, Variable id, Function_call (fun_t, fun_name, exprs)) as e -> e
     | Assignment (Infer_me, Variable id, expr) ->
-        (* TODO: expr can contain function call that needs to resolve type variables *)
         Log.debug "%s %s" "infer_stmt: assignment " id;
-        (*let expr = infer_expression ns expr in*)
         let t = typ_of_expression ns expr in
-        Log.debug "%s %s" "infer_stmt: t = " (show_typ t);
-        if typ_contains_type_variable t then begin
-            let t2 = resolve_type_variable ns t exprs in
-        end;
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, infer_expression ns expr)
     (* TODO: Generalize this with lvalue *)
