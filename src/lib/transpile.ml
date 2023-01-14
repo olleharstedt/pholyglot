@@ -193,7 +193,7 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
         (* C stubs *)
         [
             "typedef struct array array;\n";
-            "struct array { void* thing; size_t length; };\n";
+            "struct array { uintptr_t* thing; size_t length; };\n";
         ],
         (* PHP stubs *)
         [

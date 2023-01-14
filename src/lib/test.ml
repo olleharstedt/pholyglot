@@ -366,7 +366,7 @@ let%test_unit "transpile concat" =
 #define count(x) x.length
 #define pprintf printf
 typedef struct array array;
-struct array { void* thing; size_t length; };
+struct array { uintptr_t* thing; size_t length; };
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
 function g_string_new(string $str) { return new GString($str); }
@@ -381,7 +381,7 @@ function array_make($type, $length, ...$values) { return $values; }
 function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }
 #endif//?>
 //<?php
-#define function int
+#define function long
 function main()
 #undef function
 {
