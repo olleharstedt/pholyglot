@@ -285,9 +285,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "%s %s" "infer_stmt: assignment " id;
+        let expr = infer_expression ns expr in
         let t = typ_of_expression ns expr in
         Namespace.add_identifier ns id t;
-        Assignment (t, Variable id, infer_expression ns expr)
+        Assignment (t, Variable id, expr)
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
