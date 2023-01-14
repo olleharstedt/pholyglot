@@ -135,7 +135,7 @@ let typ_to_constant (t : Ast.typ) : Ast.expression = match t with
     | _ -> raise (Type_error ("typ_to_constant: Not supported type: " ^ show_typ t))
 
 let rec typ_contains_type_variable (t : typ): bool =
-    Log.debug "typ_contains_type_variable";
+    Log.debug "typ_contains_type_variable %s" (show_typ t);
     match t with
     | Function_type {return_type; arguments} ->
         typ_contains_type_variable return_type || List.exists (fun t -> typ_contains_type_variable t) arguments
@@ -153,7 +153,7 @@ let rec get_type_variable (t : typ): string option = match t with
 
 (* Takes a typ and a type variable hashtable and replaces type variables in typ *)
 let rec replace_type_variables t_vars_tbl t : typ =
-    Log.debug "replace_type_variables";
+    Log.debug "replace_type_variables %s" (show_typ t);
     match t with
     | Function_type {return_type; arguments} ->
         Function_type {
@@ -174,7 +174,7 @@ let rec replace_type_variables t_vars_tbl t : typ =
  * Used for Function_type
  *)
 let resolve_type_variable ns t exprs : typ =
-    Log.debug "resolve_type_variable";
+    Log.debug "resolve_type_variable %s" (show_typ t);
     match t with
     | Function_type {return_type; arguments} ->
         let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10 in
@@ -201,9 +201,11 @@ let rec infer_expression ns expr =
         let params = List.map inf params in
         match Namespace.find_function ns name with
         | Some (Function_type {return_type; arguments} as fun_t) ->
-            if typ_contains_type_variable fun_t then
-                Function_call (resolve_type_variable ns fun_t params, name, params)
-            else
+            if typ_contains_type_variable fun_t then begin
+                let resolved_fun_t = resolve_type_variable ns fun_t params in
+                Log.debug "resolved_fun_t = %s" (show_typ resolved_fun_t);
+                Function_call (resolved_fun_t, name, params)
+            end else
                 Function_call (fun_t, name, params)
             (* TODO: Type variable here *)
             (*Function_call (Function_type {return_type; arguments}, name, params)*)
@@ -281,22 +283,6 @@ let rec find_all_type_variables t : string list = match t with
 let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
-    (* TODO: How to generalize this? *)
-    (* Infer_me *)
-    (*
-    | Assignment (t, Variable id, Function_call (Infer_me, fun_name, exprs)) as e ->
-        Log.debug "hello1";
-        (*
-         *
-         *)
-        if typ_contains_type_variable fun_t then begin
-            Log.debug "hello";
-            let exprs = infer_expressions ns exprs in
-            let new_fun_t = resolve_type_variable ns fun_t exprs in
-            let new_ret_t = match new_fun_t with Function_type {return_type; arguments} -> return_type in
-            Assignment (new_ret_t, Variable id, Function_call (new_fun_t, id, exprs))
-        end else e
-        *)
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "%s %s" "infer_stmt: assignment " id;
         let t = typ_of_expression ns expr in
@@ -367,23 +353,6 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         end
         | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
-    | Function_call (fun_t, id, exprs) as f when typ_contains_type_variable fun_t ->
-        Log.debug "infer_stmt: Function_call when typ_contains_type_variable";
-        (*
-         * resolve_type_variable
-         *   Find all type variables in typ
-         *   Match type variable with current input
-         *   What's type of current input?
-         *   Replace all type variable "A" with current input at this call site.
-         *   Repeat for each type variable.
-         *
-         * or
-         *   Find all type variables in input args
-         *   Replace with what you find in exr
-         *   Replace output if it's using a type variable
-         *)
-        let new_fun_t = resolve_type_variable ns fun_t exprs in
-        Function_call (new_fun_t, id, exprs)
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 
