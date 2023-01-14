@@ -229,6 +229,7 @@ let rec find_all_type_variables t : string list = match t with
     | _ -> []
 *)
 
+(* Takes a typ and a type variable hashtable and replaces type variables in typ *)
 let rec replace_type_variables t_vars_tbl t : typ =
     Log.debug "replace_type_variables";
     match t with
@@ -245,6 +246,10 @@ let rec replace_type_variables t_vars_tbl t : typ =
     | Dynamic_array t -> Dynamic_array (replace_type_variables t_vars_tbl t)
     | _ -> raise (Type_error "replace_type_variables: Can only replace type variables in Function_type")
 
+(**
+ * Figure out the typ of type variables using namespace, typ and expression list
+ * Used for Function_type
+ *)
 let resolve_type_variable ns t exprs : typ =
     Log.debug "resolve_type_variable";
     match t with
@@ -269,7 +274,16 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     (* TODO: How to generalize this? *)
-    | Assignment (Infer_me, Variable id, Function_call (fun_t, fun_name, exprs)) as e -> e
+    | Assignment (Infer_me, Variable id, Function_call (fun_t, fun_name, exprs)) as e ->
+        (*
+         *
+         *)
+        if typ_contains_type_variable fun_t then begin
+            Log.debug "hello";
+            let exprs = infer_expressions ns exprs in
+            let new_fun_t = resolve_type_variable ns fun_t exprs in
+            Assignment (new_fun_t.return_type, Variable id, Function_call (new_fun_t, id, exprs))
+        end else e
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "%s %s" "infer_stmt: assignment " id;
         let t = typ_of_expression ns expr in
