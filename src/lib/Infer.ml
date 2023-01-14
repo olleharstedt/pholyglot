@@ -135,9 +135,9 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 let typ_to_constant (t : Ast.typ) : Ast.expression = match t with
-    | Int -> Constant "int"
+    | Int -> Constant "long"
+    | Float -> Constant "double"
     | String -> Constant "string"
-    | Float -> Constant "float"
     | Class_type s -> Constant s
     | _ -> raise (Type_error ("typ_to_constant: Not supported type: " ^ show_typ t))
 
@@ -172,7 +172,7 @@ let rec replace_type_variables t : typ =
         | Some t -> t
         | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
     end
-    | Dynamic_array t -> replace_type_variables t
+    | Dynamic_array t -> Dynamic_array (replace_type_variables t)
     | t -> t
     (*| t -> raise (Type_error ("replace_type_variables: Can only replace type variables in Function_type but got " ^ (show_typ t)))*)
 

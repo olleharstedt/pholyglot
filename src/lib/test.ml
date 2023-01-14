@@ -149,7 +149,7 @@ let%test_unit "trivial transpile" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function int
+    [%test_eq: string] pholyglot_code {|#define function long
 function main()
 #undef function
 {
@@ -290,7 +290,7 @@ let%test_unit "trivial array infer" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "int"; Num 3; Num 1; Num 2; Num 3;]
+                        [Constant "long"; Num 3; Num 1; Num 2; Num 3;]
                     )
                 );
                 Function_call (
@@ -301,7 +301,7 @@ let%test_unit "trivial array infer" =
                         Function_call (
                             Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                             "array_get",
-                            [Constant "int"; Variable "arr"; Num 0]
+                            [Constant "long"; Variable "arr"; Num 0]
                         );
                     ]
                 );
@@ -372,7 +372,9 @@ class GString { public $str; public function __construct($str) { $this->str = $s
 function g_string_new(string $str) { return new GString($str); }
 function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
 define("int", "int");
+define("long", "long");
 define("float", "float");
+define("double", "double");
 define("string", "string");
 function array_get($type, $arr, $i) { return $arr[$i]; }
 function array_make($type, $length, ...$values) { return $values; }
@@ -1444,7 +1446,7 @@ let%test_unit "transpile method" =
                         Function_call (
                             Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                             "array_get",
-                            [Constant "int"; Variable "arr"; Num 0]
+                            [Constant "long"; Variable "arr"; Num 0]
                         );
                     ];
                     left_hand = Variable "p";
@@ -1454,7 +1456,7 @@ let%test_unit "transpile method" =
     in
     let phast = Transpile.expression_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_expression phast in
-    [%test_eq: string] code {|pprintf("%d", $p->getX($p, $var1, moo(), array_get(int, $arr, 0)))|}
+    [%test_eq: string] code {|pprintf("%d", $p->getX($p, $var1, moo(), array_get(long, $arr, 0)))|}
 
 
 let%test_unit "float test" =
@@ -1723,7 +1725,7 @@ let%test_unit "infer foreach" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "long"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Foreach {
@@ -1731,7 +1733,7 @@ let%test_unit "infer foreach" =
                     key = None; 
                     value = Variable "val";
                     value_typ = Int;
-                    value_typ_constant = Constant "int";
+                    value_typ_constant = Constant "long";
                     body = [
                         Function_call (
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1755,7 +1757,7 @@ let%test_unit "foreach to pholyglot" =
         key = None; 
         value = Variable "val";
         value_typ = Int;
-        value_typ_constant = Constant "int";
+        value_typ_constant = Constant "long";
         body = [
             Function_call (
                 Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1810,7 +1812,7 @@ let%test_unit "infer foreach with key" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "int"; Num 3; Num 2; Num 3; Num 4]
+                        [Constant "long"; Num 3; Num 2; Num 3; Num 4]
                     )
                 );
                 Foreach {
@@ -1818,7 +1820,7 @@ let%test_unit "infer foreach with key" =
                     key = Some (Variable "i");
                     value = Variable "val";
                     value_typ = Int;
-                    value_typ_constant = Constant "int";
+                    value_typ_constant = Constant "long";
                     body = [
                         Function_call (
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1866,7 +1868,7 @@ let%test_unit "array slice test" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "long"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
@@ -1880,7 +1882,7 @@ let%test_unit "array slice test" =
                     Function_call (
                         Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                         "array_get",
-                        [Constant "int"; Variable "arr2"; Num 0]
+                        [Constant "long"; Variable "arr2"; Num 0]
                     )
                 );
                 Function_call (
@@ -1906,7 +1908,7 @@ let%test_unit "array slice pholyglot code" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "long"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
@@ -1920,7 +1922,7 @@ let%test_unit "array slice pholyglot code" =
                     Function_call (
                         Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                         "array_get",
-                        [Constant "int"; Variable "arr2"; Num 0]
+                        [Constant "long"; Variable "arr2"; Num 0]
                     )
                 );
                 Function_call (
@@ -1937,7 +1939,28 @@ let%test_unit "array slice pholyglot code" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {| |}
+    [%test_eq: string] code {|#define function void
+function foo()
+#undef function
+{
+    //?>
+    array
+    //<?php
+    $arr 
+    = array_make(long, 3, 1, 2, 3);
+    //?>
+    array
+    //<?php
+    $arr2 
+    = array_slice($arr, 1);
+    //?>
+    long
+    //<?php
+    $i 
+    = array_get(long, $arr2, 0);
+     printf("%d", $i);
+    }
+|}
 
 let%test_unit "plusplus and minusminus" =
     let source = {|<?php // @pholyglot
