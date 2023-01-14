@@ -1869,14 +1869,14 @@ let%test_unit "array slice test" =
                         [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
-                Assignment (Fixed_array (Int, Some 3), Variable "arr", 
+                Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Fixed_array (Int, Some 3); Int]},
                         "array_slice",
                         [Variable "arr"; Num 1]
                     )
                 );
-                Assignment (Int, Variable "x",
+                Assignment (Int, Variable "i",
                     Function_call (
                         Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                         "array_get",
