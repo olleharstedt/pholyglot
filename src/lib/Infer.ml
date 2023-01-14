@@ -182,6 +182,7 @@ let resolve_type_variable ns t exprs : typ =
             match get_type_variable arg_t with 
             | Some t_var_name -> begin
                 let t = typ_of_expression ns expr in
+                Log.debug "resolve_type_variable t = %s" (show_typ t);
                 Hashtbl.add t_vars_tbl t_var_name t
             end
             | None -> ()
@@ -190,8 +191,10 @@ let resolve_type_variable ns t exprs : typ =
         replace_type_variables t_vars_tbl t
     | _ -> raise (Type_error "resolve_type_variable: No Function_type")
 
-
-let rec infer_expression ns expr = 
+(**
+ * Replace Infer_me and type variables inside expr using bindings in namespace ns
+ *)
+let rec infer_expression ns expr : expression = 
     Log.debug "%s %s" "infer_expression" (show_expression expr);
     match expr with
     (* This is allowed to enable infering aliasing, like $b = $a *)
@@ -249,7 +252,9 @@ let infer_expressions ns exprs =
     let inf = fun e -> infer_expression ns e in
     List.map inf exprs
 
-(** Parse format string from printf etc *)
+(**
+ * Parse format string from printf and return a list of types
+ *)
 let infer_printf (s : string) : Ast.typ list =
     Log.debug "infer_printf";
     let s = Str.global_replace (Str.regexp "%%") "" s in
@@ -286,7 +291,9 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "%s %s" "infer_stmt: assignment " id;
         let expr = infer_expression ns expr in
+        Log.debug "expr = %s" (show_expression expr);
         let t = typ_of_expression ns expr in
+        Log.debug "t = %s" (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
     (* TODO: Generalize this with lvalue *)
