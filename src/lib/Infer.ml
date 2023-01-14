@@ -172,7 +172,7 @@ let rec replace_type_variables t : typ =
         | Some t -> t
         | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
     end
-    | Dynamic_array t -> Dynamic_array (replace_type_variables t)
+    | Dynamic_array t -> replace_type_variables t
     | t -> t
     (*| t -> raise (Type_error ("replace_type_variables: Can only replace type variables in Function_type but got " ^ (show_typ t)))*)
 
@@ -293,17 +293,17 @@ let rec find_all_type_variables t : string list = match t with
  * Infer types inside Ast.statement
  *)
 let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 
-    Log.debug "%s %s" "infer_stmt" (show_statement s);
+    Log.debug "infer_stmt: %s" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
-        Log.debug "%s %s" "infer_stmt: assignment " id;
+        Log.debug "infer_stmt: assignment to id %s" id;
         (*let expr = infer_expression ns expr in
         Log.debug "expr = %s" (show_expression expr);*)
         let t = typ_of_expression ns expr in
         (* TODO: Replace type variables in t *)
         let expr = infer_expression ns expr in
         let t = replace_type_variables t in
-        Log.debug "t = %s" (show_typ t);
+        Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
     (* TODO: Generalize this with lvalue *)
