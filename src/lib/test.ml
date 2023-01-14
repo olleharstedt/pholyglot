@@ -312,10 +312,6 @@ let%test_unit "trivial array infer" =
     ])
 
 let%test_unit "trivial array infer and print" =
-    Log.set_log_level Log.DEBUG;
-    (* Location becomes ./_build/default/lib/debug.txt *)
-    Log.set_output (open_out "debug.txt");
-    Log.debug "trivial arith infer and print";
     let fn = Ast.Function {
             name = "main";
             docblock = [];
@@ -328,9 +324,6 @@ let%test_unit "trivial array infer and print" =
             function_type = Function_type {return_type = Int; arguments = []}
         }
     in
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
-    Log.debug "should not be visible";
     let fn = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot fn in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
@@ -1843,6 +1836,10 @@ let%test_unit "infer foreach with key" =
     ])
 
 let%test_unit "array slice test" =
+    Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/debug.txt *)
+    Log.set_output (open_out "debug.txt");
+    Log.debug "array slice test";
     let source = {|<?php // @pholyglot
     function foo(): void {
         $arr = [1, 2, 3];
@@ -1854,8 +1851,10 @@ let%test_unit "array slice test" =
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    [%test_eq: Ast.program] ast (Declaration_list [
-    ])
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
+    Log.debug "should not be visible";
+    [%test_eq: Ast.program] ast (Declaration_list [])
 
 let%test_unit "plusplus and minusminus" =
     let source = {|<?php // @pholyglot

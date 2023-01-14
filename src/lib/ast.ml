@@ -41,6 +41,7 @@ and typ =
         arguments: typ list;
     }
     | Void
+    | Variadic (* Used by array_make *)
 
 and docblock_comment =
     | DocParam of identifier * typ

@@ -201,11 +201,22 @@ let infer_printf (s : string) : Ast.typ list =
     in
     get_all_matches 0
 
-let rec typ_contains_type_variable (t : typ): bool = match t with
+let rec typ_contains_type_variable (t : typ): bool =
+    Log.debug "typ_contains_type_variable";
+    match t with
     | Function_type {return_type; arguments} ->
-        typ_contains_type_variable return_type or List.exists (fun t -> typ_contains_type_variable t) arguments
+        typ_contains_type_variable return_type || List.exists (fun t -> typ_contains_type_variable t) arguments
     | Type_variable _ -> true
+    | Dynamic_array t -> typ_contains_type_variable t
+    | Fixed_array (t, _) -> typ_contains_type_variable t
     | _ -> false
+
+let rec get_type_variable (t : typ): string option = match t with
+    | Function_type {return_type; arguments} -> failwith "get_type_variable: not supported: Function_type"
+    | Type_variable s -> Some s
+    | Dynamic_array t -> get_type_variable t
+    | Fixed_array (t, _) -> get_type_variable t
+    | _ -> None
 
 (**
  * Returns string list of all type variables in t
@@ -218,6 +229,39 @@ let rec find_all_type_variables t : string list = match t with
     | _ -> []
 *)
 
+let rec replace_type_variables t_vars_tbl t : typ =
+    Log.debug "replace_type_variables";
+    match t with
+    | Function_type {return_type; arguments} ->
+        Function_type {
+            return_type = replace_type_variables t_vars_tbl return_type;
+            arguments   = List.map (fun a -> replace_type_variables t_vars_tbl a) arguments;
+        }
+    | Type_variable s -> begin
+        match Hashtbl.find_opt t_vars_tbl s with
+        | Some t -> t
+        | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
+    end
+    | Dynamic_array t -> Dynamic_array (replace_type_variables t_vars_tbl t)
+    | _ -> raise (Type_error "replace_type_variables: Can only replace type variables in Function_type")
+
+let resolve_type_variable ns t exprs : typ =
+    Log.debug "resolve_type_variable";
+    match t with
+    | Function_type {return_type; arguments} ->
+        let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10 in
+        let populate_type_variables = fun arg_t expr ->
+            match get_type_variable arg_t with 
+            | Some t_var_name -> begin
+                let t = typ_of_expression ns expr in
+                Hashtbl.add t_vars_tbl t_var_name t
+            end
+            | None -> ()
+        in
+        List.iter2 populate_type_variables arguments exprs;
+        replace_type_variables t_vars_tbl t
+    | _ -> raise (Type_error "resolve_type_variable: No Function_type")
+
 (**
  * Infer types inside Ast.statement
  *)
@@ -225,8 +269,14 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     Log.debug "%s %s" "infer_stmt" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
-        Log.debug "%s %s" "assignment " id;
+        (* TODO: expr can contain function call that needs to resolve type variables *)
+        Log.debug "%s %s" "infer_stmt: assignment " id;
+        (*let expr = infer_expression ns expr in*)
         let t = typ_of_expression ns expr in
+        Log.debug "%s %s" "infer_stmt: t = " (show_typ t);
+        if typ_contains_type_variable t then begin
+            let t2 = resolve_type_variable ns t exprs in
+        end;
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, infer_expression ns expr)
     (* TODO: Generalize this with lvalue *)
@@ -260,6 +310,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     (* printf is hard-coded *)
     (* Head of expressions is always a format string to printf *)
     | Function_call (Infer_me, "printf", String s :: xs) ->
+        Log.debug "infer_stmt: printf";
         let expected_types = infer_printf s in
         let exprs : expression list = Coerce (String_literal, String s) :: List.map2 (fun e t -> match e, t with
             (* Match on xs and expected_types to check that it matches *)
@@ -283,11 +334,18 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     | Function_call (Infer_me, "printf", _ :: xs) ->
         failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, exprs) ->
+        Log.debug "infer_stmt: Function_call Infer_me";
         begin match Namespace.find_identifier ns id with
-        | Some fun_type -> Function_call (fun_type, id, infer_expressions ns exprs)
+        | Some fun_type -> begin
+            if typ_contains_type_variable fun_type then
+                Function_call (resolve_type_variable ns fun_type exprs, id, infer_expressions ns exprs)
+            else
+                Function_call (fun_type, id, infer_expressions ns exprs)
+        end
         | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
         end
     | Function_call (fun_t, id, exprs) as f when typ_contains_type_variable fun_t ->
+        Log.debug "infer_stmt: Function_call when typ_contains_type_variable";
         (*
          * resolve_type_variable
          *   Find all type variables in typ
@@ -301,7 +359,8 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
          *   Replace with what you find in exr
          *   Replace output if it's using a type variable
          *)
-        f
+        let new_fun_t = resolve_type_variable ns fun_t exprs in
+        Function_call (new_fun_t, id, exprs)
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 
