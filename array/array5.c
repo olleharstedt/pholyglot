@@ -2,6 +2,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <alloca.h>
+#include <stdint.h>
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
@@ -11,7 +12,21 @@
 #define count(x) x.length
 #define pprintf printf
 typedef struct array array;
-struct array {void* thing; size_t length; };
+struct array {uintptr_t* thing; size_t length; };
+array array_slice(array old, int offset)
+{
+    size_t new_length = old.length - offset;
+    array new = {
+        .length = new_length,
+        .thing = malloc(sizeof(uintptr_t) * new_length)
+    };
+    size_t j = 0;
+    for (size_t i = offset; i < old.length; i++) {
+        new.thing[j] = old.thing[i];
+        j++;
+    }
+    return new;
+}
 //<?php
 //?>
 typedef struct Body* Body;
@@ -103,7 +118,25 @@ function main()
     $ints = array_make(int, 4, 1, 2, 3, 5);
     fii($ints);
     fprintf(stderr, "hello");
-    abort();
+
+    //?>
+    array
+        //<?php
+        $arr 
+        = array_make(int, 3, 1, 2, 3);
+    //?>
+    array
+        //<?php
+        $arr2 
+        = array_slice($arr, 1);
+    //?>
+    int
+        //<?php
+        $i 
+        = array_get(int, $arr2, 0);
+        printf("\nshould be 2: %d\n", $i);
+
+
     return 0;
 }
 //?>

@@ -1934,8 +1934,9 @@ let%test_unit "array slice pholyglot code" =
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
+    in
     let phast = Transpile.declaration_to_pholyglot ast in
-    let code = Pholyglot_ast.string_of_statement phast in
+    let code = Pholyglot_ast.string_of_declare phast in
     [%test_eq: string] code {| |}
 
 let%test_unit "plusplus and minusminus" =
