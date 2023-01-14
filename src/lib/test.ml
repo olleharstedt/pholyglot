@@ -1841,9 +1841,14 @@ let%test_unit "array slice test" =
     Log.set_output (open_out "debug.txt");
     Log.debug "array slice test";
     let source = {|<?php // @pholyglot
+    class Body {public int $x;}
     function foo(): void {
-        $arr = [1, 2, 3];
+        $arr = [1, 2, 3, 4];
         $arr2 = array_slice($arr, 1);
+        $arr3 = [new Body(), new Body()];
+        $arr4 = array_slice($arr3, 1);
+        $b = $arr4[0];
+        printf("%d", $b->x);
     }
     |} in
     let ast =

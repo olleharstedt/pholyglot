@@ -9,6 +9,12 @@ module Log = Dolog.Log
 
 exception Type_error of string
 
+(**
+ * Global variable
+ * Should only be used by Function_call expression to replace type variables in Function_type
+ *)
+let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10
+
 let rec typ_of_lvalue ns lv : typ = 
     Log.debug "%s %s" "typ_of_lvalue" (show_lvalue lv);
     match lv with
@@ -68,7 +74,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "not all element in array_init have the same type")
     | Array_init (t, _, _) -> t
     | New (t, exprs) -> t
-    (* $point->[0] ? *)
+    (* $point[0]-> ? *)
     | Object_access (Array_access (id, _), Property_access prop_name)
     (* $point->x *)
     | Object_access (Variable id, Property_access prop_name) -> begin
@@ -152,20 +158,20 @@ let rec get_type_variable (t : typ): string option = match t with
     | _ -> None
 
 (* Takes a typ and a type variable hashtable and replaces type variables in typ *)
-let rec replace_type_variables t_vars_tbl t : typ =
+let rec replace_type_variables t : typ =
     Log.debug "replace_type_variables %s" (show_typ t);
     match t with
     | Function_type {return_type; arguments} ->
         Function_type {
-            return_type = replace_type_variables t_vars_tbl return_type;
-            arguments   = List.map (fun a -> replace_type_variables t_vars_tbl a) arguments;
+            return_type = replace_type_variables return_type;
+            arguments   = List.map (fun a -> replace_type_variables a) arguments;
         }
     | Type_variable s -> begin
         match Hashtbl.find_opt t_vars_tbl s with
         | Some t -> t
         | None -> raise (Type_error ("Found no resolved type variable with name " ^ s))
     end
-    | Dynamic_array t -> Dynamic_array (replace_type_variables t_vars_tbl t)
+    | Dynamic_array t -> Dynamic_array (replace_type_variables t)
     | t -> t
     (*| t -> raise (Type_error ("replace_type_variables: Can only replace type variables in Function_type but got " ^ (show_typ t)))*)
 
@@ -177,7 +183,7 @@ let resolve_type_variable ns t exprs : typ =
     Log.debug "resolve_type_variable %s" (show_typ t);
     match t with
     | Function_type {return_type; arguments} ->
-        let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10 in
+        Hashtbl.clear t_vars_tbl;
         let populate_type_variables = fun arg_t expr ->
             match get_type_variable arg_t with 
             | Some t_var_name -> begin
@@ -188,7 +194,7 @@ let resolve_type_variable ns t exprs : typ =
             | None -> ()
         in
         List.iter2 populate_type_variables arguments exprs;
-        replace_type_variables t_vars_tbl t
+        replace_type_variables t
     | _ -> raise (Type_error "resolve_type_variable: No Function_type")
 
 (**
@@ -294,9 +300,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Log.debug "expr = %s" (show_expression expr);*)
         let t = typ_of_expression ns expr in
         (* TODO: Replace type variables in t *)
+        let expr = infer_expression ns expr in
+        let t = replace_type_variables t in
         Log.debug "t = %s" (show_typ t);
         Namespace.add_identifier ns id t;
-        let expr = infer_expression ns expr in
         Assignment (t, Variable id, expr)
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
