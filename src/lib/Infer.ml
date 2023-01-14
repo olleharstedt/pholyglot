@@ -290,11 +290,13 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "%s %s" "infer_stmt: assignment " id;
-        let expr = infer_expression ns expr in
-        Log.debug "expr = %s" (show_expression expr);
+        (*let expr = infer_expression ns expr in
+        Log.debug "expr = %s" (show_expression expr);*)
         let t = typ_of_expression ns expr in
+        (* TODO: Replace type variables in t *)
         Log.debug "t = %s" (show_typ t);
         Namespace.add_identifier ns id t;
+        let expr = infer_expression ns expr in
         Assignment (t, Variable id, expr)
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
@@ -350,17 +352,6 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Function_call (Function_type {return_type = Void; arguments = String_literal :: expected_types}, "printf", exprs)
     | Function_call (Infer_me, "printf", _ :: xs) ->
         failwith "infer_stmt: printf must have a string literal as first argument"
-    | Function_call (Infer_me, id, exprs) ->
-        Log.debug "infer_stmt: Function_call Infer_me";
-        begin match Namespace.find_identifier ns id with
-        | Some fun_type -> begin
-            if typ_contains_type_variable fun_type then
-                Function_call (resolve_type_variable ns fun_type exprs, id, infer_expressions ns exprs)
-            else
-                Function_call (fun_type, id, infer_expressions ns exprs)
-        end
-        | None -> raise (Type_error (sprintf "infer_stmt: Could not find function type %s in namespace" id))
-        end
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 

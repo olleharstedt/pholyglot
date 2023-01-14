@@ -2,19 +2,19 @@ open Printf
 open Ast
 
 type t = {
-    (* Variables and functions go in identifiers bucket *)
+    (* Variables go in identifiers bucket *)
     identifiers : (string, typ) Hashtbl.t;
     (* In PHP, you can have property and method with same name, so we need a triple instead of truple here *)
-    classes : (string, (kind * class_property list * function_def list)) Hashtbl.t;
-    functions: (string, typ) Hashtbl.t;
+    classes     : (string, (kind * class_property list * function_def list)) Hashtbl.t;
+    functions   : (string, typ) Hashtbl.t;
 }
 
 exception Namespace_error of string
 
 let create () : t = {
     identifiers = Hashtbl.create 10;
-    classes = Hashtbl.create 10;
-    functions = Hashtbl.create 10;
+    classes     = Hashtbl.create 10;
+    functions   = Hashtbl.create 10;
 }
 
 (** Add value to namespace with key *)
@@ -84,7 +84,7 @@ let populate (t : t) : t=
     add_function_type_ignore t "printf" (Function_type {return_type = Void; arguments = [String_literal]});
     (*add_function_type_ignore t "array_slice" (Function_type {return_type = Dynamic_array (Type_variable "a"); arguments = [Fixed_array (Type_variable "a", None); Int]});*)
     add_function_type_ignore t "array_slice" (Function_type {return_type = Dynamic_array (Type_variable "A"); arguments = [Dynamic_array (Type_variable "A"); Int]});
-    add_function_type_ignore t "array_make" (Function_type {return_type = Dynamic_array (Type_variable "A"); arguments = [String; Int; Variadic]});
+    (*add_function_type_ignore t "array_make" (Function_type {return_type = Fixed_array (Type_variable "A"); arguments = [String; Int; Variadic]});*)
     t
 
 (* Call this before passing namespace to another function to resetthe local namespace while keeping classes and functions types *)
