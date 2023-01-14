@@ -356,6 +356,8 @@ let%test_unit "transpile concat" =
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
+#include <stdlib.h>
+#include <stdint.h>
 #include <glib.h>
 #define class struct
 #define __PHP__ 0
