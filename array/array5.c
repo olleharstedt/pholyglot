@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <alloca.h>
 #include <stdint.h>
+#include <math.h>
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
@@ -123,7 +124,7 @@ function main()
     array
         //<?php
         $arr 
-        = array_make(long, 3, 2, 3, 4);
+        = array_make(long, 3, 1, 2, 3);
     //?>
     array
         //<?php
@@ -137,6 +138,7 @@ function main()
         printf("\nshould be 2: %ld\n", $i);
 
 
+        double d = sqrt(1.123);
     return 0;
 }
 //?>

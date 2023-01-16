@@ -179,6 +179,7 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             Include "stdlib.h";
             Include "stdint.h";
             Include "glib.h";
+            Include "math.h";
             Include "phollylib.c";
         ],
         (* C macros *)

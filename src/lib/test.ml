@@ -359,6 +359,7 @@ let%test_unit "transpile concat" =
 #include <stdlib.h>
 #include <stdint.h>
 #include <glib.h>
+#include <math.h>
 #include <phollylib.c>
 #if __PHP__//<?php
 class GString { public $str; public function __construct($str) { $this->str = $str; } }
