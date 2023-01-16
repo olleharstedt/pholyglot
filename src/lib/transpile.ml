@@ -178,7 +178,8 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             Include "stdio.h";
             Include "stdlib.h";
             Include "stdint.h";
-            Include "glib.h"
+            Include "glib.h";
+            Include "phollylib.c";
         ],
         (* C macros *)
         [
@@ -196,6 +197,7 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
         [
             "typedef struct array array;\n";
             "struct array { uintptr_t* thing; size_t length; };\n";
+            "array array_slice(array old, int offset) { size_t new_length = old.length - offset; if (new_length < 1) { return (array) {.length = 0, .thing = NULL}; } array new = { .length = new_length, .thing = malloc(sizeof(uintptr_t) * new_length) }; size_t j = 0; for (size_t i = offset; i < old.length; i++) { new.thing[j] = old.thing[i]; j++; } return new; }\n";
         ],
         (* PHP stubs *)
         [

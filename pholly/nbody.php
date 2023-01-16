@@ -24,15 +24,22 @@ function advance(array &$bodies, float $dt): void
  */
 function energy(array &$bodies): float
 {
-    /*
     $e = 0.0;
-    foreach ($bodies as $body) {
-        $e = $e + 0.5 * $body->mass * 
-            ( $body->vx * $body->vx 
+    foreach ($bodies as $i => $body) {
+        $tmp2 =
+              $body->vx * $body->vx 
             + $body->vy * $body->vy 
-            + $body->vz * $body->vz);
+            + $body->vz * $body->vz;
+        $tmp = $e + 0.5 * $body->mass * $tmp2;
 
-        for (int j=i+1; j < bodies.length; ++j) {
+        $slice = array_slice($bodies, $i);
+        foreach ($slice as $body2) {
+            $dx = $body->x - $body2->x;
+            $dy = $body->y - $body2->y;
+            $dz = $body->z - $body2->z;
+        }
+    /*
+        //for (int j=i+1; j < bodies.length; ++j) {
             dx = bodies[i].x - bodies[j].x;
             dy = bodies[i].y - bodies[j].y;
             dz = bodies[i].z - bodies[j].z;
@@ -40,9 +47,9 @@ function energy(array &$bodies): float
             distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
             e -= (bodies[i].mass * bodies[j].mass) / distance;
         }
-    }
-    return e;
      */
+    }
+    return $e;
 }
 
 function main(): int
@@ -100,6 +107,9 @@ function main(): int
     foreach ($bodies as $i => $body) {
         printf("%d \n", $i);
     }
+    $e = energy($bodies);
+    printf("%f\n", $e);
+
     //foreach ([1, 2, 3] as $j) {
         //printf("%d ", $j);
     //}

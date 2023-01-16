@@ -12,7 +12,6 @@ array array_slice(array old, int offset)
     if (new_length < 1) {
         return (array) {.length = 0, .thing = NULL};
     }
-    printf("%ld\n", new_length);
     array new = {
         .length = new_length,
         .thing = malloc(sizeof(uintptr_t) * new_length)

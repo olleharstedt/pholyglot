@@ -340,7 +340,9 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     | Function_call (Infer_me, "printf", String s :: xs) ->
         Log.debug "infer_stmt: printf";
         let expected_types = infer_printf s in
-        let exprs : expression list = Coerce (String_literal, String s) :: List.map2 (fun e t -> match e, t with
+        (* Convert %d to %ld etc for long *)
+        let adapted_s = Str.global_replace (Str.regexp "%d") "%ld" s in
+        let exprs : expression list = Coerce (String_literal, String adapted_s) :: List.map2 (fun e t -> match e, t with
             (* Match on xs and expected_types to check that it matches *)
             | String s, String_literal -> Coerce (String_literal, e)
             | e, t -> begin

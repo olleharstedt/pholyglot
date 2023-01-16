@@ -297,7 +297,7 @@ let%test_unit "trivial array infer" =
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%d\"");
+                        Coerce (String_literal, String "\"%ld\"");
                         Function_call (
                             Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                             "array_get",
@@ -336,7 +336,7 @@ function main()
     //<?php
     $arr 
     = array_make(long, 3, 1, 2, 3);
-     printf("%d", array_get(long, $arr, 0));
+     printf("%ld", array_get(long, $arr, 0));
     return 0;
 }
 |}
@@ -504,7 +504,7 @@ let%test_unit "double printf" =
                     Function_type {return_type = Void; arguments = [String_literal; String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%s %d\"");
+                        Coerce (String_literal, String "\"%s %ld\"");
                         Coerce (String_literal, String "\"Hello\"");
                         Num 1
                     ]
@@ -704,7 +704,7 @@ let%test_unit "infer object access" =
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
-                    [Coerce (String_literal, String "\"%d\""); Object_access (Variable "p", Property_access "x")]
+                    [Coerce (String_literal, String "\"%ld\""); Object_access (Variable "p", Property_access "x")]
                 );
                 Return (Num 0)
             ];
@@ -734,7 +734,7 @@ let%test_unit "output object access" =
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%d\"");
+                        Coerce (String_literal, String "\"%ld\"");
                         Object_access (Variable "p", Property_access "__object_property_x")
                     ]
                 );
@@ -792,7 +792,7 @@ function main()
     = new(Point);
     $p->__object_property_x 
     = 1;
-     printf("%d", $p->__object_property_x);
+     printf("%ld", $p->__object_property_x);
     return 0;
 }
 |}
@@ -1418,7 +1418,7 @@ function main(): int
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%d\"");
+                        Coerce (String_literal, String "\"%ld\"");
                         Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"};
                     ]
                 );
@@ -1434,7 +1434,7 @@ let%test_unit "transpile method" =
             Function_type {return_type = Void; arguments = [String_literal; Int]},
             "printf",
             [
-                Coerce (String_literal, String "\"%d\"");
+                Coerce (String_literal, String "\"%ld\"");
                 Method_call {
                     return_type = Int;
                     method_name = "getX";
@@ -1458,7 +1458,7 @@ let%test_unit "transpile method" =
     in
     let phast = Transpile.expression_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_expression phast in
-    [%test_eq: string] code {|pprintf("%d", $p->getX($p, $var1, moo(), array_get(long, $arr, 0)))|}
+    [%test_eq: string] code {|pprintf("%ld", $p->getX($p, $var1, moo(), array_get(long, $arr, 0)))|}
 
 
 let%test_unit "float test" =
@@ -1607,7 +1607,7 @@ let%test_unit "object access inside array access" =
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%d\"");
+                        Coerce (String_literal, String "\"%ld\"");
                         Object_access(
                             Function_call (
                                 Function_type {return_type = Class_type "Body"; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
@@ -1741,7 +1741,7 @@ let%test_unit "infer foreach" =
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
                             "printf",
                             [
-                                Coerce (String_literal, String "\"%d\"");
+                                Coerce (String_literal, String "\"%ld\"");
                                 Variable "val";
                             ]
                         );
@@ -1765,7 +1765,7 @@ let%test_unit "foreach to pholyglot" =
                 Function_type {return_type = Void; arguments = [String_literal; Int]},
                 "printf",
                 [
-                    Coerce (String_literal, String "\"%d\"");
+                    Coerce (String_literal, String "\"%ld\"");
                     Variable "val";
                 ]
             );
@@ -1785,7 +1785,7 @@ let%test_unit "foreach to pholyglot" =
     //<?php
     $val 
     = array_get(long, $arr, $__i);
-     printf("%d", $val);
+     printf("%ld", $val);
     
         }
     |}
@@ -1828,7 +1828,7 @@ let%test_unit "infer foreach with key" =
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
                             "printf",
                             [
-                                Coerce (String_literal, String "\"%d\"");
+                                Coerce (String_literal, String "\"%ld\"");
                                 Variable "i";
                             ]
                         );
@@ -1891,7 +1891,7 @@ let%test_unit "array slice test" =
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%d\"");
+                        Coerce (String_literal, String "\"%ld\"");
                         Variable "i";
                     ]
                 );
@@ -1931,7 +1931,7 @@ let%test_unit "array slice pholyglot code" =
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
-                        Coerce (String_literal, String "\"%d\"");
+                        Coerce (String_literal, String "\"%ld\"");
                         Variable "i";
                     ]
                 );
@@ -1960,7 +1960,7 @@ function foo()
     //<?php
     $i 
     = array_get(long, $arr2, 0);
-     printf("%d", $i);
+     printf("%ld", $i);
     }
 |}
 
