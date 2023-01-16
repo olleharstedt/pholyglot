@@ -30,25 +30,16 @@ function energy(array &$bodies): float
               $body->vx * $body->vx 
             + $body->vy * $body->vy 
             + $body->vz * $body->vz;
-        $tmp = $e + 0.5 * $body->mass * $tmp2;
+        $e += 0.5 * $body->mass * $tmp2;
 
-        $slice = array_slice($bodies, $i);
+        $slice = array_slice($bodies, $i + 1);
         foreach ($slice as $body2) {
             $dx = $body->x - $body2->x;
             $dy = $body->y - $body2->y;
             $dz = $body->z - $body2->z;
             $distance = sqrt($dx*$dx + $dy*$dy + $dz*$dz);
-			$e -= $body->mass * $body2->mass / $distance;
+			$e -= ($body->mass * $body2->mass) / $distance;
         }
-    /*
-        //for (int j=i+1; j < bodies.length; ++j) {
-            dx = bodies[i].x - bodies[j].x;
-            dy = bodies[i].y - bodies[j].y;
-            dz = bodies[i].z - bodies[j].z;
-
-            e -= (bodies[i].mass * bodies[j].mass) / distance;
-        }
-     */
     }
     return $e;
 }
