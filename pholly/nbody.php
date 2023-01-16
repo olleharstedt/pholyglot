@@ -37,6 +37,7 @@ function energy(array &$bodies): float
             $dx = $body->x - $body2->x;
             $dy = $body->y - $body2->y;
             $dz = $body->z - $body2->z;
+            $distance = sqrt($dx*$dx + $dy*$dy + $dz*$dz);
         }
     /*
         //for (int j=i+1; j < bodies.length; ++j) {
@@ -44,7 +45,6 @@ function energy(array &$bodies): float
             dy = bodies[i].y - bodies[j].y;
             dz = bodies[i].z - bodies[j].z;
 
-            distance = Math.sqrt(dx*dx + dy*dy + dz*dz);
             e -= (bodies[i].mass * bodies[j].mass) / distance;
         }
      */
