@@ -68,6 +68,9 @@ and statement =
     | Return of expression
     | Plusplus of lvalue
     | Minusminus of lvalue
+    (** TODO: Not needed if you use assignment instead? *)
+    | Minuseq of lvalue * expression
+    | Pluseq of lvalue * expression
     | Assignment of typ * lvalue * expression
     | Function_call of typ * identifier * expression list
     | For of {
@@ -220,6 +223,8 @@ let rec string_of_statement = function
     | Return exp -> "return " ^ string_of_expression exp ^ ";\n"
     | Plusplus (Variable v) -> string_of_expression (Variable v) ^ "++;\n"
     | Minusminus (Variable v) -> string_of_expression (Variable v) ^ "--;\n"
+    | Pluseq (Variable v, e) -> string_of_expression (Variable v) ^ " += " ^ string_of_expression e ^ ";\n"
+    | Minuseq (Variable v, e) -> string_of_expression (Variable v) ^ " -= " ^ string_of_expression e ^ ";\n"
     | Function_call (Function_type {return_type = Void; arguments}, id, exprs) ->
         sprintf {| %s(%s);
     |}

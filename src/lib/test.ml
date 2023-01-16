@@ -2012,7 +2012,7 @@ $a--;
 }
 |}
 
-let%test_unit "plusplus and minusminus" =
+let%test_unit "pluseq and minuseq" =
     let source = {|<?php // @pholyglot
     function foo(): void {
         $a = 10;
@@ -2038,6 +2038,35 @@ let%test_unit "plusplus and minusminus" =
             ]
         }
     ])
+
+let%test_unit "pluseq and minuseq pholyglot" =
+    let fn = Ast.Function {
+        name = "foo";
+        docblock = [];
+        params = [];
+        function_type = Function_type {return_type = Void; arguments = []};
+        stmts = [
+            Assignment (Int, Variable "a", Num 10);
+            Pluseq (Variable "a", Num 10);
+            Minuseq (Variable "a", Times (Num 10, Num 2));
+        ]
+    }
+    in
+    let phast = Transpile.declaration_to_pholyglot fn in
+    let code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] code {|#define function void
+function foo()
+#undef function
+{
+    //?>
+    long
+    //<?php
+    $a 
+    = 10;
+    $a += 10;
+$a -= 10 * 2;
+}
+|}
 
 
     (*
