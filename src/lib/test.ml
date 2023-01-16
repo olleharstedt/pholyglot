@@ -2017,7 +2017,7 @@ let%test_unit "pluseq and minuseq" =
     function foo(): void {
         $a = 10;
         $a += 10;
-        $a -= 10 * 2;
+        $a -= (10 * 2);
     }
     |} in
     let ast =
@@ -2034,7 +2034,7 @@ let%test_unit "pluseq and minuseq" =
             stmts = [
                 Assignment (Int, Variable "a", Num 10);
                 Pluseq (Variable "a", Num 10);
-                Minuseq (Variable "a", Times (Num 10, Num 2));
+                Minuseq (Variable "a", Parenth (Times (Num 10, Num 2)));
             ]
         }
     ])
@@ -2048,7 +2048,7 @@ let%test_unit "pluseq and minuseq pholyglot" =
         stmts = [
             Assignment (Int, Variable "a", Num 10);
             Pluseq (Variable "a", Num 10);
-            Minuseq (Variable "a", Times (Num 10, Num 2));
+            Minuseq (Variable "a", Parenth (Times (Num 10, Num 2)));
         ]
     }
     in
@@ -2064,7 +2064,7 @@ function foo()
     $a 
     = 10;
     $a += 10;
-$a -= 10 * 2;
+$a -= (10 * 2);
 }
 |}
 

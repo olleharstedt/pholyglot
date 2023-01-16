@@ -185,6 +185,7 @@ expr:
   | MINUS f=FLOAT                                                {Num_float (-. f)}
   | f=FLOAT                                                      {Num_float f}
   | s=STRING_LITERAL                                             {String s}
+  | "(" e=expr ")"                                               {Parenth e}
   | e=expr "+" f=expr                                            {Plus (e, f)} 
   | e=expr "-" f=expr                                            {Minus (e, f)} 
   | e=expr "*" f=expr                                            {Times (e, f)} 

@@ -49,6 +49,7 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Constant s -> Pholyglot_ast.Constant s
     | Num i -> Pholyglot_ast.Num i
     | Num_float f -> Pholyglot_ast.Num_float f
+    | Parenth e -> Pholyglot_ast.Parenth (expression_to_pholyglot e)
     | Plus (i, j) -> Pholyglot_ast.Plus (expression_to_pholyglot i, expression_to_pholyglot j)
     | Minus (i, j) -> Pholyglot_ast.Minus (expression_to_pholyglot i, expression_to_pholyglot j)
     | Times (i, j) -> Pholyglot_ast.Times (expression_to_pholyglot i, expression_to_pholyglot j)

@@ -125,6 +125,7 @@ and expression =
     (** TODO: GString *)
     | String of string
     | Constant of string
+    | Parenth of expression
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression

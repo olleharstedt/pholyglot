@@ -90,6 +90,7 @@ and expression =
     | Num_float of float
     | String of string
     | Constant of string (* Used in array_make(int, 2, 1, 2) *)
+    | Parenth of expression
     | Plus of expression * expression
     | Minus of expression * expression
     | Times of expression * expression
@@ -174,6 +175,7 @@ let rec string_of_expression = function
 	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
     | String s -> sprintf "g_string_new(%s)" s
     | Constant s -> s
+    | Parenth e -> "(" ^ string_of_expression e ^ ")"
     | Coerce (String_literal, String s) -> s
     | Coerce (_, _) -> failwith "string_of_expression: Coerce: Do not know what to coerce"
     | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)
