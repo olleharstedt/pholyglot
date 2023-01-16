@@ -64,6 +64,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         check e;
         check f;
         String
+    | Parenth e -> typ_of_expression ns e
     | Array_init (Infer_me, length, exprs) ->
         if List.length exprs = 0 then raise (Type_error "array_init cannot be empty list");
         let first_elem = List.nth exprs 0 in

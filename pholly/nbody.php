@@ -17,6 +17,31 @@ class Body
  */
 function advance(array &$bodies, float $dt): void
 {
+    foreach ($bodies as $i => $body) {
+        $slice = array_slice($bodies, $i + 1);
+        foreach ($slice as $body2) {
+            $dx = $body->x - $body2->x;
+            $dy = $body->y - $body2->y;
+            $dz = $body->z - $body2->z;
+
+            $distance = sqrt($dx*$dx + $dy*$dy + $dz*$dz);               
+            $mag = $dt / ($distance * $distance * $distance);
+
+            $body->vx = $body->vx - $dx * $body2->mass * $mag;
+            $body->vy = $body->vy - $dy * $body2->mass * $mag;
+            $body->vz = $body->vz - $dz * $body2->mass * $mag;
+
+            $body2->vx = $body2->vx + $dx * $body->mass * $mag;
+            $body2->vy = $body2->vx + $dy * $body->mass * $mag;
+            $body2->vz = $body2->vx + $dz * $body->mass * $mag;
+        }
+    }      
+
+    foreach ($bodies as $body3) {
+        $body3->x = $body3->x + $dt * $body3->vx;
+        $body3->y = $body3->y + $dt * $body3->vy;
+        $body3->z = $body3->z + $dt * $body3->vz;
+    }      
 }
 
 /**
@@ -104,6 +129,10 @@ function main(): int
 
     //foreach ([1, 2, 3] as $j) {
         //printf("%d ", $j);
+    //}
+
+    //for (int i=0; i<n; ++i) {
+        //bodies.advance(0.01);
     //}
     printf("%f", $bodies[0]->x);
     return 0;

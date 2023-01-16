@@ -265,6 +265,7 @@ let rec string_of_statement = function
             $stmts_s
         }
     |}]
+    | s -> failwith ("Unsupported statement: " ^ show_statement s)
 
 
 let string_of_prop (p : class_property) : string = match p with

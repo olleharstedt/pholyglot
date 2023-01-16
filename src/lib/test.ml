@@ -2117,6 +2117,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* do { ... } while (bool) *)
 (* foreach ([1, 2, 3] as $i) *)
 (* foreach ($bodies as $i => $body) *)
 (* array_slice is polymorph on both memory and input type *)

@@ -12,6 +12,7 @@
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
 #define pprintf printf
+#define STDERR stderr
 typedef struct array array;
 struct array {uintptr_t* thing; size_t length; };
 array array_slice(array old, int offset)
@@ -41,6 +42,7 @@ class Body {
 #if __PHP__
 define("Body", "Body");
 define("int", "int");
+define("long", "long");
 function array_get($class, $arr, $i) { return $arr[$i]; }
 function array_make($class, $length, ...$values) { return $values; }
 function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }
@@ -81,7 +83,7 @@ function foo(array &$bodies)
 function fii(array $numbers)
 #undef function
 {
-
+    //?>
    int
    //<?php
    $i 
@@ -118,7 +120,7 @@ function main()
     //<?php
     $ints = array_make(int, 4, 1, 2, 3, 5);
     fii($ints);
-    fprintf(stderr, "hello");
+    fprintf(STDERR, "hello");
 
     //?>
     array
@@ -135,11 +137,25 @@ function main()
         //<?php
         $i 
         = array_get(long, $arr2, 0);
-        printf("\nshould be 2: %ld\n", $i);
+        pprintf("\nshould be 2: %ld\n", $i);
 
-    double d = sqrt(1.123);
-    d = d + 10.0;
-    printf("%f\n", d);
+    //?>
+    long
+    //<?php
+    $n = 1000;
+
+    //?>
+    long
+    //<?php
+    $k = 0;
+
+    do {
+        $k++;
+    } while ($k < 1000);
+    //double d = sqrt(1.123);
+    //d = d + 10.0;
+    //printf("%f\n", d);
+
     return 0;
 }
 //?>
