@@ -137,8 +137,9 @@ function main()
         = array_get(long, $arr2, 0);
         printf("\nshould be 2: %ld\n", $i);
 
-
-        double d = sqrt(1.123);
+    double d = sqrt(1.123);
+    d = d + 10.0;
+    printf("%f\n", d);
     return 0;
 }
 //?>

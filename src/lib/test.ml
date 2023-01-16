@@ -2012,6 +2012,34 @@ $a--;
 }
 |}
 
+let%test_unit "plusplus and minusminus" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $a = 10;
+        $a += 10;
+        $a -= 10 * 2;
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            function_type = Function_type {return_type = Void; arguments = []};
+            stmts = [
+                Assignment (Int, Variable "a", Num 10);
+                Pluseq (Variable "a", Num 10);
+                Minuseq (Variable "a", Times (Num 10, Num 2));
+            ]
+        }
+    ])
+
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot

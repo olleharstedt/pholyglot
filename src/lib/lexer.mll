@@ -59,6 +59,8 @@ rule token = parse
   | "0"                           { INT 0 }
   | "="                           { EQ }
   | "=="                          { EQEQ }
+  | "-="                          { MINUSEQ }
+  | "+="                          { PLUSEQ }
   | "==="                         { EQEQ }
   | "<"                           { LT }
   | ">"                           { GT }
