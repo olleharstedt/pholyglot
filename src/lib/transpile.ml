@@ -56,6 +56,8 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Div (i, j) -> Pholyglot_ast.Div (expression_to_pholyglot i, expression_to_pholyglot j)
     | Concat (s, t) -> Pholyglot_ast.Concat (expression_to_pholyglot s, expression_to_pholyglot t)
     | Variable id -> Pholyglot_ast.Variable id
+    | Lessthan (s, t) -> Pholyglot_ast.Lessthan (expression_to_pholyglot s, expression_to_pholyglot t)
+    | Greaterthan (s, t) -> Pholyglot_ast.Greaterthan (expression_to_pholyglot s, expression_to_pholyglot t)
     | Array_init (Infer_me, _, _) -> raise (Transpile_error "Array_init: Infer before transpiling")
     | Array_init (_, None, _) -> raise (Transpile_error "Array_init: Array init has no inferred length")
     | Array_init _ -> raise (Transpile_error "Array_init: This should be a function call to array_make")
@@ -133,6 +135,7 @@ let rec statement_to_pholyglot s = match s with
                 )
                 :: List.map statement_to_pholyglot body;
         }
+    | Dowhile {condition; body;} -> Pholyglot_ast.Dowhile {condition = expression_to_pholyglot condition; body = List.map statement_to_pholyglot body;}
 
 let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with
     | (name, t) -> (name, typ_to_pholyglot t)

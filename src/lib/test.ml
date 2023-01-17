@@ -2100,6 +2100,40 @@ let%test_unit "do while" =
         }
     ])
 
+let%test_unit "do while pholyglot" =
+    let fn = Ast.Function {
+        name = "foo";
+        docblock = [];
+        params = [];
+        function_type = Function_type {return_type = Void; arguments = []};
+        stmts = [
+            Assignment (Int, Variable "a", Num 10);
+            Dowhile {
+                body = [
+                    Minusminus (Variable "a");
+                ];
+                condition = Greaterthan (Variable "a", Num 0);
+            };
+        ]
+    }
+    in
+    let phast = Transpile.declaration_to_pholyglot fn in
+    let code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] code {|#define function void
+function foo()
+#undef function
+{
+    //?>
+    long
+    //<?php
+    $a 
+    = 10;
+    do {
+$a--;
+} while ($a > 0);
+}
+|}
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot

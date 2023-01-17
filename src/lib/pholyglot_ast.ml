@@ -261,7 +261,7 @@ let rec string_of_statement = function
     (string_of_expression expr)
     | For {init; condition; incr; stmts;} ->
         let init_s = string_of_statement init in
-        let stmts_s = (concat (List.map stmts ~f:string_of_statement)) in
+        let stmts_s = concat (List.map stmts ~f:string_of_statement) in
         let condition_s = string_of_expression condition in
         let incr_s = string_of_expression incr in
         [%string {|$init_s
@@ -269,7 +269,13 @@ let rec string_of_statement = function
             $stmts_s
         }
     |}]
-    | s -> failwith ("Unsupported statement: " ^ show_statement s)
+    | Dowhile {condition; body;} ->
+        let condition_s = string_of_expression condition in
+        let body_s      = concat (List.map body ~f:string_of_statement) in
+        [%string {|do {
+$body_s} while ($condition_s);
+|}]
+    | s -> failwith ("Pholyglot_ast.string_of_statement: Unsupported statement: " ^ show_statement s)
 
 
 let string_of_prop (p : class_property) : string = match p with
