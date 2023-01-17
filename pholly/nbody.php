@@ -12,6 +12,18 @@ class Body
 }
 
 /**
+ * @param Body $body
+ */
+function offsetMomentum(Body $body, float $px, float $py, float $pz): void
+{
+    $pi = 3.141592653589793;   
+    $solarmass = 4. * $pi * $pi;
+    $body->vx = (0. - $px) / $solarmass;
+    $body->vy = (0. - $py) / $solarmass;
+    $body->vz = (0. - $pz) / $solarmass;
+}                             
+
+/**
  * @param array<Body> $bodies
  * @param float $dt
  */
@@ -24,7 +36,7 @@ function advance(array &$bodies, float $dt): void
             $dy = $body->y - $body2->y;
             $dz = $body->z - $body2->z;
 
-            $distance = sqrt($dx*$dx + $dy*$dy + $dz*$dz);               
+            $distance = sqrt($dx * $dx + $dy * $dy + $dz * $dz);               
             $mag = $dt / ($distance * $distance * $distance);
 
             $body->vx = $body->vx - $dx * $body2->mass * $mag;
@@ -121,22 +133,28 @@ function main(): int
     $sun->mass = $solarmass;
 
     $bodies = [$sun, $jupiter, $saturn, $uranus, $neptune];
-    foreach ($bodies as $i => $body) {
-        printf("%d \n", $i);
-    }
+
+    $px = 0.0;
+    $py = 0.0;   
+    $pz = 0.0;            
+    foreach ($bodies as $body2) {
+        $px += $body2->vx * $body2->mass;
+        $py += $body2->vy * $body2->mass;      
+        $pz += $body2->vz * $body2->mass;            
+    }      
+    offsetMomentum($bodies[0], $px, $py, $pz);
+
     $e = energy($bodies);
     printf("%f\n", $e);
-
-    //foreach ([1, 2, 3] as $j) {
-        //printf("%d ", $j);
-    //}
-
     $k = 0;
     do {
         advance($bodies, 0.01);
         $k++;
     } while ($k < 10000);
-    printf("%f", $bodies[0]->x);
+
+    $e2 = energy($bodies);
+    printf("%f\n", $e2);
+
     return 0;
 }
 
