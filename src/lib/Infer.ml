@@ -366,11 +366,11 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, e) ->
         let t = match Namespace.find_function ns id with
-            | Some (Function_type {return_type; arguments}) -> return_type
+            | Some (Function_type {return_type; arguments} as t) -> t
             | Some t -> failwith ("not a function: " ^ show_typ t)
             | _ -> failwith ("found no function declared with name " ^ id)
         in
-        Function_call (t, id, e)
+        Function_call (t, id, infer_expressions ns e)
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 
@@ -389,6 +389,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let value_typ = typ_of_expression ns (Variable value_name) in
         Foreach {arr; key; value = Variable value_name; value_typ; value_typ_constant = typ_to_constant value_typ; body = List.map f stmts}
     end
+    | Dowhile {condition; body;} ->
+        let inf = fun s -> infer_stmt s ns in
+        let new_body = List.map inf body in
+        Dowhile {condition = infer_expression ns condition; body = new_body;}
     | s -> s
 
 let rec kind_of_typ ns t : kind = match t with
