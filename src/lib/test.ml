@@ -2134,6 +2134,24 @@ $a--;
 }
 |}
 
+let%test_unit "void return type" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+    }
+    function main(): int {
+        foo();
+        return 0;
+    }
+    |} in
+    let ns = Namespace.create () in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ()) |>
+        Transpile.run
+    in
+    ()
+
     (*
 let%test "nbody benchmark" =
     let source = {|<?php // @pholyglot

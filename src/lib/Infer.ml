@@ -364,6 +364,13 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Function_call (Function_type {return_type = Void; arguments = String_literal :: expected_types}, "printf", exprs)
     | Function_call (Infer_me, "printf", _ :: xs) ->
         failwith "infer_stmt: printf must have a string literal as first argument"
+    | Function_call (Infer_me, id, e) ->
+        let t = match Namespace.find_function ns id with
+            | Some (Function_type {return_type; arguments}) -> return_type
+            | Some t -> failwith ("not a function: " ^ show_typ t)
+            | _ -> failwith ("found no function declared with name " ^ id)
+        in
+        Function_call (t, id, e)
     | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
         let t = typ_of_expression ns arr in
         begin match t with 

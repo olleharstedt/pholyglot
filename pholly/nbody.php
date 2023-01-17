@@ -131,11 +131,11 @@ function main(): int
         //printf("%d ", $j);
     //}
 
-    //do {
-        //advance($bodies, 0.01);
-        //$k++;
-    //}
-    // while ($k < 10000);
+    $k = 0;
+    do {
+        advance($bodies, 0.01);
+        $k++;
+    } while ($k < 10000);
     printf("%f", $bodies[0]->x);
     return 0;
 }
