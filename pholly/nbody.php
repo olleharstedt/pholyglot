@@ -44,8 +44,8 @@ function advance(array &$bodies, float $dt): void
             $body->vz = $body->vz - $dz * $body2->mass * $mag;
 
             $body2->vx = $body2->vx + $dx * $body->mass * $mag;
-            $body2->vy = $body2->vx + $dy * $body->mass * $mag;
-            $body2->vz = $body2->vx + $dz * $body->mass * $mag;
+            $body2->vy = $body2->vy + $dy * $body->mass * $mag;
+            $body2->vz = $body2->vz + $dz * $body->mass * $mag;
         }
     }      
 
