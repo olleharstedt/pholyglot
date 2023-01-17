@@ -138,8 +138,8 @@ let string_of_define (d : define) : string = match d with
 
 let rec string_of_typ (t : typ) : string = match t with
     (* We need to use long and double here to keep same size as uintptr_t *)
-    | Int -> "long"
-    | Float -> "double"
+    | Int -> "int"
+    | Float -> "float"
     | String -> "GString*"
     | Void -> "void"
     | Fixed_array (t, n) -> (*string_of_typ t*) "array"
@@ -243,9 +243,7 @@ let rec string_of_statement = function
             id
             (string_of_typ fun_type)
         )
-    | Assignment (typ, Variable v, expr) -> sprintf {|//?>
-    %s
-    //<?php
+    | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
     $%s %s
     = %s;
     |}
@@ -294,10 +292,7 @@ let string_of_prop (p : class_property) : string = match p with
 let string_of_function_pointer meth : string = match meth with
   (*| (name, params, stmts, Function_type {return_type; arguments}) ->*)
     | { name; params; stmts; function_type = Function_type {return_type; arguments}} ->
-    sprintf {|//?>
-    %s (*%s) (%s);
-    //<?php
-    |}
+    sprintf {|#__C__ %s (*%s) (%s); |}
     (* Return type *)
     (string_of_typ (Function_type {return_type; arguments}))
     (* Function name *)
@@ -327,9 +322,7 @@ let string_of_method class_name meth = match meth with
         let params_s = concat ~sep:", " (List.map params ~f:string_of_param) in
         let stmts_s  = (concat (List.map stmts ~f:string_of_statement)) in
         [%string {|
-//?>
-$return_type_s $(class_name)__$(method_name) ($params_s)
-//<?php
+#__C__ $return_type_s $(class_name)__$(method_name) ($params_s)
 #if __PHP__
 public function $method_name($params_s): $return_type_s
 #endif
@@ -365,9 +358,7 @@ function $function_name($params_s)
 |}]
         end else begin
             let params_without_ref_s = concat ~sep:", " (List.map params ~f:string_of_param_without_ref) in
-            [%string {|//?>
-$typ_s $function_name($params_without_ref_s)
-//<?php
+            [%string {|#__C__ $typ_s $function_name($params_without_ref_s)
 #if __PHP__
 function $function_name($params_s): $typ_s
 #endif
@@ -384,16 +375,12 @@ function $function_name($params_s): $typ_s
         let methods = (concat (List.map ~f:string_of_method methods)) in
         (* TODO: Fix macro for sizeof *)
         [%string {|
-//?>
-typedef struct $class_name* $class_name;
-//<?php
+#__C__ typedef struct $class_name* $class_name;
 class $class_name {
     $props
     $function_pointers
 // End of C struct def. Class methods are outside the struct.
-//?>
-};
-//<?php
+#__C__ };
 $methods
 #if __PHP__
 // End of PHP class def.

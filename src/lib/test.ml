@@ -149,7 +149,7 @@ let%test_unit "trivial transpile" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function long
+    [%test_eq: string] pholyglot_code {|#define function int
 function main()
 #undef function
 {
@@ -172,13 +172,11 @@ let%test_unit "trivial arith transpile" =
     let ast = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function long
+    [%test_eq: string] pholyglot_code {|#define function int
 function main()
 #undef function
 {
-    //?>
-    long
-    //<?php
+    #__C__ int
     $a 
     = 0;
     return $a + 1 - 1 * 1 / 1;
@@ -290,7 +288,7 @@ let%test_unit "trivial array infer" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "long"; Num 3; Num 1; Num 2; Num 3;]
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3;]
                     )
                 );
                 Function_call (
@@ -301,7 +299,7 @@ let%test_unit "trivial array infer" =
                         Function_call (
                             Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                             "array_get",
-                            [Constant "long"; Variable "arr"; Num 0]
+                            [Constant "int"; Variable "arr"; Num 0]
                         );
                     ]
                 );
@@ -327,16 +325,14 @@ let%test_unit "trivial array infer and print" =
     let fn = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot fn in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function long
+    [%test_eq: string] pholyglot_code {|#define function int
 function main()
 #undef function
 {
-    //?>
-    array
-    //<?php
+    #__C__ array
     $arr 
-    = array_make(long, 3, 1, 2, 3);
-     printf("%ld", array_get(long, $arr, 0));
+    = array_make(int, 3, 1, 2, 3);
+     printf("%ld", array_get(int, $arr, 0));
     return 0;
 }
 |}
@@ -366,16 +362,14 @@ class GString { public $str; public function __construct($str) { $this->str = $s
 function g_string_new(string $str) { return new GString($str); }
 function g_string_append(GString $s1, string $s2) { return new GString($s1->str . $s2); }
 define("int", "int");
-define("long", "long");
 define("float", "float");
-define("double", "double");
 define("string", "string");
 function array_get($type, $arr, $i) { return $arr[$i]; }
 function array_make($type, $length, ...$values) { return $values; }
 function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }
 #endif//?>
 //<?php
-#define function long
+#define function int
 function main()
 #undef function
 {
@@ -441,19 +435,17 @@ let%test_unit "two functions to pholyglot" =
         }
     ] |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: string] code {|#define function long
-function foo(long $c)
+    [%test_eq: string] code {|#define function int
+function foo(int $c)
 #undef function
 {
     return $c + 20;
 }
-#define function long
+#define function int
 function main()
 #undef function
 {
-    //?>
-    long
-    //<?php
+    #__C__ int
     $b 
     = foo(10 + 20);
     return $b + 30;
@@ -743,20 +735,18 @@ let%test_unit "output object access" =
 typedef struct Point* Point;
 //<?php
 class Point {
-    #define public long
+    #define public int
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
-#define public long
+#define public int
 #define __object_property_y $__object_property_y
     public $__object_property_y;
 #undef public
 
     
 // End of C struct def. Class methods are outside the struct.
-//?>
-};
-//<?php
+#__C__ };
 
 #if __PHP__
 // End of PHP class def.
@@ -773,13 +763,11 @@ Point Point__constructor(Point $p)
     return $p;
 }
 //<?php
-#define function long
+#define function int
 function main()
 #undef function
 {
-    //?>
-    Point
-    //<?php
+    #__C__ Point
     $p 
     = new(Point);
     $p->__object_property_x 
@@ -1157,9 +1145,7 @@ void foo(array $bodies, double $dt)
 function foo(array &$bodies, double $dt): void
 #endif
 {
-    //?>
-    long
-    //<?php
+    #__C__ int
     $a 
     = 123;
     }
@@ -1245,29 +1231,20 @@ let%test_unit "simple getter" =
          |> Pholyglot_ast.string_of_declare
     in
     [%test_eq: string] code {|
-//?>
-typedef struct Point* Point;
-//<?php
+#__C__ typedef struct Point* Point;
 class Point {
-    #define public long
+    #define public int
 #define __object_property_x $__object_property_x
     public $__object_property_x;
 #undef public
 
-    //?>
-    long (*getX) (Point $self);
-    //<?php
-    
+    #__C__ int (*getX) (Point $self);
 // End of C struct def. Class methods are outside the struct.
-//?>
-};
-//<?php
+#__C__ };
 
-//?>
-long Point__getX (Point $self)
-//<?php
+#__C__ int Point__getX (Point $self)
 #if __PHP__
-public function getX(Point $self): long
+public function getX(Point $self): int
 #endif
 {
     return $self->__object_property_x;
@@ -1440,7 +1417,7 @@ let%test_unit "transpile method" =
                         Function_call (
                             Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                             "array_get",
-                            [Constant "long"; Variable "arr"; Num 0]
+                            [Constant "int"; Variable "arr"; Num 0]
                         );
                     ];
                     left_hand = Variable "p";
@@ -1450,7 +1427,7 @@ let%test_unit "transpile method" =
     in
     let phast = Transpile.expression_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_expression phast in
-    [%test_eq: string] code {|pprintf("%ld", $p->getX($p, $var1, moo(), array_get(long, $arr, 0)))|}
+    [%test_eq: string] code {|pprintf("%ld", $p->getX($p, $var1, moo(), array_get(int, $arr, 0)))|}
 
 
 let%test_unit "float test" =
@@ -1508,13 +1485,11 @@ let%test_unit "float to code test" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function long
+    [%test_eq: string] code {|#define function int
 function main()
 #undef function
 {
-    //?>
-    double
-    //<?php
+    #__C__ float
     $a 
     = 1. + 2. - 3.25;
     return 0;
@@ -1648,21 +1623,15 @@ let%test_unit "object access inside array access transpile" =
 function foo()
 #undef function
 {
-    //?>
-    Body
-    //<?php
+    #__C__ Body
     $b 
     = new(Body);
     $b->__object_property_x 
     = 10;
-    //?>
-    array
-    //<?php
+    #__C__ array
     $arr 
     = array_make(Body, 1, $b);
-    //?>
-    long
-    //<?php
+    #__C__ int
     $x 
     = array_get(Body, $arr, 0)->__object_property_x;
     }
@@ -1719,7 +1688,7 @@ let%test_unit "infer foreach" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "long"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Foreach {
@@ -1727,7 +1696,7 @@ let%test_unit "infer foreach" =
                     key = None; 
                     value = Variable "val";
                     value_typ = Int;
-                    value_typ_constant = Constant "long";
+                    value_typ_constant = Constant "int";
                     body = [
                         Function_call (
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1751,7 +1720,7 @@ let%test_unit "foreach to pholyglot" =
         key = None; 
         value = Variable "val";
         value_typ = Int;
-        value_typ_constant = Constant "long";
+        value_typ_constant = Constant "int";
         body = [
             Function_call (
                 Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1765,18 +1734,14 @@ let%test_unit "foreach to pholyglot" =
     } in
     let phast = Transpile.statement_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_statement phast in
-    [%test_eq: string] code {|//?>
-    long
-    //<?php
+    [%test_eq: string] code {|#__C__ int
     $__i 
     = 0;
     
         for (; $__i < count($arr); $__i = $__i + 1) {
-            //?>
-    long
-    //<?php
+            #__C__ int
     $val 
-    = array_get(long, $arr, $__i);
+    = array_get(int, $arr, $__i);
      printf("%ld", $val);
     
         }
@@ -1806,7 +1771,7 @@ let%test_unit "infer foreach with key" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "long"; Num 3; Num 2; Num 3; Num 4]
+                        [Constant "int"; Num 3; Num 2; Num 3; Num 4]
                     )
                 );
                 Foreach {
@@ -1814,7 +1779,7 @@ let%test_unit "infer foreach with key" =
                     key = Some (Variable "i");
                     value = Variable "val";
                     value_typ = Int;
-                    value_typ_constant = Constant "long";
+                    value_typ_constant = Constant "int";
                     body = [
                         Function_call (
                             Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -1862,7 +1827,7 @@ let%test_unit "array slice test" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "long"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
@@ -1876,7 +1841,7 @@ let%test_unit "array slice test" =
                     Function_call (
                         Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                         "array_get",
-                        [Constant "long"; Variable "arr2"; Num 0]
+                        [Constant "int"; Variable "arr2"; Num 0]
                     )
                 );
                 Function_call (
@@ -1902,7 +1867,7 @@ let%test_unit "array slice pholyglot code" =
                     Function_call (
                         Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
                         "array_make",
-                        [Constant "long"; Num 3; Num 1; Num 2; Num 3]
+                        [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
@@ -1916,7 +1881,7 @@ let%test_unit "array slice pholyglot code" =
                     Function_call (
                         Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
                         "array_get",
-                        [Constant "long"; Variable "arr2"; Num 0]
+                        [Constant "int"; Variable "arr2"; Num 0]
                     )
                 );
                 Function_call (
@@ -1937,21 +1902,15 @@ let%test_unit "array slice pholyglot code" =
 function foo()
 #undef function
 {
-    //?>
-    array
-    //<?php
+    #__C__ array
     $arr 
-    = array_make(long, 3, 1, 2, 3);
-    //?>
-    array
-    //<?php
+    = array_make(int, 3, 1, 2, 3);
+    #__C__ array
     $arr2 
     = array_slice($arr, 1);
-    //?>
-    long
-    //<?php
+    #__C__ int
     $i 
-    = array_get(long, $arr2, 0);
+    = array_get(int, $arr2, 0);
      printf("%ld", $i);
     }
 |}
@@ -2002,9 +1961,7 @@ let%test_unit "plusplus and minusminus pholyglot" =
 function foo()
 #undef function
 {
-    //?>
-    long
-    //<?php
+    #__C__ int
     $a 
     = 10;
     $a++;
@@ -2058,9 +2015,7 @@ let%test_unit "pluseq and minuseq pholyglot" =
 function foo()
 #undef function
 {
-    //?>
-    long
-    //<?php
+    #__C__ int
     $a 
     = 10;
     $a += 10;
@@ -2123,9 +2078,7 @@ let%test_unit "do while pholyglot" =
 function foo()
 #undef function
 {
-    //?>
-    long
-    //<?php
+    #__C__ int
     $a 
     = 10;
     do {
