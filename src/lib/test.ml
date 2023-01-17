@@ -1250,7 +1250,7 @@ class Point {
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
 
-    #__C__ int Point__getX (Point $self);
+#__C__ int Point__getX (Point $self)
 #if __PHP__
 public function getX(Point $self): int
 #endif
@@ -1286,6 +1286,7 @@ Point Point__constructor(Point $p)
             print_int (Caml.Char.code code.[i]);
             print_endline "\nExpected:";
             print_int (Caml.Char.code should_be.[i]);
+            exit 1;
         end;
     done;
     *)
