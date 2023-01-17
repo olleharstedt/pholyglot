@@ -3,6 +3,19 @@ open Base
 open Expect_test_helpers_base
 module Log = Dolog.Log
 
+(*
+let levenshtein s t =
+   let rec dist i j = match (i,j) with
+      | (i,0) -> i
+      | (0,j) -> j
+      | (i,j) ->
+         if s.[i-1] = t.[j-1] then dist (i-1) (j-1)
+         else let d1, d2, d3 = dist (i-1) j, dist i (j-1), dist (i-1) (j-1) in
+         1 + min d1 (min d2 d3)
+   in
+   dist (String.length s) (String.length t)
+*)
+
 let rec string_of_doctoken (token : Docblockparser.token) : string =
     let open Docblockparser in
     match token with
@@ -729,9 +742,7 @@ let%test_unit "output object access" =
          |> Pholyglot_ast.string_of_declares
     in
     [%test_eq: string] code {|
-//?>
-typedef struct Point* Point;
-//<?php
+#__C__ typedef struct Point* Point;
 class Point {
     #define public int
 #define __object_property_x $__object_property_x
@@ -1226,7 +1237,8 @@ let%test_unit "simple getter" =
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
     in
-    [%test_eq: string] code {|
+
+    let should_be = {|
 #__C__ typedef struct Point* Point;
 class Point {
     #define public int
@@ -1234,11 +1246,11 @@ class Point {
     public $__object_property_x;
 #undef public
 
-    #__C__ int (*getX) (Point $self);
+    #__C__ int (*getX) (Point $self); 
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
 
-#__C__ int Point__getX (Point $self)
+    #__C__ int Point__getX (Point $self);
 #if __PHP__
 public function getX(Point $self): int
 #endif
@@ -1264,6 +1276,21 @@ Point Point__constructor(Point $p)
 }
 //<?php
 |}
+    in
+
+    (*
+    for i = 0 to String.length code do
+        print_char code.[i];
+        if code.[i] != should_be.[i] then begin
+            print_endline "\nGot:";
+            print_int (Caml.Char.code code.[i]);
+            print_endline "\nExpected:";
+            print_int (Caml.Char.code should_be.[i]);
+        end;
+    done;
+    *)
+
+    [%test_eq: string] code should_be
 
 let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
