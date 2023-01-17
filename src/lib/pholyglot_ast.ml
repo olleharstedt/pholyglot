@@ -244,15 +244,13 @@ let rec string_of_statement = function
             (string_of_typ fun_type)
         )
     | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
-    $%s %s
-    = %s;
+    $%s %s= %s;
     |}
     (string_of_typ typ)
     v
     (string_of_typ_post typ)
     (string_of_expression expr)
-    | Assignment (typ, lvalue, expr) -> sprintf {|$%s %s
-    = %s;
+    | Assignment (typ, lvalue, expr) -> sprintf {|$%s %s= %s;
     |}
     (string_of_lvalue lvalue)
     (string_of_typ_post typ)

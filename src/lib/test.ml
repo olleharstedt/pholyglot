@@ -190,8 +190,7 @@ function main()
 #undef function
 {
     #__C__ int
-    $a 
-    = 0;
+    $a = 0;
     return $a + 1 - 1 * 1 / 1;
 }
 |}
@@ -343,8 +342,7 @@ function main()
 #undef function
 {
     #__C__ array
-    $arr 
-    = array_make(int, 3, 1, 2, 3);
+    $arr = array_make(int, 3, 1, 2, 3);
      printf("%ld", array_get(int, $arr, 0));
     return 0;
 }
@@ -387,8 +385,7 @@ function main()
 #undef function
 {
     #__C__ GString*
-    $str 
-    = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
+    $str = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
 }
 // ?>
@@ -457,8 +454,7 @@ function main()
 #undef function
 {
     #__C__ int
-    $b 
-    = foo(10 + 20);
+    $b = foo(10 + 20);
     return $b + 30;
 }
 |}
@@ -777,10 +773,8 @@ function main()
 #undef function
 {
     #__C__ Point
-    $p 
-    = new(Point);
-    $p->__object_property_x 
-    = 1;
+    $p = new(Point);
+    $p->__object_property_x = 1;
      printf("%ld", $p->__object_property_x);
     return 0;
 }
@@ -1153,8 +1147,7 @@ function foo(array &$bodies, float $dt): void
 #endif
 {
     #__C__ int
-    $a 
-    = 123;
+    $a = 123;
     }
 |}
 
@@ -1514,8 +1507,7 @@ function main()
 #undef function
 {
     #__C__ float
-    $a 
-    = 1. + 2. - 3.25;
+    $a = 1. + 2. - 3.25;
     return 0;
 }
 |}
@@ -1648,16 +1640,12 @@ function foo()
 #undef function
 {
     #__C__ Body
-    $b 
-    = new(Body);
-    $b->__object_property_x 
-    = 10;
+    $b = new(Body);
+    $b->__object_property_x = 10;
     #__C__ array
-    $arr 
-    = array_make(Body, 1, $b);
+    $arr = array_make(Body, 1, $b);
     #__C__ int
-    $x 
-    = array_get(Body, $arr, 0)->__object_property_x;
+    $x = array_get(Body, $arr, 0)->__object_property_x;
     }
 |}
 
@@ -1759,13 +1747,11 @@ let%test_unit "foreach to pholyglot" =
     let phast = Transpile.statement_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_statement phast in
     [%test_eq: string] code {|#__C__ int
-    $__i 
-    = 0;
+    $__i = 0;
     
         for (; $__i < count($arr); $__i = $__i + 1) {
             #__C__ int
-    $val 
-    = array_get(int, $arr, $__i);
+    $val = array_get(int, $arr, $__i);
      printf("%ld", $val);
     
         }
@@ -1927,14 +1913,11 @@ function foo()
 #undef function
 {
     #__C__ array
-    $arr 
-    = array_make(int, 3, 1, 2, 3);
+    $arr = array_make(int, 3, 1, 2, 3);
     #__C__ array
-    $arr2 
-    = array_slice($arr, 1);
+    $arr2 = array_slice($arr, 1);
     #__C__ int
-    $i 
-    = array_get(int, $arr2, 0);
+    $i = array_get(int, $arr2, 0);
      printf("%ld", $i);
     }
 |}
@@ -1986,8 +1969,7 @@ function foo()
 #undef function
 {
     #__C__ int
-    $a 
-    = 10;
+    $a = 10;
     $a++;
 $a--;
 }
@@ -2040,8 +2022,7 @@ function foo()
 #undef function
 {
     #__C__ int
-    $a 
-    = 10;
+    $a = 10;
     $a += 10;
 $a -= (10 * 2);
 }
@@ -2103,8 +2084,7 @@ function foo()
 #undef function
 {
     #__C__ int
-    $a 
-    = 10;
+    $a = 10;
     do {
 $a--;
 } while ($a > 0);
