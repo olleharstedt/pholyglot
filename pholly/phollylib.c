@@ -1,6 +1,9 @@
-#include <stdio.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <stdint.h>
+#define float double
+#define int long
+// TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));                                                                                                              
 #define class struct
 #define __PHP__ 0
 #define new(x) x ## __constructor(alloca(sizeof(struct x)))
