@@ -373,9 +373,7 @@ function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args
 function main()
 #undef function
 {
-    //?>
-    GString*
-    //<?php
+    #__C__ GString*
     $str 
     = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
@@ -468,7 +466,7 @@ let%test_unit "infer_printf 4" =
     let t = Infer.infer_printf "Bla bla $something !!! %s moo foo %deee" in
     [%test_eq: Ast.typ list] t [Ast.String_literal; Ast.Int]
 
-let%test_unit "double printf" =
+let%test_unit "float printf" =
     let source = {|<?php // @pholyglot
     function main(): int {
         printf("%s %d", "Hello", 1);
@@ -1138,11 +1136,9 @@ let%test_unit "transpile docblock object array" =
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
     in
-    [%test_eq: string] code {|//?>
-void foo(array $bodies, double $dt)
-//<?php
+    [%test_eq: string] code {|#__C__ void foo(array $bodies, float $dt)
 #if __PHP__
-function foo(array &$bodies, double $dt): void
+function foo(array &$bodies, float $dt): void
 #endif
 {
     #__C__ int
