@@ -150,7 +150,7 @@ function main(): int
     do {
         advance($bodies, 0.01);
         $k++;
-    } while ($k < 10000);
+    } while ($k < 50000000);
 
     $e2 = energy($bodies);
     printf("%f\n", $e2);
