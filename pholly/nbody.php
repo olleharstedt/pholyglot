@@ -131,9 +131,11 @@ function main(): int
         //printf("%d ", $j);
     //}
 
-    //for (int i=0; i<n; ++i) {
-        //bodies.advance(0.01);
+    //do {
+        //advance($bodies, 0.01);
+        //$k++;
     //}
+    // while ($k < 10000);
     printf("%f", $bodies[0]->x);
     return 0;
 }

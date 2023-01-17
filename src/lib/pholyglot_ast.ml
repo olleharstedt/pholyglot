@@ -79,6 +79,10 @@ and statement =
         incr:      expression;
         stmts:     statement list;
     }
+    | Dowhile of {
+        condition: expression;
+        body:      statement list;
+    }
 
 and lvalue =
     | Variable of identifier

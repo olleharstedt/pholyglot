@@ -96,6 +96,8 @@ rule token = parse
   | "&"                           { AMPERSAND }
   | "foreach"                     { FOREACH }
   | "as"                          { AS }
+  | "do"                          { DO }
+  | "while"                       { WHILE }
   | ['"'] [^ '"']+ ['"'] as s     { STRING_LITERAL s }
   | class_name as n               { CLASS_NAME n}
   | var_identifier as id          { VAR_NAME (String.sub id 1 (String.length id - 1)) }

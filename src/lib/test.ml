@@ -2068,6 +2068,37 @@ $a -= (10 * 2);
 }
 |}
 
+let%test_unit "do while" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        $a = 10;
+        do {
+            $a--;
+        } while($a > 0);
+    }
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            function_type = Function_type {return_type = Void; arguments = []};
+            stmts = [
+                Assignment (Int, Variable "a", Num 10);
+                Dowhile {
+                    body = [
+                        Minusminus (Variable "a");
+                    ];
+                    condition = Greaterthan (Variable "a", Num 0);
+                };
+            ]
+        }
+    ])
 
     (*
 let%test "nbody benchmark" =

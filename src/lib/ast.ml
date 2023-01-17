@@ -99,12 +99,16 @@ and statement =
     | Pluseq of lvalue * expression
     | Function_call of typ * identifier * expression list
     | Foreach of {
-        arr:       expression; (* Must be Variable expression *)
+        arr:       expression; (* Must be Variable expression TODO: Should support inline foreach([1 2 3] ...) *)
         key:       expression option; (* Must be Variable if it exists *)
         value:     expression; (* Must be Variable *)
         value_typ: typ;
         value_typ_constant: expression;
         body:      statement list;
+    }
+    | Dowhile of {
+        condition: expression;     (* Must have boolean type *)
+        body:      statement list; (* Must not be empty *)
     }
     (* If-statement, or only if-expression *)
     (* While-loop *)

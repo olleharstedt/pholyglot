@@ -73,6 +73,8 @@ let get_class_methods elems =
 %token PRIVATE "private"
 %token FOREACH "foreach"
 %token AS "as"
+%token DO "do"
+%token WHILE "while"
 
 %left DOT
 %left PLUS MINUS        /* lowest precedence */
@@ -125,6 +127,7 @@ statement:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
   | FOREACH "(" n=VAR_NAME AS m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = None; value = Variable m; value_typ = Infer_me; value_typ_constant = Nil; body = stmts} }
   | FOREACH "(" n=VAR_NAME AS k=VAR_NAME FATARROW m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = Some (Variable k); value = Variable m; value_typ = Infer_me; value_typ_constant = Nil; body = stmts} }
+  | DO "{" stmts=list(statement) "}" WHILE "(" e=expr ")" ";" {Dowhile {condition = e; body = stmts;}}
 
 (* TODO: Must use property and method in same rule to avoid reduce/reduce ? *)
 class_element: 
