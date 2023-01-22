@@ -927,3 +927,24 @@ function foo(): void {
             function_type = Function_type {return_type = Void; arguments = []};
         };
     ])
+
+let%test_unit "method call as statement pholyglot" =
+    let ast =
+        Ast.Function { 
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Int, Variable "x", Num 10);
+                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Method_call {
+                    lvalue = Object_access ("b", Property_access "__object_property_doSomething");
+                    args   = [Variable "x"];
+                }
+            ];
+            function_type = Function_type {return_type = Void; arguments = []};
+        }
+    in
+    let phast = Transpile.declaration_to_pholyglot ast in
+    let code = Pholyglot_ast.string_of_declare phast in
+    [%test_eq: string] code ""

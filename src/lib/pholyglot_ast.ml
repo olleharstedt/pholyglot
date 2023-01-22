@@ -73,6 +73,10 @@ and statement =
     | Pluseq of lvalue * expression
     | Assignment of typ * lvalue * expression
     | Function_call of typ * identifier * expression list
+    | Method_call of {
+        lvalue: lvalue;
+        args:   expression list;
+    }
     | For of {
         init:      statement;       (* Init happens outside the for-statement *)
         condition: expression;
@@ -243,6 +247,13 @@ let rec string_of_statement = function
             id
             (string_of_typ fun_type)
         )
+    | Method_call {lvalue = Object_access (id, Property_access m); args} ->
+        (** TODO: Ugle hack to remove __object_property - shouldn't be here in the first place *)
+        let m = Str.global_replace (Str.regexp "__object_property_") "" m in
+        let args : expression list = Variable id :: args in
+        let args_s   = concat ~sep:", " (List.map args ~f:string_of_expression) in
+        [%string {|$$$id->$m($args_s);
+|}]
     | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
     $%s %s= %s;
     |}

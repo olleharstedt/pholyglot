@@ -105,6 +105,7 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Pluseq (v, e) -> Pholyglot_ast.Pluseq (lvalue_to_pholyglot v, expression_to_pholyglot e)
     | Ast.Minuseq (v, e) -> Pholyglot_ast.Minuseq (lvalue_to_pholyglot v, expression_to_pholyglot e)
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
+    | Ast.Method_call {lvalue; args} -> Pholyglot_ast.Method_call {lvalue = lvalue_to_pholyglot lvalue; args = List.map expression_to_pholyglot args}
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     (* TODO: foreach ([1, 2, 3] as $i) { ... } *)
     | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->

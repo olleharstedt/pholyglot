@@ -197,6 +197,7 @@ typ:
 
 lvalue:
   | n=VAR_NAME                  {Variable n}
+                                (* TODO: This is not the correct plact to inject __object_property ? Can also be method call. *)
   | id=NAME                     {Property_access ("__object_property_" ^ id)}
   | n=VAR_NAME "->" v=lvalue    {Object_access (n, v)}
 
