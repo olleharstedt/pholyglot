@@ -25,10 +25,9 @@ docblock:
 
 docblock_line:
   (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
-  | "@param" {DocParam ("asd", Int) }
-  | "@param" t=typ s=VAR_NAME {DocParam (s, t) }
+  | "@param" t=typ s=VAR_NAME                 {DocParam (s, t) }
+  | "@param" "array" s=VAR_NAME               { failwith "Must be more precise in docblock than just 'array'" }
   | "@param" "array" "<" t=typ ">" s=VAR_NAME {DocParam (s, Dynamic_array t) }
-  | START_OF_COMMENT { failwith "wrong" }
 
 typ:
   | "int"      {Int : Ast.typ}

@@ -335,7 +335,7 @@ function main(): int
     | exception Infer.Type_error _ -> true
     | _ -> false
 
-let%test_unit "method" =
+let%test_unit "simple getter" =
     let source = "<?php // @pholyglot
 class Point
 {
@@ -370,7 +370,7 @@ class Point
         }
     ])
 
-let%test_unit "simple getter" =
+let%test_unit "simple getter pholyglot" =
     let code = Ast.Class {
             name = "Point";
             kind = Val;
@@ -445,6 +445,34 @@ Point Point__constructor(Point $p)
     *)
 
     [%test_eq: string] code should_be
+
+let%test_unit "offsetMomentum method" =
+    let source = "<?php // @pholyglot
+class Body
+{
+    public float $vx;
+    public float $vy;
+    public float $vz;
+
+    /**
+     * @param int $px
+     */
+    public function offsetMomentum(float $px, float $py, float $pz): void
+    {
+        $pi = 3.141592653589793;   
+        $solarmass = 4. * $pi * $pi;
+        $this->vx = (0. - $px) / $solarmass;
+        $this->vy = (0. - $py) / $solarmass;
+        $this->vz = (0. - $pz) / $solarmass;
+    }
+}
+    " in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [])
 
 let%test "return ref type is invalid" =
     let source = {|<?php // @pholyglot

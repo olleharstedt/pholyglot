@@ -142,6 +142,17 @@ class_element:
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
         }
     }
+  | doc=DOCBLOCK_AS_STR property_modifier "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
+        let linebuf = Lexing.from_string doc in
+        let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in
+        Method {
+            name;
+            docblock = cb;
+            params;
+            stmts;
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+        }
+    }
 
 property_modifier:
   | "public" {}
