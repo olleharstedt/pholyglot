@@ -483,13 +483,17 @@ let infer_method meth ns : function_def = match meth with
         stmts;
         function_type = Function_type {return_type; arguments};
     } ->
-        let params = unify_params_with_docblock params docblock in
+        let params : Ast.param list = unify_params_with_docblock params docblock in
         let ftyp =
             unify_params_with_function_type
             params
             (Function_type {return_type; arguments})
         in
         let ns = Namespace.reset_identifiers ns in
+        (* TODO: Add method args to ns *)
+        List.iter (fun p -> match p with
+            | Param (id, typ) | RefParam (id, typ) -> Namespace.add_identifier ns id typ
+        ) params;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         {name; docblock; params; stmts = new_stmts; function_type = ftyp}
