@@ -169,7 +169,7 @@ let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
     | Object_access (id, Property_access prop_name) ->
         (* TODO Code duplication *)
-        let id = if id = "this" then "self" else id in
+        let id = if id = "this" then "__self" else id in
         sprintf {|%s->%s|} id prop_name
     | Property_access n -> n
 
@@ -191,7 +191,7 @@ let rec string_of_expression = function
     | Greaterthan (s, t) -> sprintf "%s > %s" (string_of_expression s) (string_of_expression t)
     | Equal (s, t) -> sprintf "%s = %s" (string_of_expression s) (string_of_expression t)
     | Variable id ->
-        let id = if id = "this" then "self" else id in
+        let id = if id = "this" then "__self" else id in
         "$" ^ id
     (* TODO: Alloc type, possibly done as Point__stack or Point__boehm + _Generic in C macro etc *)
     (* TODO: Init function pointers *)
@@ -206,7 +206,7 @@ let rec string_of_expression = function
         sprintf {|$%s[%s]|} id (string_of_expression expr)
     | Object_access (Variable id, Property_access prop_name) ->
         (* TODO: Code duplication *)
-        let id = if id = "this" then "self" else id in
+        let id = if id = "this" then "__self" else id in
         sprintf {|$%s->%s|} id prop_name
     | Object_access (expr, Property_access prop_name) ->
         sprintf {|%s->%s|} (string_of_expression expr) prop_name

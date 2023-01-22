@@ -140,6 +140,29 @@ let rec statement_to_pholyglot s = match s with
 let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with
     | (name, t) -> (name, typ_to_pholyglot t)
 
+(*
+ * TODO: Done too late in pipeline? At string echo
+let replace_this_with_self (stmt : Pholyglot_ast.statement ) : Pholyglot_ast.statement = match stmt with
+    | Return e
+    | Plusplus lvalue
+    | Minusminus lvalue
+    | Minuseq (lvalue * expression
+    | Pluseq of lvalue * expression
+    | Assignment of typ * lvalue * expression
+    | Function_call of typ * identifier * expression list
+    | For of {
+        init:      statement;       (* Init happens outside the for-statement *)
+        condition: expression;
+        incr:      expression;
+        stmts:     statement list;
+    }
+    | Dowhile of {
+        condition: expression;
+        body:      statement list;
+    }
+*)
+
+
 let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration = match d with
     | Function {
         name;
@@ -157,7 +180,7 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
         let fn : Ast.function_def -> Pholyglot_ast.function_def = fun {name; params; stmts; function_type;} ->
             {
                 name;
-                params = Param ("self", Class_type class_name) :: List.map param_to_pholyglot params;
+                params = Param ("__self", Class_type class_name) :: List.map param_to_pholyglot params;
                 stmts = List.map statement_to_pholyglot stmts;
                 function_type = typ_to_pholyglot function_type;
             }

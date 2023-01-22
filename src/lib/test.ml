@@ -1044,6 +1044,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* Replace $this with $__self in methods and add implicit $__self as argument *)
 (* do { ... } while (bool) *)
 (* foreach ([1, 2, 3] as $i) *)
 (* foreach ($bodies as $i => $body) *)
@@ -1090,7 +1091,6 @@ function main(): int
 (* Nullable types and refinement *)
 (* All props must have default values. That's not null? *)
 (* Parse class property docblock *)
-(* Ban $self variable name, since it's used internally instead of $this *)
 (* Infer return type for methods *)
 (* Object access method call *)
 (* Method pointer init *)

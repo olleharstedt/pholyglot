@@ -69,10 +69,10 @@ and class_elements =
 and declaration =
     | Function of function_def
     | Class of {
-        name: string; 
-        kind: kind; 
+        name:       string; 
+        kind:       kind; 
         properties: class_property list;
-        methods: function_def list;
+        methods:    function_def list;
     }
 
 and function_name = string

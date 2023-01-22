@@ -10,6 +10,7 @@ module Log = Dolog.Log
 exception Type_error of string
 
 (**
+ * Global variable
  * Should only be used by Function_call expression to replace type variables in Function_type
  * TODO: Would this work when wrapping multiple generic functions in one call?
  *)
@@ -474,7 +475,10 @@ let unify_params_with_function_type params (Function_type {return_type; argument
         arguments = List.map2 map params arguments;
     }
 
-let infer_method meth ns : function_def = match meth with
+(**
+ * Replace Infer_me inside statements in method.
+ *)
+let infer_method (c_orig : Ast.declaration) meth ns : function_def = match meth with
     | {
         name;
         docblock;
@@ -482,6 +486,7 @@ let infer_method meth ns : function_def = match meth with
         stmts;
         function_type = Function_type {return_type; arguments};
     } ->
+        let class_name = match c_orig with Class {name;} -> name in
         let params : Ast.param list = unify_params_with_docblock params docblock in
         let ftyp =
             unify_params_with_function_type
@@ -494,6 +499,7 @@ let infer_method meth ns : function_def = match meth with
             | Param (id, typ)
             | RefParam (id, typ) -> Namespace.add_identifier ns id typ
         ) params;
+        Namespace.add_identifier ns "this" (Class_type class_name);
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         {name; docblock; params; stmts = new_stmts; function_type = ftyp}
@@ -527,10 +533,13 @@ let infer_declaration decl ns : declaration =
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
         Function {name; docblock; params; stmts = new_stmts; function_type = ftyp}
     | Function {function_type = ftyp} -> failwith ("infer_declaration function typ " ^ show_typ ftyp)
-    | Class {name; kind; properties = props; methods} when kind = Infer_kind -> 
+    | Class {name; kind; properties = props; methods} as c_orig when kind = Infer_kind -> 
+        (* Temporary class type during inference *)
+        Namespace.add_class_type ns c_orig;
         let k = infer_kind ns Infer_kind props in
-        let methods = List.map (fun m -> infer_method m ns) methods in
+        let methods = List.map (fun m -> infer_method c_orig m ns) methods in
         let c = Class {name; kind = k; properties = props; methods} in
+        Namespace.remove_class_type ns c;
         Namespace.add_class_type ns c;
         c
     | Class {name; kind; properties; methods} -> failwith ("infer_declaration: Class with kind " ^ show_kind kind ^ " " ^ name)

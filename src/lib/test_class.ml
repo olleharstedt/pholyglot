@@ -399,16 +399,16 @@ class Point {
     public $__object_property_x;
 #undef public
 
-    #__C__ int (*getX) (Point $self); 
+    #__C__ int (*getX) (Point $__self); 
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
 
-#__C__ int Point__getX (Point $self)
+#__C__ int Point__getX (Point $__self)
 #if __PHP__
-public function getX(Point $self): int
+public function getX(Point $__self): int
 #endif
 {
-    return $self->__object_property_x;
+    return $__self->__object_property_x;
 
 }
 
@@ -451,19 +451,10 @@ let%test_unit "offsetMomentum method" =
 class Body
 {
     public float $vx;
-    public float $vy;
-    public float $vz;
-
-    /**
-     * @param int $px
-     */
-    public function offsetMomentum(float $px, float $py, float $pz): void
+    public function offsetMomentum(float $px): void
     {
-        $pi = 3.141592653589793;   
-        $solarmass = 4. * $pi * $pi;
-        $this->vx = (0. - $px) / $solarmass;
-        $this->vy = (0. - $py) / $solarmass;
-        $this->vz = (0. - $pz) / $solarmass;
+        $solarmass = 10.;
+        $this->vx = $px / $solarmass;
     }
 }
     " in
@@ -472,7 +463,29 @@ class Body
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    [%test_eq: Ast.program] ast (Declaration_list [])
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name = "Body";
+            kind = Val;
+            properties = [("__object_property_vx", Float)];
+            methods = [
+                {
+                    name = "offsetMomentum";
+                    docblock = [];
+                    params = [Param ("px", Float)];
+                    stmts = [
+                        Assignment (Float, Variable "solarmass", Num_float 10.);
+                        Assignment (
+                            Float,
+                            Object_access ("this", (Property_access "__object_property_vx")),
+                            Div ((Variable "px"), (Variable "solarmass")))
+                    ];
+                    function_type = Function_type {return_type = Void; arguments = [Float]}
+                }
+            ]
+        }
+    ])
+
 
 let%test "return ref type is invalid" =
     let source = {|<?php // @pholyglot

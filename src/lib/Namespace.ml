@@ -32,6 +32,14 @@ let add_param t param : unit =
 
 let add_params t params : unit = List.iter (fun p -> add_param t p) params
 
+(**
+ * Used when we need a temporary class type during class inference.
+ *)
+let remove_class_type t c =
+    match c with
+    | Class {name; kind; properties = props; methods} ->
+        Hashtbl.remove t.classes name
+
 let add_class_type t (c : Ast.declaration) = match c with
     | Class {name; kind; properties = props; methods} ->
         if Hashtbl.mem t.classes name then
