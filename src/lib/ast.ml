@@ -98,6 +98,10 @@ and statement =
     | Minuseq of lvalue * expression
     | Pluseq of lvalue * expression
     | Function_call of typ * identifier * expression list
+    | Method_call of {
+        lvalue: lvalue;
+        args:   expression list;
+    }
     | Foreach of {
         arr:       expression; (* Must be Variable expression TODO: Should support inline foreach([1 2 3] ...) *)
         key:       expression option; (* Must be Variable if it exists *)

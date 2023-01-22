@@ -124,6 +124,13 @@ statement:
   | v=lvalue "--" ";"                                        {Minusminus v}
   | v=lvalue "-=" e=expr ";"                                 {Minuseq (v, e)}
   | v=lvalue "+=" e=expr ";"                                 {Pluseq (v, e)}
+  | v=lvalue "(" args_list=separated_list(COMMA, expr) ")" ";" 
+        {
+            Method_call {
+                lvalue = v;
+                args   = args_list;
+            }
+        }
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
   | FOREACH "(" n=VAR_NAME AS m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = None; value = Variable m; value_typ = Infer_me; value_typ_constant = Nil; body = stmts} }
   | FOREACH "(" n=VAR_NAME AS k=VAR_NAME FATARROW m=VAR_NAME ")" "{" stmts=list(statement) "}" {Foreach {arr = Variable n; key = Some (Variable k); value = Variable m; value_typ = Infer_me; value_typ_constant = Nil; body = stmts} }

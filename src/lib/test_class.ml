@@ -880,3 +880,39 @@ function foo()
     $x = array_get(Body, $arr, 0)->__object_property_x;
     }
 |}
+
+let%test_unit "method call as statement" =
+    let source = {|<?php // @pholyglot
+class Body {
+    public function doSomething(int $x): void
+    {
+    }
+}
+function main(): int {
+    $x = 10;
+    $b = new Body();
+    $b->doSomething($x);
+    return 0;
+}
+    |} in
+    let ast =
+        Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name = "Body";
+            kind = Val;
+            properties = [];
+            methods = [
+                {
+                    name = "doSomething";
+                    docblock = [];
+                    params = [Param ("x", Int)];
+                    stmts = [];
+                    function_type = Function_type {return_type = Void; arguments = [Int]}
+                }
+            ]
+        };
+    ])
