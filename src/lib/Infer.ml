@@ -10,7 +10,6 @@ module Log = Dolog.Log
 exception Type_error of string
 
 (**
- * Global variable
  * Should only be used by Function_call expression to replace type variables in Function_type
  * TODO: Would this work when wrapping multiple generic functions in one call?
  *)
@@ -490,9 +489,10 @@ let infer_method meth ns : function_def = match meth with
             (Function_type {return_type; arguments})
         in
         let ns = Namespace.reset_identifiers ns in
-        (* TODO: Add method args to ns *)
+        (* Add method args to namespace *)
         List.iter (fun p -> match p with
-            | Param (id, typ) | RefParam (id, typ) -> Namespace.add_identifier ns id typ
+            | Param (id, typ)
+            | RefParam (id, typ) -> Namespace.add_identifier ns id typ
         ) params;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
