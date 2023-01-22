@@ -9,19 +9,15 @@ class Body
     public float $vy;
     public float $vz;
     public float $mass;
+    public function offsetMomentum(float $px, float $py, float $pz): void
+    {
+        $pi = 3.141592653589793;   
+        $solarmass = 4. * $pi * $pi;
+        $this->vx = (0. - $px) / $solarmass;
+        $this->vy = (0. - $py) / $solarmass;
+        $this->vz = (0. - $pz) / $solarmass;
+    }                             
 }
-
-/**
- * @param Body $body
- */
-function offsetMomentum(Body $body, float $px, float $py, float $pz): void
-{
-    $pi = 3.141592653589793;   
-    $solarmass = 4. * $pi * $pi;
-    $body->vx = (0. - $px) / $solarmass;
-    $body->vy = (0. - $py) / $solarmass;
-    $body->vz = (0. - $pz) / $solarmass;
-}                             
 
 /**
  * @param array<Body> $bodies
@@ -142,7 +138,8 @@ function main(): int
         $py += $body2->vy * $body2->mass;      
         $pz += $body2->vz * $body2->mass;            
     }      
-    offsetMomentum($bodies[0], $px, $py, $pz);
+    $b = $bodies[0];
+    $b->offsetMomentum($px, $py, $pz);
 
     $e = energy($bodies);
     printf("%f\n", $e);
