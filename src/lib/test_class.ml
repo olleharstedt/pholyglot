@@ -884,15 +884,12 @@ function foo()
 let%test_unit "method call as statement" =
     let source = {|<?php // @pholyglot
 class Body {
-    public function doSomething(int $x): void
-    {
-    }
+    public function doSomething(int $x): void { }
 }
-function main(): int {
+function foo(): void {
     $x = 10;
     $b = new Body();
     $b->doSomething($x);
-    return 0;
 }
     |} in
     let ast =
@@ -914,5 +911,19 @@ function main(): int {
                     function_type = Function_type {return_type = Void; arguments = [Int]}
                 }
             ]
+        };
+        Function { 
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (Int, Variable "x", Num 10);
+                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Method_call {
+                    lvalue = Object_access ("b", Property_access "__object_property_doSomething");
+                    args   = [Variable "x"];
+                }
+            ];
+            function_type = Function_type {return_type = Void; arguments = []};
         };
     ])

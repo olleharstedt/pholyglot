@@ -393,6 +393,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let inf = fun s -> infer_stmt s ns in
         let new_body = List.map inf body in
         Dowhile {condition = infer_expression ns condition; body = new_body;}
+    (** TODO: This is not so good *)
     | s -> s
 
 let rec kind_of_typ ns t : kind = match t with
