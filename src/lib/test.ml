@@ -1,6 +1,5 @@
 open Printf
 open Base
-open Expect_test_helpers_base
 module Log = Dolog.Log
 
 (*

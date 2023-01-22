@@ -431,19 +431,6 @@ Point Point__constructor(Point $p)
 |}
     in
 
-    (*
-    for i = 0 to String.length code do
-        print_char code.[i];
-        if code.[i] != should_be.[i] then begin
-            print_endline "\nGot:";
-            print_int (Caml.Char.code code.[i]);
-            print_endline "\nExpected:";
-            print_int (Caml.Char.code should_be.[i]);
-            exit 1;
-        end;
-    done;
-    *)
-
     [%test_eq: string] code should_be
 
 let%test_unit "offsetMomentum method" =
@@ -486,6 +473,100 @@ class Body
         }
     ])
 
+let%test_unit "offsetMomentum method pholyglot" =
+    let ast : Ast.declaration =
+        Class {
+            name = "Body";
+            kind = Val;
+            properties = [("__object_property_vx", Float)];
+            methods = [
+                {
+                    name = "offsetMomentum";
+                    docblock = [];
+                    params = [Param ("px", Float)];
+                    stmts = [
+                        Assignment (Float, Variable "solarmass", Num_float 10.);
+                        Assignment (
+                            Float,
+                            Object_access ("this", (Property_access "__object_property_vx")),
+                            Div ((Variable "px"), (Variable "solarmass")))
+                    ];
+                    function_type = Function_type {return_type = Void; arguments = [Float]}
+                }
+            ]
+        }
+    in
+    let phast = Transpile.declaration_to_pholyglot ast in
+    let code = Pholyglot_ast.string_of_declare phast in
+    let should_be = {|
+#__C__ typedef struct Body* Body;
+class Body {
+    #define public float
+#define __object_property_vx $__object_property_vx
+    public $__object_property_vx;
+#undef public
+
+    #__C__ void (*offsetMomentum) (Body $__self, float $px); 
+// End of C struct def. Class methods are outside the struct.
+#__C__ };
+
+#__C__ void Body__offsetMomentum (Body $__self, float $px)
+#if __PHP__
+public function offsetMomentum(Body $__self, float $px): void
+#endif
+{
+    #__C__ float
+    $solarmass = 10.;
+    $__self->__object_property_vx = $px / $solarmass;
+    
+}
+
+#if __PHP__
+// End of PHP class def.
+};
+#endif
+#if __PHP__
+define("Body", "Body");
+#endif
+//?>
+// Function pointer init
+Body Body__constructor(Body $p)
+{
+    $p->offsetMomentum = &Body__offsetMomentum;
+
+    return $p;
+}
+//<?php
+|}
+    in
+
+    (*
+    for i = 0 to String.length code do
+        print_char code.[i];
+        if code.[i] != should_be.[i] then begin
+            print_endline "\nGot:";
+            print_int (Caml.Char.code code.[i]);
+            print_endline "\nExpected:";
+            print_int (Caml.Char.code should_be.[i]);
+            exit 1;
+        end;
+    done;
+    *)
+
+    (*
+    open Patdiff_kernel
+    module Patdiff_core = Patdiff_core.Without_unix
+    let keep_ws = false in
+    let hunks = Patdiff_core.diff
+        ~context:Configuration.default_context
+        ~line_big_enough:Configuration.default_line_big_enough
+        ~keep_ws
+        ~prev:[| "hello"; "world" |]
+        ~next:[| "good bye"; "world" |]
+    in
+    *)
+
+    [%test_eq: string] code should_be
 
 let%test "return ref type is invalid" =
     let source = {|<?php // @pholyglot
