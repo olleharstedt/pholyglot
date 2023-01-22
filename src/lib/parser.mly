@@ -138,7 +138,7 @@ statement:
 
 (* TODO: Must use property and method in same rule to avoid reduce/reduce ? *)
 class_element: 
-  | property_modifier t=typ s=VAR_NAME ";"  {Property ("__object_property_" ^ s, t)}
+  | property_modifier t=typ s=VAR_NAME ";"  {Property ("__prop_" ^ s, t)}
   | property_modifier {Property ("", Infer_me)}
   | property_modifier "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
         Method {
@@ -197,8 +197,8 @@ typ:
 
 lvalue:
   | n=VAR_NAME                  {Variable n}
-                                (* TODO: This is not the correct plact to inject __object_property ? Can also be method call. *)
-  | id=NAME                     {Property_access ("__object_property_" ^ id)}
+                                (* TODO: This is not the correct plact to inject __prop_ ? Can also be method call. *)
+  | id=NAME                     {Property_access ("__prop_" ^ id)}
   | n=VAR_NAME "->" v=lvalue    {Object_access (n, v)}
 
 expr:
@@ -218,7 +218,7 @@ expr:
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
   | n=VAR_NAME "[" e=expr "]"                                    {Array_access (n, e)}
   | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Method_call {return_type = Infer_me; method_name = m; args = args_list; left_hand = e}}
-  | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__object_property_" ^ m)) }
+  | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__prop_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
   (* TODO "new" /** @alloc stack */ *)

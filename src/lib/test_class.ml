@@ -21,8 +21,8 @@ let%test_unit "trivial class declare" =
             name= "Point";
             kind = Infer_kind;
             properties = [
-                ("__object_property_x", Int);
-                ("__object_property_y", Float);
+                ("__prop_x", Int);
+                ("__prop_y", Float);
             ];
             methods = [];
         };
@@ -55,8 +55,8 @@ let%test_unit "class new" =
             name = "Point";
             kind = Infer_kind;
             properties = [
-                ("__object_property_x", Int);
-                ("__object_property_y", Int)
+                ("__prop_x", Int);
+                ("__prop_y", Int)
             ];
             methods = [];
         };
@@ -91,8 +91,8 @@ let%test_unit "object lvalue assignment" =
             name = "Point";
             kind = Infer_kind;
             properties = [
-                ("__object_property_x", Int);
-                ("__object_property_y", Int)
+                ("__prop_x", Int);
+                ("__prop_y", Int)
             ];
             methods = [];
         };
@@ -102,7 +102,7 @@ let%test_unit "object lvalue assignment" =
             params = [];
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
-                Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
+                Assignment (Infer_me, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -129,8 +129,8 @@ let%test_unit "object object access in expression" =
             name = "Point";
             kind = Infer_kind;
             properties = [
-                ("__object_property_x", Int);
-                ("__object_property_y", Int)
+                ("__prop_x", Int);
+                ("__prop_y", Int)
             ];
             methods = [];
         };
@@ -140,8 +140,8 @@ let%test_unit "object object access in expression" =
             params = [];
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
-                Assignment (Infer_me, Object_access ("p", Property_access "__object_property_x"), (Num 1));
-                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "__object_property_x")]);
+                Assignment (Infer_me, Object_access ("p", Property_access "__prop_x"), (Num 1));
+                Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "__prop_x")]);
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -207,8 +207,8 @@ let%test_unit "output object access" =
             name = "Point";
             kind = Val;
             properties = [
-                ("__object_property_x", Int);
-                ("__object_property_y", Int)
+                ("__prop_x", Int);
+                ("__prop_y", Int)
             ];
             methods = [];
         };
@@ -218,13 +218,13 @@ let%test_unit "output object access" =
             params = [];
             stmts = [
                 Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
-                Assignment (Int, Object_access ("p", Property_access "__object_property_x"), (Num 1));
+                Assignment (Int, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
-                        Object_access (Variable "p", Property_access "__object_property_x")
+                        Object_access (Variable "p", Property_access "__prop_x")
                     ]
                 );
                 Return (Num 0)
@@ -239,12 +239,12 @@ let%test_unit "output object access" =
 #__C__ typedef struct Point* Point;
 class Point {
     #define public int
-#define __object_property_x $__object_property_x
-    public $__object_property_x;
+#define __prop_x $__prop_x
+    public $__prop_x;
 #undef public
 #define public int
-#define __object_property_y $__object_property_y
-    public $__object_property_y;
+#define __prop_y $__prop_y
+    public $__prop_y;
 #undef public
 
     
@@ -272,8 +272,8 @@ function main()
 {
     #__C__ Point
     $p = new(Point);
-    $p->__object_property_x = 1;
-     printf("%ld", $p->__object_property_x);
+    $p->__prop_x = 1;
+     printf("%ld", $p->__prop_x);
     return 0;
 }
 |}
@@ -295,7 +295,7 @@ function foo(Thing $t): void {
             name = "Thing";
             kind = Ref;
             properties = [
-                ("__object_property_name", String);
+                ("__prop_name", String);
             ];
             methods = [];
         };
@@ -307,7 +307,7 @@ function foo(Thing $t): void {
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},
                     "printf",
-                    [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__object_property_name"))]
+                    [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__prop_name"))]
                 );
             ];
             function_type = Function_type {return_type = Void; arguments = [Class_type "Thing"]}
@@ -355,14 +355,14 @@ class Point
         Class {
             name = "Point";
             kind = Val;
-            properties = [("__object_property_x", Int)];
+            properties = [("__prop_x", Int)];
             methods = [
                 {
                     name = "getX";
                     docblock = [];
                     params = [];
                     stmts = [
-                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -374,14 +374,14 @@ let%test_unit "simple getter pholyglot" =
     let code = Ast.Class {
             name = "Point";
             kind = Val;
-            properties = [("__object_property_x", Int)];
+            properties = [("__prop_x", Int)];
             methods = [
                 {
                     name = "getX";
                     docblock = [];
                     params = [];
                     stmts = [
-                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -395,8 +395,8 @@ let%test_unit "simple getter pholyglot" =
 #__C__ typedef struct Point* Point;
 class Point {
     #define public int
-#define __object_property_x $__object_property_x
-    public $__object_property_x;
+#define __prop_x $__prop_x
+    public $__prop_x;
 #undef public
 
     #__C__ int (*getX) (Point $__self); 
@@ -408,7 +408,7 @@ class Point {
 public function getX(Point $__self): int
 #endif
 {
-    return $__self->__object_property_x;
+    return $__self->__prop_x;
 
 }
 
@@ -454,7 +454,7 @@ class Body
         Class {
             name = "Body";
             kind = Val;
-            properties = [("__object_property_vx", Float)];
+            properties = [("__prop_vx", Float)];
             methods = [
                 {
                     name = "offsetMomentum";
@@ -464,7 +464,7 @@ class Body
                         Assignment (Float, Variable "solarmass", Num_float 10.);
                         Assignment (
                             Float,
-                            Object_access ("this", (Property_access "__object_property_vx")),
+                            Object_access ("this", (Property_access "__prop_vx")),
                             Div ((Variable "px"), (Variable "solarmass")))
                     ];
                     function_type = Function_type {return_type = Void; arguments = [Float]}
@@ -478,7 +478,7 @@ let%test_unit "offsetMomentum method pholyglot" =
         Class {
             name = "Body";
             kind = Val;
-            properties = [("__object_property_vx", Float)];
+            properties = [("__prop_vx", Float)];
             methods = [
                 {
                     name = "offsetMomentum";
@@ -488,7 +488,7 @@ let%test_unit "offsetMomentum method pholyglot" =
                         Assignment (Float, Variable "solarmass", Num_float 10.);
                         Assignment (
                             Float,
-                            Object_access ("this", (Property_access "__object_property_vx")),
+                            Object_access ("this", (Property_access "__prop_vx")),
                             Div ((Variable "px"), (Variable "solarmass")))
                     ];
                     function_type = Function_type {return_type = Void; arguments = [Float]}
@@ -502,8 +502,8 @@ let%test_unit "offsetMomentum method pholyglot" =
 #__C__ typedef struct Body* Body;
 class Body {
     #define public float
-#define __object_property_vx $__object_property_vx
-    public $__object_property_vx;
+#define __prop_vx $__prop_vx
+    public $__prop_vx;
 #undef public
 
     #__C__ void (*offsetMomentum) (Body $__self, float $px); 
@@ -517,7 +517,7 @@ public function offsetMomentum(Body $__self, float $px): void
 {
     #__C__ float
     $solarmass = 10.;
-    $__self->__object_property_vx = $px / $solarmass;
+    $__self->__prop_vx = $px / $solarmass;
     
 }
 
@@ -634,7 +634,7 @@ class Point
         Class {
             name = "Point";
             kind = Val;
-            properties = [("__object_property_x", Int)];
+            properties = [("__prop_x", Int)];
             methods = [
                 {
                     name = "getX";
@@ -646,7 +646,7 @@ class Point
                             "printf",
                             [Coerce (String_literal, String "\"Hello\"")]
                         );
-                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -703,7 +703,7 @@ function main(): int
         Class {
             name = "Point";
             kind = Val;
-            properties = [("__object_property_x", Int)];
+            properties = [("__prop_x", Int)];
             methods = [
                 {
                     name = "getX";
@@ -715,7 +715,7 @@ function main(): int
                             "printf",
                             [Coerce (String_literal, String "\"Hello\"")]
                         );
-                        Return (Object_access (Variable "this", Property_access "__object_property_x"))
+                        Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
@@ -793,7 +793,7 @@ let%test_unit "object access inside array access" =
         Class {
             name = "Body";
             kind = Val;
-            properties = [("__object_property_x", Int)];
+            properties = [("__prop_x", Int)];
             methods = []
         };
         Function {
@@ -802,7 +802,7 @@ let%test_unit "object access inside array access" =
             params = [];
             stmts = [
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
-                Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
+                Assignment (Int, Object_access ("b", (Property_access "__prop_x")), (Num 10));
                 Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"),
                     Function_call (
                         Function_type {return_type = Fixed_array (Class_type "Body", Some 1); arguments = [Constant; Int; Class_type "Body"]},
@@ -816,7 +816,7 @@ let%test_unit "object access inside array access" =
                         "array_get",
                         [Constant "Body"; Variable "arr"; Num 0]
                     ),
-                    Property_access "__object_property_x")
+                    Property_access "__prop_x")
                 );
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -829,7 +829,7 @@ let%test_unit "object access inside array access" =
                                 "array_get",
                                 [Constant "Body"; Variable "arr"; Num 0]
                             ),
-                            Property_access "__object_property_x"
+                            Property_access "__prop_x"
                         )
                     ]
                 );
@@ -845,7 +845,7 @@ let%test_unit "object access inside array access transpile" =
             params = [];
             stmts = [
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
-                Assignment (Int, Object_access ("b", (Property_access "__object_property_x")), (Num 10));
+                Assignment (Int, Object_access ("b", (Property_access "__prop_x")), (Num 10));
                 Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"),
                     Function_call (
                         Function_type {return_type = Fixed_array (Class_type "Body", Some 1); arguments = [Constant; Int; Class_type "Body"]},
@@ -859,7 +859,7 @@ let%test_unit "object access inside array access transpile" =
                         "array_get",
                         [Constant "Body"; Variable "arr"; Num 0]
                     ),
-                    Property_access "__object_property_x"));
+                    Property_access "__prop_x"));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
@@ -873,11 +873,11 @@ function foo()
 {
     #__C__ Body
     $b = new(Body);
-    $b->__object_property_x = 10;
+    $b->__prop_x = 10;
     #__C__ array
     $arr = array_make(Body, 1, $b);
     #__C__ int
-    $x = array_get(Body, $arr, 0)->__object_property_x;
+    $x = array_get(Body, $arr, 0)->__prop_x;
     }
 |}
 
@@ -920,7 +920,7 @@ function foo(): void {
                 Assignment (Int, Variable "x", Num 10);
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Method_call {
-                    lvalue = Object_access ("b", Property_access "__object_property_doSomething");
+                    lvalue = Object_access ("b", Property_access "__prop_doSomething");
                     args   = [Variable "x"];
                 }
             ];
@@ -938,7 +938,7 @@ let%test_unit "method call as statement pholyglot" =
                 Assignment (Int, Variable "x", Num 10);
                 Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
                 Method_call {
-                    lvalue = Object_access ("b", Property_access "__object_property_doSomething");
+                    lvalue = Object_access ("b", Property_access "__prop_doSomething");
                     args   = [Variable "x"];
                 }
             ];
@@ -947,4 +947,14 @@ let%test_unit "method call as statement pholyglot" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code ""
+    [%test_eq: string] code {|#define function void
+function foo()
+#undef function
+{
+    #__C__ int
+    $x = 10;
+    #__C__ Body
+    $b = new(Body);
+    $b->doSomething($b, $x);
+}
+|}

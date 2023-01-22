@@ -248,8 +248,8 @@ let rec string_of_statement = function
             (string_of_typ fun_type)
         )
     | Method_call {lvalue = Object_access (id, Property_access m); args} ->
-        (** TODO: Ugle hack to remove __object_property - shouldn't be here in the first place *)
-        let m = Str.global_replace (Str.regexp "__object_property_") "" m in
+        (** TODO: Ugle hack to remove __prop_ - shouldn't be here in the first place *)
+        let m = Str.global_replace (Str.regexp "__prop_") "" m in
         let args : expression list = Variable id :: args in
         let args_s   = concat ~sep:", " (List.map args ~f:string_of_expression) in
         [%string {|$$$id->$m($args_s);
