@@ -1043,7 +1043,7 @@ function main(): int
     *)
 
 (* TODO: *)
-(* SplDoublyLinkedList as dlist, $list[] = $item; *)
+(* SplDoublyLinkedList as dlist, $list = new SplDoublyLinkedList(); $list[] = $item; *)
 (* foreach ([1, 2, 3] as $i) *)
 (* array_slice is polymorph on both memory and input type *)
 (* type-cast of int and float *)
