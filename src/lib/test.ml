@@ -1043,10 +1043,8 @@ function main(): int
     *)
 
 (* TODO: *)
-(* Replace $this with $__self in methods and add implicit $__self as argument *)
-(* do { ... } while (bool) *)
+(* SplDoublyLinkedList as dlist, $list[] = $item; *)
 (* foreach ([1, 2, 3] as $i) *)
-(* foreach ($bodies as $i => $body) *)
 (* array_slice is polymorph on both memory and input type *)
 (* type-cast of int and float *)
 (* $b = [1, 2, 3];  Vector, array, linked list? SPL *)
