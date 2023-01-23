@@ -43,7 +43,9 @@ typedef struct Point* Point;
 //<?php
 class Point
 {
+#define x $x
     public int $x;
+#define y $y
     public int $y;
 };
 //?>
@@ -62,6 +64,7 @@ define("Point", "Point");
 
 /**
  * gcc -g -Wno-incompatible-pointer-types list.c
+ * cat list.c | sed -e "s/#__C__//g" | gcc -g -Wno-incompatible-pointer-types -xc -
  */
 #define function int
 function main()
@@ -74,14 +77,14 @@ function main()
     $p->x = 10;
     $p->y = 10;
     $list->push(
-        #__C__ list,
+        #__C__ $list,
         $p
     );
 
     #__C__ Point
     $p2 = new(Point);
     $list->push(
-        #__C__ list,
+        #__C__ $list,
         $p2
     );
 
@@ -89,12 +92,13 @@ function main()
     $current = $list;
     do {
         if ($current->item) {
+            #__C__ Point
             $tmp = $current->item;
             printf("Current point x = %d\n", $tmp->x);
         }
         printf("Hey\n");
         $current = $current->next;
-    } while (current);
+    } while ($current);
 
     return 0;
 }
