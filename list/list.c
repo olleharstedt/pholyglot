@@ -38,11 +38,15 @@ SplDoublyLinkedList SplDoublyLinkedList__constructor(SplDoublyLinkedList self)
 }
 
 typedef struct Point* Point;
-struct Point
+#define class struct
+#define public
+//<?php
+class Point
 {
-    int x;
-    int y;
+    public int $x;
+    public int $y;
 };
+//?>
 Point Point__constructor(Point self)
 {
     self->x = 99;
@@ -50,28 +54,49 @@ Point Point__constructor(Point self)
     return self;
 }
 
+//<?php
+#if __PHP__//<?php
+define("SplDoublyLinkedList", "SplDoublyLinkedList");
+define("Point", "Point");
+#endif
+
 /**
  * gcc -g -Wno-incompatible-pointer-types list.c
  */
-int main()
+#define function int
+function main()
+#undef function
 {
-    SplDoublyLinkedList l = new(SplDoublyLinkedList);
-    Point p = new(Point);
-    p->x = 10;
-    p->y = 10;
-    l->push(l, p);
+    #__C__ SplDoublyLinkedList
+    $list = new(SplDoublyLinkedList);
+    #__C__ Point
+    $p = new(Point);
+    $p->x = 10;
+    $p->y = 10;
+    $list->push(
+        #__C__ list,
+        $p
+    );
 
-    Point p2 = new(Point);
-    l->push(l, p2);
+    #__C__ Point
+    $p2 = new(Point);
+    $list->push(
+        #__C__ list,
+        $p2
+    );
 
-    SplDoublyLinkedList current = l;
+    #__C__ SplDoublyLinkedList
+    $current = $list;
     do {
-        if (current->item) {
-            printf("Current point x = %d\n", ((Point) current->item)->x);
+        if ($current->item) {
+            $tmp = $current->item;
+            printf("Current point x = %d\n", $tmp->x);
         }
         printf("Hey\n");
-        current = current->next;
+        $current = $current->next;
     } while (current);
 
     return 0;
 }
+//?>
+//<?php ob_end_clean(); main();
