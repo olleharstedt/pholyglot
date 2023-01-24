@@ -110,6 +110,7 @@ function main()
     #undef function
 {
     // TODO: Always require length to fgets to simplify buffer
+    // TODO: Always glib string
     #__C__ char*
     $buffer = fgets(malloc(sizeof(char) * 10), 10, STDIN);
     #__C__ long
