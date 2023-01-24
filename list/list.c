@@ -5,6 +5,8 @@
 #include <stdint.h>
 #include <math.h>
 #define new(x) x ## __constructor(malloc(sizeof(struct x)))
+#define intval(x) strtol(x, (char **) NULL, 10);
+#define STDIN stdin
 typedef struct SplDoublyLinkedList* SplDoublyLinkedList;
 struct SplDoublyLinkedList {
     uintptr_t* item;
@@ -107,11 +109,11 @@ define("Point", "Point");
 function main()
     #undef function
 {
-    #__C__ char
-    $buffer[100];
-    fgets($buffer, 100, stdin);
+    // TODO: Always require length to fgets to simplify buffer
+    #__C__ char*
+    $buffer = fgets(malloc(sizeof(char) * 10), 10, STDIN);
     #__C__ long
-    $i = strtol($buffer, (char **) NULL, 10);
+    $i = intval($buffer);
 
     #__C__ SplDoublyLinkedList
     $list = new(SplDoublyLinkedList);
@@ -124,7 +126,9 @@ function main()
         $p
     );
 
-    for (int $j = 0; $j < $i; $j++) {
+    #__C__ int
+    $j = 0;
+    for (; $j < $i; $j++) {
         #__C__ Point
         $p2 = new(Point);
         $p2->x = $j;
