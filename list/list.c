@@ -107,6 +107,12 @@ define("Point", "Point");
 function main()
     #undef function
 {
+    #__C__ char
+    $buffer[100];
+    fgets($buffer, 100, stdin);
+    #__C__ long
+    $i = strtol($buffer, (char **) NULL, 10);
+
     #__C__ SplDoublyLinkedList
     $list = new(SplDoublyLinkedList);
     #__C__ Point
@@ -118,14 +124,16 @@ function main()
         $p
     );
 
-    #__C__ Point
-    $p2 = new(Point);
-    $p2->x = 11;
-    $p2->y = 11;
-    $list->push(
-        #__C__ $list,
-        $p2
-    );
+    for (int $j = 0; $j < $i; $j++) {
+        #__C__ Point
+        $p2 = new(Point);
+        $p2->x = $j;
+        $p2->y = 11;
+        $list->push(
+            #__C__ $list,
+            $p2
+        );
+    }
 
     $list->rewind(
         #__C__ $list
@@ -138,7 +146,6 @@ function main()
         if ($tmp) {
             printf("Current point x = %d\n", $tmp->x);
         }
-        printf("Hey\n");
         $list->next(
             #__C__ $list
         );
