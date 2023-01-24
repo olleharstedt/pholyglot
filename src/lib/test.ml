@@ -1044,8 +1044,9 @@ function main(): int
 
 (* TODO: *)
 (* SplDoublyLinkedList as dlist, $list = new SplDoublyLinkedList(); $list[] = $item; *)
-(*   BUT: SplDoublyLinkedList is horrible with internal state, not C-like at all D: *)
-(*   foreach works with SplDoublyLinkedList, but for-loop does not *)
+(*   foreach works with SplDoublyLinkedList --> transpile to do-while $list->valid()
+ *   $list->valid() - must pass self in C but not PHP - special typ of method? "Implied self" *)
+(* fgets for input *)
 (* foreach ([1, 2, 3] as $i) *)
 (* array_slice is polymorph on both memory and input type *)
 (* type-cast of int and float *)
