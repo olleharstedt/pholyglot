@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <math.h>
 #define new(x) x ## __constructor(malloc(sizeof(struct x)))
+#define __new(x, y) x ## __constructor(y(sizeof(struct x)))
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
 typedef struct SplDoublyLinkedList* SplDoublyLinkedList;
@@ -99,11 +100,14 @@ Point Point__constructor(Point self)
 #if __PHP__//<?php
 define("SplDoublyLinkedList", "SplDoublyLinkedList");
 define("Point", "Point");
+define("malloc", "malloc");
+function __new($c, $f) { return new $c; }
 #endif
 
 /**
  * gcc -g -Wno-incompatible-pointer-types list.c
  * cat list.c | sed -e "s/#__C__//g" | gcc -g -Wno-incompatible-pointer-types -xc -
+ * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
  */
 #define function int
 function main()
@@ -111,13 +115,13 @@ function main()
 {
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
-    #__C__ char*
-    $buffer = fgets(malloc(sizeof(char) * 10), 10, STDIN);
+    //#__C__ char*
+    //$buffer = fgets(malloc(sizeof(char) * 10), 10, STDIN);
     #__C__ long
-    $i = intval($buffer);
+    $i = 10; //intval($buffer);
 
     #__C__ SplDoublyLinkedList
-    $list = new(SplDoublyLinkedList);
+    $list = __new(SplDoublyLinkedList, malloc);
     #__C__ Point
     $p = new(Point);
     $p->x = 10;
