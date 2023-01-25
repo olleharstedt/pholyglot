@@ -126,10 +126,12 @@ arena arena_init(size_t size)
 uintptr_t* arena_alloc(arena a, size_t size)
 {
     if (a->offset + size > a->size) {
+        printf("here");
         exit(123);
     }
-    a->offset += size;
+    //printf("offset = %ld\n", a->offset);
     uintptr_t* ptr = &(a->chunk[a->offset]);
+    a->offset = a->offset + size;
     memset(ptr, 0, size);
     return ptr;
 }

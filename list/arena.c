@@ -59,5 +59,10 @@ function main()
     #__C__ SplDoublyLinkedList
     $list = __new(SplDoublyLinkedList, arena_alloc);
 
+    #__C__ Point
+    $p = __new(Point, arena_alloc);
+
+    arena_free(__a);
+
     return 0;
 }
