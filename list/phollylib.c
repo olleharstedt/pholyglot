@@ -111,6 +111,7 @@ struct arena {
     size_t size;
     size_t offset;
 };
+
 arena arena_init(size_t size)
 {
     arena a       = malloc(sizeof(struct arena));
@@ -119,4 +120,20 @@ arena arena_init(size_t size)
     a->size       = size;
     a->offset     = 0;
     return a;
+}
+
+uintptr_t* arena_alloc(arena a, size_t size)
+{
+    if (a->offset + size > a->size) {
+        exit(123);
+    }
+    a->offset += size;
+    uintptr_t* ptr = &a->chunk[a->offset];
+    return  ptr;
+}
+
+void arena_free(arena a)
+{
+    free(a->chunk);
+    free(a);
 }

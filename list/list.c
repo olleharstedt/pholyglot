@@ -4,6 +4,7 @@
 #include <alloca.h>
 #include <stdint.h>
 #include <math.h>
+#include <phollylib.c>
 #define new(x) x ## __constructor(malloc(sizeof(struct x)))
 #define __new(x, y) x ## __constructor(y(sizeof(struct x)))
 #define intval(x) strtol(x, (char **) NULL, 10);
@@ -37,7 +38,7 @@ function __new($c, $f) { return new $c; }
 
 /**
  * gcc -g -Wno-incompatible-pointer-types list.c
- * cat list.c | sed -e "s/#__C__//g" | gcc -g -Wno-incompatible-pointer-types -xc -
+ * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc -
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
  */
 #define function int
