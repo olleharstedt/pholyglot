@@ -8,75 +8,6 @@
 #define __new(x, y) x ## __constructor(y(sizeof(struct x)))
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
-typedef struct SplDoublyLinkedList* SplDoublyLinkedList;
-struct SplDoublyLinkedList {
-    uintptr_t* item;
-    struct SplDoublyLinkedList* next_node;
-    struct SplDoublyLinkedList* last;
-    struct SplDoublyLinkedList* current_node;
-
-    void (*push) (SplDoublyLinkedList self, uintptr_t* item);
-    void (*next) (SplDoublyLinkedList self);
-    uintptr_t* (*current) (SplDoublyLinkedList self);
-    _Bool (*valid) (SplDoublyLinkedList self);
-    void (*rewind) (SplDoublyLinkedList self);
-};
-
-void SplDoublyLinkedList__push(SplDoublyLinkedList self, uintptr_t* item)
-{
-    if (self->item == NULL) {
-        self->item = item;
-    } else {
-        SplDoublyLinkedList n = malloc(sizeof(struct SplDoublyLinkedList));
-        n->item = item;
-
-        SplDoublyLinkedList current = self;
-        while (current->next_node != NULL) {
-            current = current->next_node;
-        }
-
-        current->next_node = n;
-        current->next_node->next_node = NULL;
-    }
-}
-
-uintptr_t* SplDoublyLinkedList__current(SplDoublyLinkedList self)
-{
-    return self->current_node->item;
-}
-
-SplDoublyLinkedList SplDoublyLinkedList__next(SplDoublyLinkedList self)
-{
-    if (self->current_node) {
-        self->current_node = self->current_node->next_node;
-    }
-}
-
-_Bool SplDoublyLinkedList__valid(SplDoublyLinkedList self)
-{
-    return self->current_node != NULL;
-}
-
-void SplDoublyLinkedList__rewind(SplDoublyLinkedList self)
-{
-    self->current_node = self;
-}
-
-SplDoublyLinkedList SplDoublyLinkedList__constructor(SplDoublyLinkedList self)
-{
-    self->push         = &SplDoublyLinkedList__push;
-    self->current      = &SplDoublyLinkedList__current;
-    self->next         = &SplDoublyLinkedList__next;
-    self->valid        = &SplDoublyLinkedList__valid;
-    self->rewind       = &SplDoublyLinkedList__rewind;
-
-    self->item         = NULL;
-    self->last         = NULL;
-    self->next_node    = NULL;
-    self->current_node = self;
-    return self;
-}
-
 typedef struct Point* Point;
 #define class struct
 #define public
@@ -113,6 +44,9 @@ function __new($c, $f) { return new $c; }
 function main()
     #undef function
 {
+    // TODO: arena
+
+
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
     //#__C__ char*
@@ -122,6 +56,7 @@ function main()
 
     #__C__ SplDoublyLinkedList
     $list = __new(SplDoublyLinkedList, malloc);
+
     #__C__ Point
     $p = new(Point);
     $p->x = 10;
