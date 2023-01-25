@@ -6,7 +6,7 @@
 #include <math.h>
 #include <phollylib.c>
 #define new(x) x ## __constructor(malloc(sizeof(struct x)))
-#define __new(x, m) x ## __constructor((x) m(__a, sizeof(struct x)))
+#define __new(x, m) x ## __constructor(m(__a, sizeof(struct x)))
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
 typedef struct Point* Point;
@@ -39,12 +39,12 @@ function __new($c, $f) { return new $c; }
 
 /**
  * gcc -g -Wno-incompatible-pointer-types list.c
- * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc -
- * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
+ * cat arena.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc -
+ * cat arena.c | sed -e "s/#__C__//g" | gcc -xc - -E
  */
 #define function int
 function main()
-    #undef function
+#undef function
 {
     // TODO: arena
     #__C__ arena __a = arena_init(sizeof(Point) * 20);
@@ -59,47 +59,5 @@ function main()
     #__C__ SplDoublyLinkedList
     $list = __new(SplDoublyLinkedList, arena_alloc);
 
-    #__C__ Point
-    $p = new(Point);
-    $p->x = 10;
-    $p->y = 10;
-    $list->push(
-        #__C__ $list,
-        $p
-    );
-
-    #__C__ int
-    $j = 0;
-    for (; $j < $i; $j++) {
-        #__C__ Point
-        $p2 = new(Point);
-        $p2->x = $j;
-        $p2->y = 11;
-        $list->push(
-            #__C__ $list,
-            $p2
-        );
-    }
-
-    $list->rewind(
-        #__C__ $list
-    );
-    do {
-        #__C__ Point
-        $tmp = $list->current(
-            #__C__ $list
-        );
-        if ($tmp) {
-            printf("Current point x = %ld\n", $tmp->x);
-        }
-        $list->next(
-            #__C__ $list
-        );
-    } while ($list->valid(
-        #__C__ $list
-    ));
-
     return 0;
 }
-//?>
-//<?php ob_end_clean(); main();

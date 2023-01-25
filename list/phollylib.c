@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
 #define float double
 #define int long
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
@@ -128,12 +129,14 @@ uintptr_t* arena_alloc(arena a, size_t size)
         exit(123);
     }
     a->offset += size;
-    uintptr_t* ptr = &a->chunk[a->offset];
-    return  ptr;
+    uintptr_t* ptr = &(a->chunk[a->offset]);
+    memset(ptr, 0, size);
+    return ptr;
 }
 
 void arena_free(arena a)
 {
     free(a->chunk);
+    // TODO: For each next_chunk, free
     free(a);
 }

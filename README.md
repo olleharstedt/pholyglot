@@ -264,3 +264,7 @@ Make long == double == uintptr_t same size
     #define __SIZEOF_LONG_DOUBLE__ 16
     #define __UINTPTR_TYPE__ long long unsigned int
     #define __SIZEOF_LONG_LONG__ 8
+
+    x86_64 tolerates unaligned access but it's slow. Other platforms normally just segfaults.
+    alignof(max_align_t) is the safest alignment that works for all types.
+
