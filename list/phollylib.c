@@ -2,6 +2,9 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include <assert.h>
+#include <string.h>
+#include <stddef.h>
 #define float double
 #define int long
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
@@ -71,7 +74,7 @@ uintptr_t* SplDoublyLinkedList__current(SplDoublyLinkedList self)
     return self->current_node->item;
 }
 
-SplDoublyLinkedList SplDoublyLinkedList__next(SplDoublyLinkedList self)
+void SplDoublyLinkedList__next(SplDoublyLinkedList self)
 {
     if (self->current_node) {
         self->current_node = self->current_node->next_node;
@@ -105,28 +108,8 @@ SplDoublyLinkedList SplDoublyLinkedList__constructor(SplDoublyLinkedList self)
 
 // Arena allocator
 // @see https://www.gingerbill.org/article/2019/02/08/memory-allocation-strategies-002/
-#include <stddef.h>
-#include <stdint.h>
 
-#if !defined(__cplusplus)
-	#if (defined(_MSC_VER) && _MSC_VER < 1800) || (!defined(_MSC_VER) && !defined(__STDC_VERSION__))
-		#ifndef true
-		#define true  (0 == 0)
-		#endif
-		#ifndef false
-		#define false (0 != 0)
-		#endif
-		typedef unsigned char bool;
-	#else
-		#include <stdbool.h>
-	#endif
-#endif
-
-#include <stdio.h>
-#include <assert.h>
-#include <string.h>
-
-bool is_power_of_two(uintptr_t x) {
+_Bool is_power_of_two(uintptr_t x) {
 	return (x & (x-1)) == 0;
 }
 
@@ -191,7 +174,6 @@ void* arena_alloc_align(Arena a, size_t size, size_t align) {
             return arena_alloc_align(a->next, size, align);
         } else {
             size_t new_len = a->buf_len * 2;
-            printf("Alloc next\n");
             Arena next     = malloc(sizeof(struct Arena));
             arena_init(next, malloc(new_len), new_len);
             a->next        = next;
@@ -208,114 +190,9 @@ uintptr_t* arena_alloc(Arena a, size_t size) {
 }
 
 void arena_free(Arena a) {
-    printf("Free\n");
     if (a->next) {
-        printf("Recurse\n");
         arena_free(a->next);
     }
-    printf("Free a->buf\n");
     free(a->buf);
     free(a);
 }
-
-/*
-uintptr_t* arena_resize_align(Arena a, uintptr_t* old_memory, size_t old_size, size_t new_size, size_t align) {
-    uintptr_t* old_mem = (uintptr_t*) old_memory;
-
-    assert(is_power_of_two(align));
-
-    if (old_mem == NULL || old_size == 0) {
-        return arena_alloc_align(a, new_size, align);
-    } else if (a->buf <= old_mem && old_mem < a->buf+a->buf_len) {
-        if (a->buf+a->prev_offset == old_mem) {
-            a->curr_offset = a->prev_offset + new_size;
-            if (new_size > old_size) {
-                // Zero the new memory by default
-                memset(&a->buf[a->curr_offset], 0, new_size-old_size);
-            }
-            return old_memory;
-        } else {
-            uintptr_t* new_memory = arena_alloc_align(a, new_size, align);
-            size_t copy_size = old_size < new_size ? old_size : new_size;
-            // Copy across old memory to the new memory
-            memmove(new_memory, old_memory, copy_size);
-            return new_memory;
-        }
-
-    } else {
-        assert(0 && "Memory is out of bounds of the buffer in this arena");
-        return NULL;
-    }
-
-}
-*/
-
-// Because C doesn't have default parameters
-//uintptr_t* arena_resize(Arena a, void *old_memory, size_t old_size, size_t new_size) {
-    //return arena_resize_align(a, old_memory, old_size, new_size, DEFAULT_ALIGNMENT);
-//}
-
-void arena_free_all(Arena a) {
-    a->curr_offset = 0;
-    a->prev_offset = 0;
-}
-
-// Extra Features
-typedef struct Temp_Arena_Memory Temp_Arena_Memory;
-struct Temp_Arena_Memory {
-    Arena arena;
-    size_t prev_offset;
-    size_t curr_offset;
-};
-
-Temp_Arena_Memory temp_arena_memory_begin(Arena a) {
-    Temp_Arena_Memory temp;
-    temp.arena = a;
-    temp.prev_offset = a->prev_offset;
-    temp.curr_offset = a->curr_offset;
-    return temp;
-}
-
-void temp_arena_memory_end(Temp_Arena_Memory temp) {
-    temp.arena->prev_offset = temp.prev_offset;
-    temp.arena->curr_offset = temp.curr_offset;
-}
-
-/*
-   int main(int argc, char **argv) {
-   int i;
-
-   uintptr_t* backing_buffer = malloc(256);
-   struct Arena a = {0};
-   arena_init(&a, backing_buffer, 256);
-
-   for (i = 0; i < 10; i++) {
-   int *x;
-   float *f;
-   char *str;
-
-// Reset all arena offsets for each loop
-arena_free_all(&a);
-
-x = (int *)arena_alloc(&a, sizeof(int));
-f = (float *)arena_alloc(&a, sizeof(float));
-str = arena_alloc(&a, 10);
-
- *x = 123;
- *f = 987;
- memmove(str, "Hellope", 7);
-
- printf("%p: %d\n", x, *x);
- printf("%p: %f\n", f, *f);
- printf("%p: %s\n", str, str);
-
- str = arena_resize(&a, str, 10, 16);
- memmove(str+7, " world!", 7);
- printf("%p: %s\n", str, str);
- }
-
- arena_free_all(&a);
-
- return 0;
- }
- */

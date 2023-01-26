@@ -48,7 +48,8 @@ function main()
 #undef function
 {
     // TODO: arena
-    #__C__ arena __a = arena_init(sizeof(Point) * 20);
+    #__C__ Arena __a = malloc(sizeof(struct Arena));
+    #__C__ arena_init(__a, malloc(256), 256);
 
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
