@@ -19,6 +19,10 @@
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
 #define pprintf printf
+struct mem {
+    uintptr_t* (*alloc) (void* a, size_t size);
+    void* arena;
+};
 typedef struct array array;
 struct array {
     uintptr_t* thing;
@@ -53,8 +57,7 @@ struct SplDoublyLinkedList {
     _Bool (*valid) (SplDoublyLinkedList self);
     void (*rewind) (SplDoublyLinkedList self);
 
-    uintptr_t* (*alloc) (void* a, size_t size);
-    void* mem;
+    struct mem mem;
 };
 
 void SplDoublyLinkedList__push(SplDoublyLinkedList self, uintptr_t* item)
@@ -62,7 +65,7 @@ void SplDoublyLinkedList__push(SplDoublyLinkedList self, uintptr_t* item)
     if (self->item == NULL) {
         self->item = item;
     } else {
-        SplDoublyLinkedList n = self->alloc(self->mem, sizeof(struct SplDoublyLinkedList));
+        SplDoublyLinkedList n = self->mem.alloc(self->mem.arena, sizeof(struct SplDoublyLinkedList));
         if (n == NULL) {
             printf("No mem\n");
         }
@@ -100,7 +103,7 @@ void SplDoublyLinkedList__rewind(SplDoublyLinkedList self)
     self->current_node = self;
 }
 
-SplDoublyLinkedList SplDoublyLinkedList__constructor(SplDoublyLinkedList self)
+SplDoublyLinkedList SplDoublyLinkedList__constructor(SplDoublyLinkedList self, struct mem m)
 {
     self->push         = &SplDoublyLinkedList__push;
     self->current      = &SplDoublyLinkedList__current;
@@ -112,6 +115,9 @@ SplDoublyLinkedList SplDoublyLinkedList__constructor(SplDoublyLinkedList self)
     self->last         = NULL;
     self->next_node    = NULL;
     self->current_node = self;
+
+    self->mem = m;
+
     return self;
 }
 

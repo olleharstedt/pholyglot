@@ -6,12 +6,14 @@
 #include <math.h>
 #include "phollylib.c"
 #include <gc.h>
-#define __new(x, m) x ## __constructor((x) m(__a, sizeof(struct x)))
+#define __new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
 typedef struct Point* Point;
 #define class struct
 #define public
+struct mem arena_mem = {0};
+struct mem gc_mem = {.alloc = &gc_malloc, .arena = NULL};
 //<?php
 class Point
 {
@@ -19,12 +21,14 @@ class Point
     public int $x;
     #define y $y
     public int $y;
+    struct mem mem;
 };
 //?>
-Point Point__constructor(Point self)
+Point Point__constructor(Point self, struct mem m)
 {
     self->x = 99;
     self->y = 99;
+    self->mem = m;
     return self;
 }
 
@@ -37,7 +41,6 @@ define("arena_alloc", "arena_alloc");
 define("gc_malloc", "gc_malloc");
 function __new($c, $f) { return new $c; }
 #endif
-
 
 #define function void
 function printlist(SplDoublyLinkedList $list)
@@ -65,6 +68,25 @@ function printlist(SplDoublyLinkedList $list)
 
 }
 
+#define function void
+function additems(SplDoublyLinkedList $list, int $nr)
+#undef function
+{
+    #__C__ int
+    $j = 0;
+    for (; $j < $nr; $j++) {
+        #__C__ Point
+        // NB: Using mem struct from list here
+        $p2 = __new(Point, $list->mem);
+        $p2->x = $j;
+        $p2->y = 11;
+        $list->push(
+            #__C__ $list,
+            $p2
+        );
+    }
+}
+
 /**
  * gcc -g -Wno-incompatible-pointer-types list.c
  * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc - -lgc
@@ -75,9 +97,13 @@ function printlist(SplDoublyLinkedList $list)
 function main()
 #undef function
 {
-    #__C__ GC_INIT();
+    #__C__ GC_INIT();  // Boehm init
     #__C__ Arena __a = malloc(sizeof(struct Arena));
     #__C__ arena_init(__a, malloc(256), 256);
+    #__C__ arena_mem.alloc = &arena_alloc;
+    #__C__ arena_mem.arena = __a;
+    gc_mem.alloc = &gc_malloc;
+    gc_mem.arena = NULL;
 
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
@@ -87,35 +113,21 @@ function main()
     $i = 10; //intval($buffer);
 
     #__C__ SplDoublyLinkedList
-    $list = __new(SplDoublyLinkedList, arena_alloc);
-    #__C__ $list->alloc = &arena_alloc;
-    #__C__ $list->mem   = __a;
+    $list = __new(SplDoublyLinkedList, arena_mem);
+    #__C__ $list->mem.alloc = &arena_alloc;
+    #__C__ $list->mem.arena   = __a;
 
-    #__C__ int
-    $j = 0;
-    for (; $j < $i; $j++) {
-        #__C__ Point
-        $p2 = __new(Point, arena_alloc);
-        $p2->x = $j;
-        $p2->y = 11;
-        $list->push(
-            #__C__ $list,
-            $p2
-        );
-    }
-
+    additems($list, 10);
     printlist($list);
 
     #__C__ SplDoublyLinkedList
-    $list2 = __new(SplDoublyLinkedList, gc_malloc);
-    #__C__ $list2->alloc = &gc_malloc;
-    #__C__ $list2->mem   = NULL;
+    $list2 = __new(SplDoublyLinkedList, gc_mem);
 
     #__C__ int
     $k = 0;
     for (; $k < $i; $k++) {
         #__C__ Point
-        $p2 = __new(Point, gc_malloc);
+        $p2 = __new(Point, gc_mem);
         if (!$p2) {
             printf("No point\n");
         }
@@ -126,7 +138,6 @@ function main()
             $p2
         );
     }
-
     printlist($list2);
 
     #__C__ arena_free(__a);
