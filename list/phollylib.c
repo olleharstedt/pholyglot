@@ -5,6 +5,9 @@
 #include <assert.h>
 #include <string.h>
 #include <stddef.h>
+#ifndef DEFAULT_ALIGNMENT
+#define DEFAULT_ALIGNMENT (2*sizeof(void *))
+#endif
 #define float double
 #define int long
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
@@ -132,10 +135,6 @@ uintptr_t align_forward(uintptr_t ptr, size_t align) {
 	}
 	return p;
 }
-
-#ifndef DEFAULT_ALIGNMENT
-#define DEFAULT_ALIGNMENT (2*sizeof(void *))
-#endif
 
 typedef struct Arena* Arena;
 struct Arena {
