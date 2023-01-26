@@ -49,7 +49,7 @@ function main()
 {
     // TODO: arena
     #__C__ struct Arena __a = {0};
-	arena_init(&__a, malloc(1024), 1024);
+	arena_init(&__a, malloc(255), 256);
 
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
@@ -61,7 +61,7 @@ function main()
     #__C__ SplDoublyLinkedList
     $list = __new(SplDoublyLinkedList, arena_alloc);
 
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 100; i++) {
         #__C__ Point
         $p = __new(Point, arena_alloc);
     }
