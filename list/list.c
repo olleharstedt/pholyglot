@@ -6,7 +6,7 @@
 #include <math.h>
 #include "phollylib.c"
 #include <gc.h>
-#define __new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
+#define new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
 typedef struct Point* Point;
@@ -21,7 +21,7 @@ class Point
     public int $x;
     #define y $y
     public int $y;
-    struct mem mem;
+    #__C__ struct mem mem;
 };
 //?>
 Point Point__constructor(Point self, struct mem m)
@@ -37,9 +37,8 @@ Point Point__constructor(Point self, struct mem m)
 define("SplDoublyLinkedList", "SplDoublyLinkedList");
 define("Point", "Point");
 define("malloc", "malloc");
-define("arena_alloc", "arena_alloc");
-define("gc_malloc", "gc_malloc");
-function __new($c, $f) { return new $c; }
+define("arena_mem", "arena_mem");
+define("gc_mem", "gc_mem");
 #endif
 
 #define function void
@@ -77,7 +76,10 @@ function additems(SplDoublyLinkedList $list, int $nr)
     for (; $j < $nr; $j++) {
         #__C__ Point
         // NB: Using mem struct from list here
-        $p2 = __new(Point, $list->mem);
+        // Must be inferred by the compiler somehow.
+        $p2 = new(Point
+            #__C__ ,$list->mem
+        );
         $p2->x = $j;
         $p2->y = 11;
         $list->push(
@@ -102,8 +104,8 @@ function main()
     #__C__ arena_init(__a, malloc(256), 256);
     #__C__ arena_mem.alloc = &arena_alloc;
     #__C__ arena_mem.arena = __a;
-    gc_mem.alloc = &gc_malloc;
-    gc_mem.arena = NULL;
+    #__C__ gc_mem.alloc = &gc_malloc;
+    #__C__ gc_mem.arena = NULL;
 
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
@@ -113,15 +115,17 @@ function main()
     $i = 10; //intval($buffer);
 
     #__C__ SplDoublyLinkedList
-    $list = __new(SplDoublyLinkedList, arena_mem);
-    #__C__ $list->mem.alloc = &arena_alloc;
-    #__C__ $list->mem.arena   = __a;
+    $list = new(SplDoublyLinkedList
+        #__C__, arena_mem
+    );
 
     additems($list, 10);
     printlist($list);
 
     #__C__ SplDoublyLinkedList
-    $list2 = __new(SplDoublyLinkedList, gc_mem);
+    $list2 = new(SplDoublyLinkedList
+        #__C__ , gc_mem
+    );
 
     additems($list2, 10);
     printlist($list2);
