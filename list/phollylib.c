@@ -162,11 +162,8 @@ struct Arena {
 };
 
 void arena_init(Arena a, uintptr_t* backing_buffer, size_t buf_len) {
-    printf("Init with len %ld\n", buf_len);
-    printf("buffer start = %p\n", backing_buffer);
     a->buf = (unsigned char*) backing_buffer;
     void* ptr = &a->buf[buf_len];
-    printf("buffer end   = %p\n", ptr);
     a->buf_len = buf_len;
     a->curr_offset = 0;
     a->prev_offset = 0;
@@ -175,7 +172,6 @@ void arena_init(Arena a, uintptr_t* backing_buffer, size_t buf_len) {
 }
 
 void* arena_alloc_align(Arena a, size_t size, size_t align) {
-    printf("size = %ld\n", size);
     // Align 'curr_offset' forward to the specified alignment
     uintptr_t curr_ptr = (uintptr_t)a->buf + (uintptr_t)a->curr_offset;
     uintptr_t offset = align_forward(curr_ptr, align);
@@ -183,10 +179,7 @@ void* arena_alloc_align(Arena a, size_t size, size_t align) {
 
     // Check to see if the backing memory has space left
     if (offset + size <= a->buf_len) {
-        printf("offset + size = %ld + %ld = %ld\n", offset, size, offset + size);
-        printf("Have space\n");
         unsigned char* ptr = &a->buf[offset];
-        printf("ptr = %p\n", ptr);
         a->prev_offset = offset;
         a->curr_offset = offset+size;
 
@@ -194,11 +187,11 @@ void* arena_alloc_align(Arena a, size_t size, size_t align) {
         memset(ptr, 0, size);
         return ptr;
     } else {
-        printf("Need next\n");
         if (a->next) {
             return arena_alloc_align(a->next, size, align);
         } else {
             size_t new_len = a->buf_len * 2;
+            printf("Alloc next\n");
             Arena next     = malloc(sizeof(struct Arena));
             arena_init(next, malloc(new_len), new_len);
             a->next        = next;
@@ -215,10 +208,14 @@ uintptr_t* arena_alloc(Arena a, size_t size) {
 }
 
 void arena_free(Arena a) {
+    printf("Free\n");
     if (a->next) {
+        printf("Recurse\n");
         arena_free(a->next);
     }
+    printf("Free a->buf\n");
     free(a->buf);
+    free(a);
 }
 
 /*
