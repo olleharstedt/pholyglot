@@ -53,7 +53,9 @@ function printlist(SplDoublyLinkedList $list)
         );
         if ($tmp) {
             printf("Current point x = %ld\n", $tmp->x);
-        }
+        } else {
+            printf("No current :(\n");
+        }   
         $list->next(
             #__C__ $list
         );
