@@ -45,18 +45,20 @@ https://stackoverflow.com/questions/25144963/converting-a-mysql-result-into-a-js
 https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-cgi-bin-program-written-in-c
 
 * Class can be struct.
-* String can use smart strings from PHP core.
+    * Pass around `$__self` explicitly
+* String can use smart strings from PHP core or GNU libc
 * Array can use same array.
 ** `#define array const Body*` but also need to pass length as an argument
 * Hashtable gonna be hard. Must use class for that?
 * GC with Boehm, no long-running scripts? Or glib slice/manual ref count
+    * libgc-dev on Ubuntu
 * Need docblock for arrays - no collection class built-in in PHP
-** Array (as in C); can't change size
-** Vector, as array but can change size
-** (Double-linked) list
-** Hashtable
+    * Fixed-size array (as in C); can't change size (at least not without copy mem; but mess up pointers?)
+    * Vector, as array but can change size
+    * (Double-linked) list
+    * Hashtable
 
-**Impossible:**
+**Impossible**
 
 * Nested assoc arrays
 * Read/write from PHP session
@@ -64,7 +66,7 @@ https://stackoverflow.com/questions/5451913/how-to-retrieve-form-post-data-via-c
 ** BUT: Maybe possible with `#__C__` and sed? Or just sed?
 * UTF8
 
-**Snippets:**
+**Snippets**
 
 To include PHP which is ignored in C:
 
@@ -267,4 +269,5 @@ Make long == double == uintptr_t same size
 
     x86_64 tolerates unaligned access but it's slow. Other platforms normally just segfaults.
     alignof(max_align_t) is the safest alignment that works for all types.
+
 
