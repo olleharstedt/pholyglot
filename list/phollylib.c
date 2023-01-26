@@ -154,40 +154,40 @@ uintptr_t align_forward(uintptr_t ptr, size_t align) {
 
 typedef struct Arena* Arena;
 struct Arena {
-	uintptr_t* buf;
-	size_t     buf_len;
-	size_t     prev_offset; // This will be useful for later on
-	size_t     curr_offset;
+    uintptr_t* buf;
+    size_t     buf_len;
+    size_t     prev_offset; // This will be useful for later on
+    size_t     curr_offset;
     Arena      next;        // If no space left, allocate another arena
 };
 
 void arena_init(Arena a, uintptr_t* backing_buffer, size_t backing_buffer_length) {
-	a->buf = (uintptr_t*) backing_buffer;
-	a->buf_len = backing_buffer_length;
-	a->curr_offset = 0;
-	a->prev_offset = 0;
-	a->next        = NULL;
+    a->buf = (uintptr_t*) backing_buffer;
+    a->buf_len = backing_buffer_length;
+    a->curr_offset = 0;
+    a->prev_offset = 0;
+    a->next        = NULL;
 }
 
 uintptr_t* arena_alloc_align(Arena a, size_t size, size_t align) {
     printf("size = %ld\n", size);
-	// Align 'curr_offset' forward to the specified alignment
-	uintptr_t curr_ptr = (uintptr_t)a->buf + (uintptr_t)a->curr_offset;
-	uintptr_t offset = align_forward(curr_ptr, align);
-	offset -= (uintptr_t)a->buf; // Change to relative offset
+    // Align 'curr_offset' forward to the specified alignment
+    uintptr_t curr_ptr = (uintptr_t)a->buf + (uintptr_t)a->curr_offset;
+    uintptr_t offset = align_forward(curr_ptr, align);
+    offset -= (uintptr_t)a->buf; // Change to relative offset
 
-	// Check to see if the backing memory has space left
-	if (offset + size <= a->buf_len) {
+    // Check to see if the backing memory has space left
+    if (offset + size <= a->buf_len) {
         printf("offset + size = %ld + %ld = %ld\n", offset, size, offset + size);
         printf("Have space\n");
-		uintptr_t* ptr = &a->buf[offset];
-		a->prev_offset = offset;
-		a->curr_offset = offset+size;
+        uintptr_t* ptr = &a->buf[offset];
+        a->prev_offset = offset;
+        a->curr_offset = offset+size;
 
-		// Zero new memory by default
-		memset(ptr, 0, size);
-		return ptr;
-	} else {
+        // Zero new memory by default
+        memset(ptr, 0, size);
+        return ptr;
+    } else {
         printf("Need next\n");
         if (a->next) {
             return arena_alloc_align(a->next, size, align);
@@ -199,13 +199,13 @@ uintptr_t* arena_alloc_align(Arena a, size_t size, size_t align) {
             return arena_alloc_align(a->next, size, align);
         }
     }
-	// Return NULL if the arena is out of memory (or handle differently)
-	return NULL;
+    // Return NULL if the arena is out of memory (or handle differently)
+    return NULL;
 }
 
 // Because C doesn't have default parameters
 uintptr_t* arena_alloc(Arena a, size_t size) {
-	return arena_alloc_align(a, size, DEFAULT_ALIGNMENT);
+    return arena_alloc_align(a, size, DEFAULT_ALIGNMENT);
 }
 
 void arena_free(Arena a) {
@@ -216,101 +216,101 @@ void arena_free(Arena a) {
 }
 
 uintptr_t* arena_resize_align(Arena a, uintptr_t* old_memory, size_t old_size, size_t new_size, size_t align) {
-	uintptr_t* old_mem = (uintptr_t*) old_memory;
+    uintptr_t* old_mem = (uintptr_t*) old_memory;
 
-	assert(is_power_of_two(align));
+    assert(is_power_of_two(align));
 
-	if (old_mem == NULL || old_size == 0) {
-		return arena_alloc_align(a, new_size, align);
-	} else if (a->buf <= old_mem && old_mem < a->buf+a->buf_len) {
-		if (a->buf+a->prev_offset == old_mem) {
-			a->curr_offset = a->prev_offset + new_size;
-			if (new_size > old_size) {
-				// Zero the new memory by default
-				memset(&a->buf[a->curr_offset], 0, new_size-old_size);
-			}
-			return old_memory;
-		} else {
-			void *new_memory = arena_alloc_align(a, new_size, align);
-			size_t copy_size = old_size < new_size ? old_size : new_size;
-			// Copy across old memory to the new memory
-			memmove(new_memory, old_memory, copy_size);
-			return new_memory;
-		}
+    if (old_mem == NULL || old_size == 0) {
+        return arena_alloc_align(a, new_size, align);
+    } else if (a->buf <= old_mem && old_mem < a->buf+a->buf_len) {
+        if (a->buf+a->prev_offset == old_mem) {
+            a->curr_offset = a->prev_offset + new_size;
+            if (new_size > old_size) {
+                // Zero the new memory by default
+                memset(&a->buf[a->curr_offset], 0, new_size-old_size);
+            }
+            return old_memory;
+        } else {
+            void *new_memory = arena_alloc_align(a, new_size, align);
+            size_t copy_size = old_size < new_size ? old_size : new_size;
+            // Copy across old memory to the new memory
+            memmove(new_memory, old_memory, copy_size);
+            return new_memory;
+        }
 
-	} else {
-		assert(0 && "Memory is out of bounds of the buffer in this arena");
-		return NULL;
-	}
+    } else {
+        assert(0 && "Memory is out of bounds of the buffer in this arena");
+        return NULL;
+    }
 
 }
 
 // Because C doesn't have default parameters
 uintptr_t* arena_resize(Arena a, void *old_memory, size_t old_size, size_t new_size) {
-	return arena_resize_align(a, old_memory, old_size, new_size, DEFAULT_ALIGNMENT);
+    return arena_resize_align(a, old_memory, old_size, new_size, DEFAULT_ALIGNMENT);
 }
 
 void arena_free_all(Arena a) {
-	a->curr_offset = 0;
-	a->prev_offset = 0;
+    a->curr_offset = 0;
+    a->prev_offset = 0;
 }
 
 // Extra Features
 typedef struct Temp_Arena_Memory Temp_Arena_Memory;
 struct Temp_Arena_Memory {
-	Arena arena;
-	size_t prev_offset;
-	size_t curr_offset;
+    Arena arena;
+    size_t prev_offset;
+    size_t curr_offset;
 };
 
 Temp_Arena_Memory temp_arena_memory_begin(Arena a) {
-	Temp_Arena_Memory temp;
-	temp.arena = a;
-	temp.prev_offset = a->prev_offset;
-	temp.curr_offset = a->curr_offset;
-	return temp;
+    Temp_Arena_Memory temp;
+    temp.arena = a;
+    temp.prev_offset = a->prev_offset;
+    temp.curr_offset = a->curr_offset;
+    return temp;
 }
 
 void temp_arena_memory_end(Temp_Arena_Memory temp) {
-	temp.arena->prev_offset = temp.prev_offset;
-	temp.arena->curr_offset = temp.curr_offset;
+    temp.arena->prev_offset = temp.prev_offset;
+    temp.arena->curr_offset = temp.curr_offset;
 }
 
 /*
-int main(int argc, char **argv) {
-	int i;
+   int main(int argc, char **argv) {
+   int i;
 
-	uintptr_t* backing_buffer = malloc(256);
-	struct Arena a = {0};
-	arena_init(&a, backing_buffer, 256);
+   uintptr_t* backing_buffer = malloc(256);
+   struct Arena a = {0};
+   arena_init(&a, backing_buffer, 256);
 
-	for (i = 0; i < 10; i++) {
-		int *x;
-		float *f;
-		char *str;
+   for (i = 0; i < 10; i++) {
+   int *x;
+   float *f;
+   char *str;
 
-		// Reset all arena offsets for each loop
-		arena_free_all(&a);
+// Reset all arena offsets for each loop
+arena_free_all(&a);
 
-		x = (int *)arena_alloc(&a, sizeof(int));
-		f = (float *)arena_alloc(&a, sizeof(float));
-		str = arena_alloc(&a, 10);
+x = (int *)arena_alloc(&a, sizeof(int));
+f = (float *)arena_alloc(&a, sizeof(float));
+str = arena_alloc(&a, 10);
 
-		*x = 123;
-		*f = 987;
-		memmove(str, "Hellope", 7);
+ *x = 123;
+ *f = 987;
+ memmove(str, "Hellope", 7);
 
-		printf("%p: %d\n", x, *x);
-		printf("%p: %f\n", f, *f);
-		printf("%p: %s\n", str, str);
+ printf("%p: %d\n", x, *x);
+ printf("%p: %f\n", f, *f);
+ printf("%p: %s\n", str, str);
 
-		str = arena_resize(&a, str, 10, 16);
-		memmove(str+7, " world!", 7);
-		printf("%p: %s\n", str, str);
-	}
+ str = arena_resize(&a, str, 10, 16);
+ memmove(str+7, " world!", 7);
+ printf("%p: %s\n", str, str);
+ }
 
-	arena_free_all(&a);
+ arena_free_all(&a);
 
-	return 0;
-}
-*/
+ return 0;
+ }
+ */
