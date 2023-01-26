@@ -41,7 +41,7 @@ function __new($c, $f) { return new $c; }
  * gcc -g -Wno-incompatible-pointer-types list.c
  * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc -
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
- * cat arena.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address
+ * cat list.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address
  */
 #define function int
 function main()

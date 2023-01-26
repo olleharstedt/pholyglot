@@ -6,7 +6,7 @@
 #include <math.h>
 #include <phollylib.c>
 #define new(x) x ## __constructor(malloc(sizeof(struct x)))
-#define __new(x, m) x ## __constructor(m(__a, sizeof(struct x)))
+#define __new(x, m) x ## __constructor(m(&__a, sizeof(struct x)))
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
 typedef struct Point* Point;
@@ -41,13 +41,15 @@ function __new($c, $f) { return new $c; }
  * gcc -g -Wno-incompatible-pointer-types list.c
  * cat arena.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc -
  * cat arena.c | sed -e "s/#__C__//g" | gcc -xc - -E
+ * cat arena.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address
  */
 #define function int
 function main()
 #undef function
 {
     // TODO: arena
-    #__C__ arena __a = arena_init(sizeof(Point) * 20);
+    #__C__ struct Arena __a = {0};
+	arena_init(&__a, malloc(1024), 1024);
 
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string
@@ -59,10 +61,12 @@ function main()
     #__C__ SplDoublyLinkedList
     $list = __new(SplDoublyLinkedList, arena_alloc);
 
-    #__C__ Point
-    $p = __new(Point, arena_alloc);
+    for (int i = 0; i < 10; i++) {
+        #__C__ Point
+        $p = __new(Point, arena_alloc);
+    }
 
-    arena_free(__a);
+    arena_free(&__a);
 
     return 0;
 }
