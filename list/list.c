@@ -123,21 +123,7 @@ function main()
     #__C__ SplDoublyLinkedList
     $list2 = __new(SplDoublyLinkedList, gc_mem);
 
-    #__C__ int
-    $k = 0;
-    for (; $k < $i; $k++) {
-        #__C__ Point
-        $p2 = __new(Point, gc_mem);
-        if (!$p2) {
-            printf("No point\n");
-        }
-        $p2->x = $k * 22;
-        $p2->y = 11;
-        $list2->push(
-            #__C__ $list2,
-            $p2
-        );
-    }
+    additems($list2, 10);
     printlist($list2);
 
     #__C__ arena_free(__a);
