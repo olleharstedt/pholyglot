@@ -63,6 +63,9 @@ void SplDoublyLinkedList__push(SplDoublyLinkedList self, uintptr_t* item)
         self->item = item;
     } else {
         SplDoublyLinkedList n = self->alloc(self->mem, sizeof(struct SplDoublyLinkedList));
+        if (n == NULL) {
+            printf("No mem\n");
+        }
         n->item = item;
 
         SplDoublyLinkedList current = self;
