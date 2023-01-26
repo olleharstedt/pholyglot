@@ -5,7 +5,6 @@
 #include <stdint.h>
 #include <math.h>
 #include <phollylib.c>
-#define new(x) x ## __constructor(malloc(sizeof(struct x)))
 #define __new(x, m) x ## __constructor((x) m(__a, sizeof(struct x)))
 #define intval(x) strtol(x, (char **) NULL, 10);
 #define STDIN stdin
@@ -56,10 +55,12 @@ function main()
     //#__C__ char*
     //$buffer = fgets(malloc(sizeof(char) * 10), 10, STDIN);
     #__C__ long
-    $i = 10; //intval($buffer);
+    $i = 100; //intval($buffer);
 
     #__C__ SplDoublyLinkedList
     $list = __new(SplDoublyLinkedList, arena_alloc);
+    #__C__ $list->alloc = &arena_alloc;
+    #__C__ $list->mem   = __a;
 
     #__C__ Point
     $p = __new(Point, arena_alloc);
@@ -74,7 +75,7 @@ function main()
     $j = 0;
     for (; $j < $i; $j++) {
         #__C__ Point
-        $p2 = new(Point);
+        $p2 = __new(Point, arena_alloc);
         $p2->x = $j;
         $p2->y = 11;
         $list->push(
@@ -101,6 +102,7 @@ function main()
         #__C__ $list
     ));
 
+    #__C__ arena_free(__a);
     return 0;
 }
 //?>

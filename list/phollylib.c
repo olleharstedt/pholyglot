@@ -10,7 +10,6 @@
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
 #define class struct
 #define __PHP__ 0
-#define new(x) x ## __constructor(malloc(sizeof(struct x)))
 #define array(...) {__VA_ARGS__}
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
@@ -49,6 +48,9 @@ struct SplDoublyLinkedList {
     uintptr_t* (*current) (SplDoublyLinkedList self);
     _Bool (*valid) (SplDoublyLinkedList self);
     void (*rewind) (SplDoublyLinkedList self);
+
+    uintptr_t* (*alloc) (void* a, size_t size);
+    void* mem;
 };
 
 void SplDoublyLinkedList__push(SplDoublyLinkedList self, uintptr_t* item)
@@ -56,7 +58,7 @@ void SplDoublyLinkedList__push(SplDoublyLinkedList self, uintptr_t* item)
     if (self->item == NULL) {
         self->item = item;
     } else {
-        SplDoublyLinkedList n = malloc(sizeof(struct SplDoublyLinkedList));
+        SplDoublyLinkedList n = self->alloc(self->mem, sizeof(struct SplDoublyLinkedList));
         n->item = item;
 
         SplDoublyLinkedList current = self;
