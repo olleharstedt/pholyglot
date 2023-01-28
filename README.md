@@ -270,4 +270,6 @@ Make long == double == uintptr_t same size
     x86_64 tolerates unaligned access but it's slow. Other platforms normally just segfaults.
     alignof(max_align_t) is the safest alignment that works for all types.
 
+Single owner as a solution to malloc from mysqli and other external libs?
 
+PHP FFI could be used?
