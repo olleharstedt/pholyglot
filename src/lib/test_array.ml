@@ -200,15 +200,15 @@ let%test_unit "infer docblock object array" =
         Function {
             name = "foo";
             docblock = [
-                DocParam ("bodies", Dynamic_array (Class_type "Body"));
+                DocParam ("bodies", Dynamic_array (Class_type ("Body", Boehm)));
                 DocParam ("dt", Float);
             ];
             params = [
-                RefParam ("bodies", Dynamic_array (Class_type "Body"));
+                RefParam ("bodies", Dynamic_array (Class_type ("Body", Boehm)));
                 Param ("dt", Float);
             ];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body"); Float]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Boehm)); Float]}
         }
     ])
 
@@ -217,17 +217,17 @@ let%test_unit "transpile docblock object array" =
         Ast.Function {
             name = "foo";
             docblock = [
-                DocParam ("bodies", Dynamic_array (Class_type "Body"));
+                DocParam ("bodies", Dynamic_array (Class_type ("Body", Boehm)));
                 DocParam ("dt", Float);
             ];
             params = [
-                RefParam ("bodies", Dynamic_array (Class_type "Body"));
+                RefParam ("bodies", Dynamic_array (Class_type ("Body", Boehm)));
                 Param ("dt", Float);
             ];
             stmts = [
                 Assignment (Int, Variable "a", Num 123);
             ];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type "Body"); Float]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Boehm)); Float]}
         }
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare

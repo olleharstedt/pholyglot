@@ -21,6 +21,11 @@ and kind =
     | Ref
     | Val
 
+and allocation_strategy =
+    | Boehm
+    | Stack
+    | Arena
+
 and typ =
     | Int
     | Float
@@ -36,7 +41,7 @@ and typ =
         (* TODO: Not needed in Pholyglot_ast? *)
         arguments: typ list
     }
-    | Class_type of class_name
+    | Class_type of class_name * allocation_strategy
 
 and param =
     | Param of identifier * typ
@@ -149,7 +154,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | Fixed_array (t, n) -> (*string_of_typ t*) "array"
     | Dynamic_array t -> (* string_of_typ t *) "array"
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
-    | Class_type (n) -> n
+    | Class_type (n, a) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
 
 (** Type notation that goes AFTER the variable name, as in array init *)
@@ -199,8 +204,9 @@ let rec string_of_expression = function
         "$" ^ id
     (* TODO: Alloc type, possibly done as Point__stack or Point__boehm + _Generic in C macro etc *)
     (* TODO: Init function pointers *)
-    | New (Class_type (ct), exprs) -> 
+    | New (Class_type (ct, alloc_strat), exprs) -> 
         (*let t_text = show_typ t in*)
+        (* TODO: Add alloc strat in new line #__C__ *)
         sprintf {|new(%s)|}
         ct
     | Array_init exprs -> sprintf {|array_make(%s)|}

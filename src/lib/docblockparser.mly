@@ -33,4 +33,4 @@ typ:
   | "int"      {Int : Ast.typ}
   | "float"    {Float : Ast.typ}
   | "string"   {String : Ast.typ}
-  | s=CLASS_NAME {Class_type s : Ast.typ}
+  | s=CLASS_NAME {Class_type (s, Infer_allocation_strategy) : Ast.typ}

@@ -16,6 +16,12 @@ and kind =
     | Val
     | Infer_kind
 
+and allocation_strategy =
+    | Boehm
+    | Stack
+    | Arena
+    | Infer_allocation_strategy
+
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)
 and typ =
     | Type_variable of string
@@ -26,7 +32,7 @@ and typ =
     | String
     | String_literal            (* For library code *)
     | Constant
-    | Class_type of class_name
+    | Class_type of class_name * allocation_strategy
     (* Fixed array can have Infer_me * None, when size is not yet known *)
     | Fixed_array of typ * int option
     | Dynamic_array of typ

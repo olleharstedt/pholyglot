@@ -28,7 +28,7 @@ let rec typ_of_lvalue ns lv : typ =
     (* TODO: id is expression? *)
     | Object_access (id, Property_access prop_name) ->
         let class_type_name = match Namespace.find_identifier ns id with
-            | Some (Class_type (c)) -> c
+            | Some (Class_type (c, a)) -> c
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
         in
         let (k, props, methods) = match Namespace.find_class ns class_type_name with
@@ -81,8 +81,8 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     (* $point->x *)
     | Object_access (Variable id, Property_access prop_name) -> begin
         match Namespace.find_identifier ns id with
-            | Some (Fixed_array (Class_type class_type_name, _))
-            | Some (Class_type class_type_name) -> begin
+            | Some (Fixed_array (Class_type (class_type_name, _), _))
+            | Some (Class_type (class_type_name, _)) -> begin
                 let (k, props, methods) = match Namespace.find_class ns class_type_name with
                     | Some p -> p
                     | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
@@ -98,7 +98,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     (*| Object_access (Array_access (class_name, _), Method_call {return_type = Infer_me; method_name})*)
     | Object_access (Variable class_name, Method_call {return_type = Infer_me; method_name}) -> begin
         let class_type_name = match Namespace.find_identifier ns class_name with
-            | Some (Class_type (c)) -> c
+            | Some (Class_type (c, a)) -> c
             | None -> begin
                 raise (Type_error (sprintf "typ_of_expression method call: Could not find identifier %s in namespace" class_name))
             end
@@ -140,7 +140,7 @@ let typ_to_constant (t : Ast.typ) : Ast.expression = match t with
     | Int -> Constant "int"
     | Float -> Constant "float"
     | String -> Constant "string"
-    | Class_type s -> Constant s
+    | Class_type (s, _) -> Constant s
     | _ -> raise (Type_error ("typ_to_constant: Not supported type: " ^ show_typ t))
 
 let rec typ_contains_type_variable (t : typ): bool =
@@ -314,7 +314,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let t = typ_of_expression ns expr in
         (* Check if class def has property with name and type *)
         let class_name = match Namespace.find_identifier ns variable_name with
-            | Some (Class_type s) -> s
+            | Some (Class_type (s, alloc_strat)) -> s
             | None -> failwith ("infer_stmt: Could not find identifier " ^ variable_name)
         in
         let (k, props, methods) = match Namespace.find_class ns class_name with
@@ -399,7 +399,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
 let rec kind_of_typ ns t : kind = match t with
     | Int | Float | Void -> Val
     | String -> Ref
-    | Class_type s -> begin
+    | Class_type (s, alloc_strat) -> begin
         match Namespace.find_class ns s with
         | Some (Infer_kind, props, methods) -> infer_kind ns Infer_kind props
         | Some (k, _, _) -> k
@@ -500,7 +500,8 @@ let infer_method (c_orig : Ast.declaration) meth ns : function_def = match meth 
             | Param (id, typ)
             | RefParam (id, typ) -> Namespace.add_identifier ns id typ
         ) params;
-        Namespace.add_identifier ns "this" (Class_type class_name);
+        (* TODO: Does alloc strat matter here? *)
+        Namespace.add_identifier ns "this" (Class_type (class_name, Boehm));
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         {name; docblock; params; stmts = new_stmts; function_type = ftyp}

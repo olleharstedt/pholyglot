@@ -191,7 +191,7 @@ typ:
   | "string"                    {String : Ast.typ}
   | "void"                      {Void : Ast.typ}
   | "array"                     {Fixed_array (Infer_me, None) : Ast.typ}
-  | s=CLASS_NAME                {Class_type s : Ast.typ}
+  | s=CLASS_NAME                {Class_type (s, Infer_allocation_strategy) : Ast.typ}
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                      {failwith ("Unknown type: " ^ s)}
 
@@ -220,7 +220,7 @@ expr:
   | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Method_call {return_type = Infer_me; method_name = m; args = args_list; left_hand = e}}
   | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__prop_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
-  | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type s, [])}
+  | "new" s=CLASS_NAME "(" ")"                                   {New (Class_type (s, Infer_allocation_strategy), [])}
   (* TODO "new" /** @alloc stack */ *)
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init (Infer_me, None, array_init)}

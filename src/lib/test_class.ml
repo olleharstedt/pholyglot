@@ -65,7 +65,7 @@ let%test_unit "class new" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Return (Num 0)
             ];
             function_type = Function_type {return_type = Int; arguments = []}
@@ -101,7 +101,7 @@ let%test_unit "object lvalue assignment" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Assignment (Infer_me, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Return (Num 0);
             ];
@@ -139,7 +139,7 @@ let%test_unit "object object access in expression" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Assignment (Infer_me, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "__prop_x")]);
                 Return (Num 0);
@@ -165,7 +165,7 @@ let%test_unit "infer object access" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Infer_me, Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Assignment (Infer_me, Object_access ("p", Property_access "x"), (Num 1));
                 Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "x")]);
                 Return (Num 0);
@@ -188,7 +188,7 @@ let%test_unit "infer object access" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -217,7 +217,7 @@ let%test_unit "output object access" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Class_type "Point", Variable "p", (New (Class_type "Point", [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Assignment (Int, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -302,7 +302,7 @@ function foo(Thing $t): void {
         Function { 
             name = "foo";
             docblock = [];
-            params = [Param ("t", Class_type "Thing")];
+            params = [Param ("t", Class_type ("Thing", Boehm))];
             stmts = [
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},
@@ -310,7 +310,7 @@ function foo(Thing $t): void {
                     [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__prop_name"))]
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [Class_type "Thing"]}
+            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Boehm)]}
         };
     ])
 
@@ -671,7 +671,7 @@ let%test_unit "infer method call" =
         ];
     } in
     Namespace.add_class_type ns c;
-    Namespace.add_identifier ns "p" (Class_type "Point");
+    Namespace.add_identifier ns "p" (Class_type ("Point", Boehm));
     let expr : Ast.expression = Object_access (Variable "p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; left_hand = Variable "p"}) in
     let ast = Infer.infer_expression ns expr in
     [%test_eq: Ast.expression] ast (Object_access (Variable "p", Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"}))
@@ -726,7 +726,7 @@ function main(): int
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Class_type "Point", Variable "p", (New (Class_type ("Point"), [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Class_type ("Point", Boehm), [])));
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
                     "printf",
@@ -801,18 +801,18 @@ let%test_unit "object access inside array access" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Assignment (Class_type ("Body", Boehm), Variable "b", New (Class_type ("Body", Boehm), []));
                 Assignment (Int, Object_access ("b", (Property_access "__prop_x")), (Num 10));
-                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"),
+                Assignment (Fixed_array (Class_type ("Body", Boehm), Some 1), (Variable "arr"),
                     Function_call (
-                        Function_type {return_type = Fixed_array (Class_type "Body", Some 1); arguments = [Constant; Int; Class_type "Body"]},
+                        Function_type {return_type = Fixed_array (Class_type ("Body", Boehm), Some 1); arguments = [Constant; Int; Class_type ("Body", Boehm)]},
                         "array_make",
                         [Constant "Body"; Num 1; Variable "b"];
                     )
                 );
                 Assignment (Int, Variable "x", Object_access (
                     Function_call (
-                        Function_type {return_type = Class_type "Body"; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
+                        Function_type {return_type = Class_type ("Body", Boehm); arguments = [Constant; Dynamic_array (Class_type ("Body", Boehm)); Int]},
                         "array_get",
                         [Constant "Body"; Variable "arr"; Num 0]
                     ),
@@ -825,7 +825,7 @@ let%test_unit "object access inside array access" =
                         Coerce (String_literal, String "\"%ld\"");
                         Object_access(
                             Function_call (
-                                Function_type {return_type = Class_type "Body"; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
+                                Function_type {return_type = Class_type ("Body", Boehm); arguments = [Constant; Dynamic_array (Class_type ("Body", Boehm)); Int]},
                                 "array_get",
                                 [Constant "Body"; Variable "arr"; Num 0]
                             ),
@@ -844,18 +844,18 @@ let%test_unit "object access inside array access transpile" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Assignment (Class_type ("Body", Boehm), Variable "b", New (Class_type ("Body", Boehm), []));
                 Assignment (Int, Object_access ("b", (Property_access "__prop_x")), (Num 10));
-                Assignment (Fixed_array (Class_type "Body", Some 1), (Variable "arr"),
+                Assignment (Fixed_array (Class_type ("Body", Boehm), Some 1), (Variable "arr"),
                     Function_call (
-                        Function_type {return_type = Fixed_array (Class_type "Body", Some 1); arguments = [Constant; Int; Class_type "Body"]},
+                        Function_type {return_type = Fixed_array (Class_type ("Body", Boehm), Some 1); arguments = [Constant; Int; Class_type ("Body", Boehm)]},
                         "array_make",
                         [Constant "Body"; Num 1; Variable "b"];
                     )
                 );
                 Assignment (Int, Variable "x", Object_access (
                     Function_call (
-                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array (Class_type "Body"); Int]},
+                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array (Class_type ("Body", Boehm)); Int]},
                         "array_get",
                         [Constant "Body"; Variable "arr"; Num 0]
                     ),
@@ -918,7 +918,7 @@ function foo(): void {
             params = [];
             stmts = [
                 Assignment (Int, Variable "x", Num 10);
-                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Assignment (Class_type ("Body", Boehm), Variable "b", New (Class_type ("Body", Boehm), []));
                 Method_call {
                     lvalue = Object_access ("b", Property_access "__prop_doSomething");
                     args   = [Variable "x"];
@@ -936,7 +936,7 @@ let%test_unit "method call as statement pholyglot" =
             params = [];
             stmts = [
                 Assignment (Int, Variable "x", Num 10);
-                Assignment (Class_type "Body", Variable "b", New (Class_type "Body", []));
+                Assignment (Class_type ("Body", Boehm), Variable "b", New (Class_type ("Body", Boehm), []));
                 Method_call {
                     lvalue = Object_access ("b", Property_access "__prop_doSomething");
                     args   = [Variable "x"];

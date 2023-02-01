@@ -6,6 +6,12 @@ let kind_to_pholyglot k = match k with
     | Ast.Ref -> Pholyglot_ast.Ref
     | Ast.Val -> Pholyglot_ast.Val
 
+let alloc_to_pholyglot (a : Ast.allocation_strategy) : Pholyglot_ast.allocation_strategy = match a with
+    | Stack -> Stack
+    | Boehm -> Boehm
+    | Arena -> Arena
+    | Infer_allocation_strategy -> failwith "alloc_to_pholyglot: Must infer allocation strategy before transpile"
+
 (** Transpile from Pholly AST to Pholyglot AST *)
 let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     | Int -> Pholyglot_ast.Int
@@ -20,14 +26,14 @@ let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     | Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Infer_me -> failwith "Infer before transpiling"
-    | Class_type (n) -> Pholyglot_ast.Class_type (n)
+    | Class_type (n, a) -> Pholyglot_ast.Class_type (n, alloc_to_pholyglot a)
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 
 let typ_to_pholyglot_constant (t : Ast.typ) : Pholyglot_ast.expression = match t with
     | Int -> Constant "int"
     | Float -> Constant "float"
     | String -> Constant "string"
-    | Class_type s -> Constant s
+    | Class_type (s, _) -> Constant s
     | _ -> raise (Transpile_error ("typ_to_pholyglot_constant: Not supported type"))
 
 let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
@@ -181,7 +187,8 @@ let declaration_to_pholyglot (d : Ast.declaration) : Pholyglot_ast.declaration =
         let fn : Ast.function_def -> Pholyglot_ast.function_def = fun {name; params; stmts; function_type;} ->
             {
                 name;
-                params = Param ("__self", Class_type class_name) :: List.map param_to_pholyglot params;
+                (* TODO: Alloc strat should be None here? Or Irrelevant? *)
+                params = Param ("__self", Class_type (class_name, Boehm)) :: List.map param_to_pholyglot params;
                 stmts = List.map statement_to_pholyglot stmts;
                 function_type = typ_to_pholyglot function_type;
             }
