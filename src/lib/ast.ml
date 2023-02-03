@@ -17,9 +17,11 @@ and kind =
     | Infer_kind
 
 and allocation_strategy =
-    | Boehm
     | Stack
     | Arena
+    | Boehm
+    | Malloc        (* From third-party libs like mysqli *)
+    | Polymorph     (* Docblock params *)
     | Infer_allocation_strategy
 
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)

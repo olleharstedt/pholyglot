@@ -200,11 +200,11 @@ let%test_unit "infer docblock object array" =
         Function {
             name = "foo";
             docblock = [
-                DocParam ("bodies", Dynamic_array (Class_type ("Body", Boehm)));
+                DocParam ("bodies", Dynamic_array (Class_type ("Body", Polymorph)));
                 DocParam ("dt", Float);
             ];
             params = [
-                RefParam ("bodies", Dynamic_array (Class_type ("Body", Boehm)));
+                RefParam ("bodies", Dynamic_array (Class_type ("Body", Polymorph)));
                 Param ("dt", Float);
             ];
             stmts = [];

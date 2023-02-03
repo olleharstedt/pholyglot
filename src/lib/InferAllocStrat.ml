@@ -2,11 +2,24 @@ open Printf
 open Ast
 module Log = Dolog.Log
 
+let rec infer_alloc_strat_from_expression (ns : Namespace.t) (expr : expression) : allocation_strategy = 
+    match expr with
+    (* TODO: Read docblock here *)
+    | New (Class_type (name, alloc_strat), exprs) -> Boehm
+    | _ -> Boehm
+
+let rec infer_expression (ns : Namespace.t) (expr : expression) : expression = 
+    match expr with
+    (* TODO: Read docblock here *)
+    | New (Class_type (name, alloc_strat), exprs) ->
+        New (Class_type (name, Boehm), exprs)
+    | e -> e
+
 let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 
     match s with
-    | Assignment (Class_type (s, Infer_allocation_strategy), lvalue, expression) as a ->
-        (* TODO: Figure out allocation strategy based on expression *)
-        a
+    | Assignment (Class_type (s, Infer_allocation_strategy), lvalue, expr) as a ->
+        let alloc_strat = infer_alloc_strat_from_expression ns expr in
+        Assignment (Class_type (s, alloc_strat), lvalue, infer_expression ns expr)
     | s -> s
 
 let infer_declaration (decl : Ast.declaration) (ns : Namespace.t) : declaration = 
