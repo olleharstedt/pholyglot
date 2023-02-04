@@ -461,13 +461,26 @@ let unify_params_with_docblock (params : param list) (comments : docblock_commen
     List.map map params
 
 (**
+ * Params always have Polymorph alloc strategy for now.
+ *)
+let rec infer_arg_typ t =
+    match t with
+    | Class_type (s, alloc_strat) ->
+        print_endline "MO";
+        Class_type (s, Polymorph)
+    | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t, n)
+    | Dynamic_array t -> Dynamic_array (infer_arg_typ t)
+    | t -> t
+
+(**
  * Infer and resolve conflicts between docblock, params and function type.
  *)
 let unify_params_with_function_type params (Function_type {return_type; arguments}) =
     let map = (fun param arg ->
+        let param = infer_arg_typ param in
         match param, arg with
         (* Dynamic_array from docblock always wins over non-yet inferred Fixed_array *)
-        | RefParam (id, Dynamic_array t), Fixed_array (Infer_me, None) -> Dynamic_array t
+        | RefParam (id, Dynamic_array t), Fixed_array (Infer_me, None) -> Dynamic_array (t)
         | _, Fixed_array (Infer_me, _) -> arg
         | _, _ -> arg
     ) in
