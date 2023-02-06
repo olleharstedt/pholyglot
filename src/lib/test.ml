@@ -1099,3 +1099,4 @@ function main(): int
 (* Method pointer init *)
 (* Infer ++ and -- only on int and float *)
 (* Forbid aliasing for malloc/free from external libs (mysqli etc); some type of uniqueness *)
+(* Create composer package that install binary on Linux. https://github.com/bamarni/composer-bin-plugin https://github.com/ENM1989/chromedriver *)
