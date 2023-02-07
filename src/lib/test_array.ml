@@ -188,12 +188,12 @@ let%test_unit "infer docblock object array" =
     Log.set_log_level Log.DEBUG;
     (* Location becomes ./_build/default/lib/debug.txt *)
     Log.set_output (open_out "inferdocblock.txt");
-    Log.debug "array slice test";
     let ast =
         Lexing.from_string source |>
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
+    Log.debug "ast = %s" (show_ast ast);
     Log.set_log_level Log.FATAL;
     Log.clear_prefix ();
     Log.debug "should not be visible";
