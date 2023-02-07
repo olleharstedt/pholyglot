@@ -204,7 +204,6 @@ let%test_unit "infer object access" =
         }
     ])
 
-    (*
 let%test_unit "output object access" =
     let code = [
         Ast.Class {
@@ -314,10 +313,11 @@ function foo(Thing $t): void {
                     [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__prop_name"))]
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Boehm)]}
+            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Polymorph)]}
         };
     ])
 
+    (*
 let%test "assign wrong object property" =
     let source = {|<?php // @pholyglot
 class Point {
