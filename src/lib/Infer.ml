@@ -446,21 +446,6 @@ let find_docblock (l : docblock_comment list) (id : string) : docblock_comment o
     ) l
 
 (**
- * docblock takes precedence, because it's more precise, unless there's a conflict
- *)
-let unify_params_with_docblock (params : param list) (comments : docblock_comment list) : param list =
-    (* Are all params represented in the docblock? *)
-    let map = (fun p -> match p with
-        | RefParam (id, Fixed_array (t, size_option)) ->
-            begin match find_docblock comments id with
-                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array t_)
-                | None -> p
-            end
-        | _ -> p
-    ) in
-    List.map map params
-
-(**
  * Params always have Polymorph alloc strategy for now.
  *)
 let rec infer_arg_typ t =
@@ -473,6 +458,21 @@ let rec infer_arg_typ t =
     | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t, n)
     | Dynamic_array t -> Dynamic_array (infer_arg_typ t)
     | t -> t
+
+(**
+ * docblock takes precedence, because it's more precise, unless there's a conflict
+ *)
+let unify_params_with_docblock (params : param list) (comments : docblock_comment list) : param list =
+    (* Are all params represented in the docblock? *)
+    let map = (fun p -> match p with
+        | RefParam (id, Fixed_array (t, size_option)) ->
+            begin match find_docblock comments id with
+                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_))
+                | None -> p
+            end
+        | _ -> p
+    ) in
+    List.map map params
 
 (** Infer typ inside Param/RefParam *)
 let infer_arg_typ_param p : param =
@@ -508,6 +508,13 @@ let unify_params_with_function_type params (Function_type {return_type; argument
         return_type;
         arguments = List.map2 map params arguments;
     }
+
+(**
+ * Replace Infer_allocation_strategy inside docblock.
+ *)
+let infer_docblock d : docblock_comment =
+    match d with
+    | DocParam (id, t) -> DocParam (id, infer_arg_typ t)
 
 (**
  * Replace Infer_me inside statements in method.
@@ -554,6 +561,7 @@ let infer_declaration decl ns : declaration =
         function_type = Function_type {return_type; arguments};
     } ->
         if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
+        let docblock = List.map infer_docblock docblock in
         let params = unify_params_with_docblock params docblock in
         let ftyp =
             unify_params_with_function_type

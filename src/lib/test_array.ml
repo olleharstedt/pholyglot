@@ -193,7 +193,7 @@ let%test_unit "infer docblock object array" =
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    Log.debug "ast = %s" (show_ast ast);
+    Log.debug "ast = %s" (Ast.show_program ast);
     Log.set_log_level Log.FATAL;
     Log.clear_prefix ();
     Log.debug "should not be visible";
@@ -215,7 +215,7 @@ let%test_unit "infer docblock object array" =
                 Param ("dt", Float);
             ];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Boehm)); Float]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Polymorph)); Float]}
         }
     ])
 
