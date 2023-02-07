@@ -464,23 +464,43 @@ let unify_params_with_docblock (params : param list) (comments : docblock_commen
  * Params always have Polymorph alloc strategy for now.
  *)
 let rec infer_arg_typ t =
+    Log.debug "infer_arg_typ %s" (show_typ t);
     match t with
-    | Class_type (s, alloc_strat) ->
-        print_endline "MO";
+    | Class_type (s, alloc_strat) -> begin
+        Log.debug "infer_arg_typ Found Class_type";
         Class_type (s, Polymorph)
+    end
     | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t, n)
     | Dynamic_array t -> Dynamic_array (infer_arg_typ t)
     | t -> t
+
+(** Infer typ inside Param/RefParam *)
+let infer_arg_typ_param p : param =
+    Log.debug "infer_arg_typ_param %s" (show_param p);
+    match p with
+    | Param (id, t) ->
+        let new_t = infer_arg_typ t in
+        Param (id, new_t)
+    | RefParam (id, t) ->
+        let new_t = infer_arg_typ t in
+        RefParam (id, new_t)
 
 (**
  * Infer and resolve conflicts between docblock, params and function type.
  *)
 let unify_params_with_function_type params (Function_type {return_type; arguments}) =
+    Log.debug "unify_params_with_function_type";
     let map = (fun param arg ->
-        let param = infer_arg_typ param in
+        let param = infer_arg_typ_param param in
+        Log.debug "unify_params_with_function_type inferred param = %s" (show_param param);
+        let arg = infer_arg_typ arg in
+        Log.debug "unify_params_with_function_type inferred arg = %s" (show_typ arg);
         match param, arg with
         (* Dynamic_array from docblock always wins over non-yet inferred Fixed_array *)
-        | RefParam (id, Dynamic_array t), Fixed_array (Infer_me, None) -> Dynamic_array (t)
+        | RefParam (id, Dynamic_array t), Fixed_array (Infer_me, None) -> begin
+            Log.debug "unify_params_with_function_type Picking dynamic_array with typ %s" (show_typ t);
+            Dynamic_array (t)
+        end
         | _, Fixed_array (Infer_me, _) -> arg
         | _, _ -> arg
     ) in
@@ -520,7 +540,7 @@ let infer_method (c_orig : Ast.declaration) meth ns : function_def = match meth 
         {name; docblock; params; stmts = new_stmts; function_type = ftyp}
 
 let infer_declaration decl ns : declaration = 
-    Log.debug "%s %s" "infer_declaration" (show_declaration decl);
+    Log.debug "infer_declaration %s" (show_declaration decl);
     match decl with
     (*
     | Function of function_name * param list * statement list * typ
@@ -540,6 +560,7 @@ let infer_declaration decl ns : declaration =
             params
             (Function_type {return_type; arguments})
         in
+        Log.debug "infer_declaration: ftyp = %s" (show_typ ftyp);
         Namespace.add_function_type ns name ftyp;
         let ns = Namespace.reset_identifiers ns in
         Namespace.add_params ns params;
