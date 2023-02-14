@@ -174,8 +174,7 @@ let%test_unit "infer object access" =
             function_type = Function_type {return_type = Int; arguments = []}
         }
     ]   |>
-        Infer.run ns |>
-        InferAllocStrat.run ns
+        Infer.run ns
     in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class {
@@ -323,7 +322,6 @@ function foo(Thing $t): void {
         };
     ])
 
-    (*
 let%test "assign wrong object property" =
     let source = {|<?php // @pholyglot
 class Point {
@@ -751,6 +749,7 @@ function main(): int
         }
     ])
 
+    (*
 let%test_unit "transpile method" =
     let ast : Ast.expression =
         Function_call (

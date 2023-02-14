@@ -136,6 +136,21 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
+(**
+ * Params always have Polymorph alloc strategy for now.
+ *)
+and infer_arg_typ t =
+    Log.debug "infer_arg_typ %s" (show_typ t);
+    match t with
+    | Class_type (s, alloc_strat) -> begin
+        Log.debug "infer_arg_typ Found Class_type";
+        Class_type (s, Polymorph)
+    end
+    | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t, n)
+    | Dynamic_array t -> Dynamic_array (infer_arg_typ t)
+    | t -> t
+
+
 let typ_to_constant (t : Ast.typ) : Ast.expression = match t with
     | Int -> Constant "int"
     | Float -> Constant "float"
@@ -291,6 +306,40 @@ let rec find_all_type_variables t : string list = match t with
     | _ -> []
 *)
 
+let find_docblock (l : docblock_comment list) (id : string) : docblock_comment option =
+    List.find_opt (fun docblock_comment -> match docblock_comment with
+        | DocParam (id_, _) -> id = id_
+        | _ -> false
+    ) l
+
+(**
+ * docblock takes precedence, because it's more precise, unless there's a conflict
+ *)
+let unify_params_with_docblock (params : param list) (comments : docblock_comment list) : param list =
+    (* Are all params represented in the docblock? *)
+    let map = (fun p -> match p with
+        | RefParam (id, Fixed_array (t, size_option)) ->
+            begin match find_docblock comments id with
+                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_))
+                | None -> p
+            end
+        | RefParam (id, t) -> RefParam (id, infer_arg_typ t)
+        | Param (id, t) -> Param (id, infer_arg_typ t)
+    ) in
+    List.map map params
+
+(** Infer typ inside Param/RefParam *)
+let infer_arg_typ_param p : param =
+    Log.debug "infer_arg_typ_param %s" (show_param p);
+    match p with
+    | Param (id, t) ->
+        let new_t = infer_arg_typ t in
+        Param (id, new_t)
+    | RefParam (id, t) ->
+        let new_t = infer_arg_typ t in
+        RefParam (id, new_t)
+
+
 (**
  * Infer types inside Ast.statement
  *)
@@ -305,6 +354,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         (* TODO: Replace type variables in t *)
         let expr = infer_expression ns expr in
         let t = replace_type_variables t in
+        let t = infer_arg_typ t in
         Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
@@ -438,53 +488,6 @@ let check_return_type ns stmt typ =
             failwith (sprintf "Return type %s is not expected type %s" (show_typ return_type) (show_typ typ))
     | _ -> ()
     (* TODO: If, foreach, etc *)
-
-let find_docblock (l : docblock_comment list) (id : string) : docblock_comment option =
-    List.find_opt (fun docblock_comment -> match docblock_comment with
-        | DocParam (id_, _) -> id = id_
-        | _ -> false
-    ) l
-
-(**
- * Params always have Polymorph alloc strategy for now.
- *)
-let rec infer_arg_typ t =
-    Log.debug "infer_arg_typ %s" (show_typ t);
-    match t with
-    | Class_type (s, alloc_strat) -> begin
-        Log.debug "infer_arg_typ Found Class_type";
-        Class_type (s, Polymorph)
-    end
-    | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t, n)
-    | Dynamic_array t -> Dynamic_array (infer_arg_typ t)
-    | t -> t
-
-(**
- * docblock takes precedence, because it's more precise, unless there's a conflict
- *)
-let unify_params_with_docblock (params : param list) (comments : docblock_comment list) : param list =
-    (* Are all params represented in the docblock? *)
-    let map = (fun p -> match p with
-        | RefParam (id, Fixed_array (t, size_option)) ->
-            begin match find_docblock comments id with
-                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_))
-                | None -> p
-            end
-        | RefParam (id, t) -> RefParam (id, infer_arg_typ t)
-        | Param (id, t) -> Param (id, infer_arg_typ t)
-    ) in
-    List.map map params
-
-(** Infer typ inside Param/RefParam *)
-let infer_arg_typ_param p : param =
-    Log.debug "infer_arg_typ_param %s" (show_param p);
-    match p with
-    | Param (id, t) ->
-        let new_t = infer_arg_typ t in
-        Param (id, new_t)
-    | RefParam (id, t) ->
-        let new_t = infer_arg_typ t in
-        RefParam (id, new_t)
 
 (**
  * Infer and resolve conflicts between docblock, params and function type.
