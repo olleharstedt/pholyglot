@@ -3,6 +3,7 @@
  *)
 
 open Base
+module Log = Dolog.Log
 
 let%test_unit "trivial class declare" =
     let source = {|<?php // @pholyglot
@@ -282,6 +283,9 @@ function main()
 |}
 
 let%test_unit "string class property" =
+    Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/debug.txt *)
+    Log.set_output (open_out "string_class_property.txt");
     let source = {|<?php // @pholyglot
 class Thing {
     public string $name;
@@ -293,6 +297,8 @@ function foo(Thing $t): void {
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
         Class {
             name = "Thing";
@@ -305,7 +311,7 @@ function foo(Thing $t): void {
         Function { 
             name = "foo";
             docblock = [];
-            params = [Param ("t", Class_type ("Thing", Boehm))];
+            params = [Param ("t", Class_type ("Thing", Polymorph))];
             stmts = [
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},

@@ -470,7 +470,8 @@ let unify_params_with_docblock (params : param list) (comments : docblock_commen
                 | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_))
                 | None -> p
             end
-        | _ -> p
+        | RefParam (id, t) -> RefParam (id, infer_arg_typ t)
+        | Param (id, t) -> Param (id, infer_arg_typ t)
     ) in
     List.map map params
 
