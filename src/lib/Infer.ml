@@ -139,15 +139,15 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
 (**
  * Params always have Polymorph alloc strategy for now.
  *)
-and infer_arg_typ t =
+and infer_arg_typ t def =
     Log.debug "infer_arg_typ %s" (show_typ t);
     match t with
     | Class_type (s, alloc_strat) -> begin
         Log.debug "infer_arg_typ Found Class_type";
-        Class_type (s, Polymorph)
+        Class_type (s, def)
     end
-    | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t, n)
-    | Dynamic_array t -> Dynamic_array (infer_arg_typ t)
+    | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t def, n)
+    | Dynamic_array t -> Dynamic_array (infer_arg_typ t def)
     | t -> t
 
 
@@ -269,6 +269,9 @@ let rec infer_expression ns expr : expression =
             "array_get",
             typ_to_constant t :: Variable id :: expr :: [];
         )
+    (* TODO: Memory context *)
+    (* TODO: /** @mem moo */ *)
+    | New (Class_type (class_name, Infer_allocation_strategy), args) -> New (Class_type (class_name, Boehm), args)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 
@@ -320,11 +323,11 @@ let unify_params_with_docblock (params : param list) (comments : docblock_commen
     let map = (fun p -> match p with
         | RefParam (id, Fixed_array (t, size_option)) ->
             begin match find_docblock comments id with
-                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_))
+                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_ Polymorph))
                 | None -> p
             end
-        | RefParam (id, t) -> RefParam (id, infer_arg_typ t)
-        | Param (id, t) -> Param (id, infer_arg_typ t)
+        | RefParam (id, t) -> RefParam (id, infer_arg_typ t Polymorph)
+        | Param (id, t) -> Param (id, infer_arg_typ t Polymorph)
     ) in
     List.map map params
 
@@ -333,10 +336,10 @@ let infer_arg_typ_param p : param =
     Log.debug "infer_arg_typ_param %s" (show_param p);
     match p with
     | Param (id, t) ->
-        let new_t = infer_arg_typ t in
+        let new_t = infer_arg_typ t Polymorph in
         Param (id, new_t)
     | RefParam (id, t) ->
-        let new_t = infer_arg_typ t in
+        let new_t = infer_arg_typ t Polymorph in
         RefParam (id, new_t)
 
 
@@ -348,13 +351,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
         Log.debug "infer_stmt: assignment to id %s" id;
-        (*let expr = infer_expression ns expr in
-        Log.debug "expr = %s" (show_expression expr);*)
         let t = typ_of_expression ns expr in
-        (* TODO: Replace type variables in t *)
         let expr = infer_expression ns expr in
         let t = replace_type_variables t in
-        let t = infer_arg_typ t in
+        let t = infer_arg_typ t Boehm in
         Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
@@ -497,7 +497,7 @@ let unify_params_with_function_type params (Function_type {return_type; argument
     let map = (fun param arg ->
         let param = infer_arg_typ_param param in
         Log.debug "unify_params_with_function_type inferred param = %s" (show_param param);
-        let arg = infer_arg_typ arg in
+        let arg = infer_arg_typ arg Polymorph in
         Log.debug "unify_params_with_function_type inferred arg = %s" (show_typ arg);
         match param, arg with
         (* Dynamic_array from docblock always wins over non-yet inferred Fixed_array *)
@@ -518,7 +518,7 @@ let unify_params_with_function_type params (Function_type {return_type; argument
  *)
 let infer_docblock d : docblock_comment =
     match d with
-    | DocParam (id, t) -> DocParam (id, infer_arg_typ t)
+    | DocParam (id, t) -> DocParam (id, infer_arg_typ t Polymorph)
 
 (**
  * Replace Infer_me inside statements in method.

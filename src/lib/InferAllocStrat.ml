@@ -2,6 +2,8 @@ open Printf
 open Ast
 module Log = Dolog.Log
 
+(* OBS: NOT USED *)
+
 let rec infer_alloc_strat_from_expression (ns : Namespace.t) (expr : expression) : allocation_strategy = 
     match expr with
     (* TODO: Read docblock here *)
