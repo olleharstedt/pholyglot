@@ -1,3 +1,4 @@
 (test
+ (libraries ounit2)
  (name pholyglot)
  (preprocess (pps ppx_inline_test)))
