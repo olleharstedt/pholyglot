@@ -2,7 +2,8 @@
  * AST for Pholly
  *)
 
-open Base
+open Ppx_compare_lib.Builtin
+open Sexplib.Std
 
 exception Parser_exception of string
 
@@ -174,7 +175,7 @@ and expression =
 
 let get_arg_types_from_args args =
     let f : param -> typ = fun (Param (_, t) | RefParam (_, t)) -> t in
-    List.map ~f:f args
+    Base.List.map ~f:f args
 
 (* Returns true if typ is "value type" and allowed to escape/be copied automatically by C *)
 let typ_is_val = function

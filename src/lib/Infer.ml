@@ -75,7 +75,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             (* TODO: Tuple here *)
             raise (Type_error "not all element in array_init have the same type")
     | Array_init (t, _, _) -> t
-    | New (t, exprs) -> t
+    | New (alloc_strat, t, exprs) -> t
     (* $point[0]-> ? *)
     | Object_access (Array_access (id, _), Property_access prop_name)
     (* $point->x *)
@@ -271,7 +271,7 @@ let rec infer_expression ns expr : expression =
         )
     (* TODO: Memory context *)
     (* TODO: /** @mem moo */ *)
-    | New (Class_type (class_name, Infer_allocation_strategy), args) -> New (Class_type (class_name, Boehm), args)
+    | New (alloc_strat, Class_type (class_name, Infer_allocation_strategy), args) -> New (alloc_strat, Class_type (class_name, Boehm), args)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 

@@ -7,14 +7,14 @@ module Log = Dolog.Log
 let rec infer_alloc_strat_from_expression (ns : Namespace.t) (expr : expression) : allocation_strategy = 
     match expr with
     (* TODO: Read docblock here *)
-    | New (Class_type (name, alloc_strat), exprs) -> Boehm
+    | New (None, Class_type (name, alloc_strat), exprs) -> Boehm
     | _ -> Boehm
 
 let rec infer_expression (ns : Namespace.t) (expr : expression) : expression = 
     match expr with
     (* TODO: Read docblock here *)
-    | New (Class_type (name, alloc_strat), exprs) ->
-        New (Class_type (name, Boehm), exprs)
+    | New (None, Class_type (name, alloc_strat), exprs) ->
+        New (None, Class_type (name, Boehm), exprs)
     | e -> e
 
 let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 

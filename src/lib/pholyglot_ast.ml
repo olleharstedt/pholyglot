@@ -1,8 +1,9 @@
 (* This is the AST for the PHP+C polyglot code *)
 
-open Base
 open Printf
 open String
+open Ppx_compare_lib.Builtin
+open Sexplib.Std
 
 type program = 
     start_line * 
@@ -212,7 +213,7 @@ let rec string_of_expression : expression -> string = function
         ct
     end
     | Array_init exprs -> sprintf {|array_make(%s)|}
-        (concat ~sep:", " (List.map exprs ~f:string_of_expression))
+        (Base.String.concat ~sep:", " (Base.List.map exprs ~f:string_of_expression))
     | Array_access (id, expr) ->
         (* TODO: It's assumed that expr has type Int here *)
         sprintf {|$%s[%s]|} id (string_of_expression expr)
@@ -227,13 +228,13 @@ let rec string_of_expression : expression -> string = function
         sprintf {|$%s->%s(%s)|}
         object_name
         method_name 
-        (concat ~sep:", " (List.map args ~f:string_of_expression))
+        (Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression))
     | Property_access n -> n
     | Function_call (Function_type {return_type; arguments}, name, param_exprs) ->
         sprintf
         {|%s(%s)|}
         name
-        (concat ~sep:", " (List.map param_exprs ~f:string_of_expression))
+        (Base.String.concat ~sep:", " (Base.List.map param_exprs ~f:string_of_expression))
     (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 
@@ -247,7 +248,7 @@ let rec string_of_statement = function
         sprintf {| %s(%s);
     |}
         id
-        (concat ~sep:", " (List.map exprs ~f:string_of_expression))
+        (Base.String.concat ~sep:", " (Base.List.map exprs ~f:string_of_expression))
     | Function_call (fun_type, id, _) ->
         failwith (
             sprintf
@@ -259,7 +260,7 @@ let rec string_of_statement = function
         (** TODO: Ugle hack to remove __prop_ - shouldn't be here in the first place *)
         let m = Str.global_replace (Str.regexp "__prop_") "" m in
         let args : expression list = Variable id :: args in
-        let args_s   = concat ~sep:", " (List.map args ~f:string_of_expression) in
+        let args_s   = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
         [%string {|$$$id->$m($args_s);
 |}]
     | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
@@ -276,7 +277,7 @@ let rec string_of_statement = function
     (string_of_expression expr)
     | For {init; condition; incr; stmts;} ->
         let init_s = string_of_statement init in
-        let stmts_s = concat (List.map stmts ~f:string_of_statement) in
+        let stmts_s = Base.String.concat (Base.List.map stmts ~f:string_of_statement) in
         let condition_s = string_of_expression condition in
         let incr_s = string_of_expression incr in
         [%string {|$init_s
@@ -286,7 +287,7 @@ let rec string_of_statement = function
     |}]
     | Dowhile {condition; body;} ->
         let condition_s = string_of_expression condition in
-        let body_s      = concat (List.map body ~f:string_of_statement) in
+        let body_s      = Base.String.concat (Base.List.map body ~f:string_of_statement) in
         [%string {|do {
 $body_s} while ($condition_s);
 |}]
@@ -315,7 +316,7 @@ let string_of_function_pointer meth : string = match meth with
     (* Function name *)
     name
     (* Params *)
-    (concat ~sep:", " (List.map params ~f:string_of_param))
+    (Base.String.concat ~sep:", " (Base.List.map params ~f:string_of_param))
 
 (**
  * Returns true if any param is a RefParam
@@ -323,7 +324,7 @@ let string_of_function_pointer meth : string = match meth with
  * So this function decides if we need to split function signature in two or not.
  *)
 let params_has_ref (params : param list ) : bool =
-    let refparams = List.filter params ~f:(fun p -> match p with RefParam _ -> true | Param _ -> false) in
+    let refparams = Base.List.filter params ~f:(fun p -> match p with RefParam _ -> true | Param _ -> false) in
     match refparams with [] -> true | _ -> false
 
 (**
@@ -336,8 +337,8 @@ let params_has_ref (params : param list ) : bool =
 let string_of_method class_name meth = match meth with
     | {name = method_name; params; stmts; function_type = Function_type {return_type; arguments}} ->
         let return_type_s = string_of_typ (Function_type {return_type; arguments}) in
-        let params_s = concat ~sep:", " (List.map params ~f:string_of_param) in
-        let stmts_s  = (concat (List.map stmts ~f:string_of_statement)) in
+        let params_s = Base.String.concat ~sep:", " (Base.List.map params ~f:string_of_param) in
+        let stmts_s  = (Base.String.concat (Base.List.map stmts ~f:string_of_statement)) in
         [%string {|
 #__C__ $return_type_s $(class_name)__$(method_name) ($params_s)
 #if __PHP__
@@ -364,8 +365,8 @@ let string_of_declare (d : declaration) : string = match d with
         function_type = typ
     } ->
         let typ_s = string_of_typ typ in
-        let params_s = concat ~sep:", " (List.map params ~f:string_of_param) in
-        let stmts_s = (concat (List.map stmts ~f:string_of_statement)) in
+        let params_s = Base.String.concat ~sep:", " (Base.List.map params ~f:string_of_param) in
+        let stmts_s = (Base.String.concat (Base.List.map stmts ~f:string_of_statement)) in
         if params_has_ref params then begin
             [%string {|#define function $typ_s
 function $function_name($params_s)
@@ -374,7 +375,7 @@ function $function_name($params_s)
     $stmts_s}
 |}]
         end else begin
-            let params_without_ref_s = concat ~sep:", " (List.map params ~f:string_of_param_without_ref) in
+            let params_without_ref_s = Base.String.concat ~sep:", " (Base.List.map params ~f:string_of_param_without_ref) in
             [%string {|#__C__ $typ_s $function_name($params_without_ref_s)
 #if __PHP__
 function $function_name($params_s): $typ_s
@@ -386,10 +387,10 @@ function $function_name($params_s): $typ_s
     | Class (class_name, kind, props, methods) ->
         let string_of_method = fun (m) -> string_of_method class_name m in
         let string_of_function_pointer_init = fun (m) -> string_of_function_pointer_init class_name m in
-        let props = (concat (List.map ~f:string_of_prop props)) in
-        let function_pointers = (concat (List.map ~f:string_of_function_pointer methods)) in
-        let function_pointers_init = (concat (List.map ~f:string_of_function_pointer_init methods)) in
-        let methods = (concat (List.map ~f:string_of_method methods)) in
+        let props = (Base.String.concat (Base.List.map ~f:string_of_prop props)) in
+        let function_pointers = (Base.String.concat (Base.List.map ~f:string_of_function_pointer methods)) in
+        let function_pointers_init = (Base.String.concat (Base.List.map ~f:string_of_function_pointer_init methods)) in
+        let methods = (Base.String.concat (Base.List.map ~f:string_of_method methods)) in
         (* TODO: Fix macro for sizeof *)
         [%string {|
 #__C__ typedef struct $class_name* $class_name;
@@ -417,23 +418,23 @@ $class_name $(class_name)__constructor($class_name $$p)
 |}]
 
 (** Probably only to be used in tests *)
-let string_of_declares ds : string = concat (List.map ds ~f:string_of_declare)
+let string_of_declares ds : string = Base.String.concat (Base.List.map ds ~f:string_of_declare)
 
 let string_of_end_line = function End_line -> {|// ?>
 // <?php ob_end_clean(); main();|}
 
 let string_of_program (p : program) : string = match p with
     | (s, is, ds, c_stubs, php_stubs, decs, e) ->
-        concat
+        Base.String.concat
         [
             string_of_start_line s;
-            concat (List.map is ~f:string_of_include);
-            concat (List.map ds ~f:string_of_define);
-            concat c_stubs;
+            Base.String.concat (Base.List.map is ~f:string_of_include);
+            Base.String.concat (Base.List.map ds ~f:string_of_define);
+            Base.String.concat c_stubs;
             "#if __PHP__//<?php\n";
-            concat php_stubs;
+            Base.String.concat php_stubs;
             "#endif//?>\n";
             "//<?php\n";
-            concat (List.map decs ~f:string_of_declare);
+            Base.String.concat (Base.List.map decs ~f:string_of_declare);
             string_of_end_line e
         ]
