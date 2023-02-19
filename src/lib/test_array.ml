@@ -1,4 +1,3 @@
-open Base
 module Log = Dolog.Log
 
 let%test_unit "trivial array" =
@@ -83,7 +82,7 @@ let%test_unit "trivial array infer and print" =
     let fn = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot fn in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function int
+    [%test_eq: Base.string] pholyglot_code {|#define function int
 function main()
 #undef function
 {
@@ -239,7 +238,7 @@ let%test_unit "transpile docblock object array" =
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
     in
-    [%test_eq: string] code {|#__C__ void foo(array $bodies, float $dt)
+    [%test_eq: Base.string] code {|#__C__ void foo(array $bodies, float $dt)
 #if __PHP__
 function foo(array &$bodies, float $dt): void
 #endif
@@ -351,7 +350,7 @@ let%test_unit "array slice pholyglot code" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function void
+    [%test_eq: Base.string] code {|#define function void
 function foo()
 #undef function
 {

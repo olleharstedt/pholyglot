@@ -2,7 +2,6 @@
  * Put all tests related to class and struct here.
  *)
 
-open Base
 module Log = Dolog.Log
 
 let%test_unit "trivial class declare" =
@@ -238,7 +237,7 @@ let%test_unit "output object access" =
          |> Transpile.declarations_to_pholyglot
          |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: string] code {|
+    [%test_eq: Base.string] code {|
 #__C__ typedef struct Point* Point;
 class Point {
     #define public int
@@ -439,7 +438,7 @@ Point Point__constructor(Point $p)
 |}
     in
 
-    [%test_eq: string] code should_be
+    [%test_eq: Base.string] code should_be
 
 let%test_unit "offsetMomentum method" =
     let source = "<?php // @pholyglot
@@ -574,7 +573,7 @@ Body Body__constructor(Body $p)
     in
     *)
 
-    [%test_eq: string] code should_be
+    [%test_eq: Base.string] code should_be
 
 let%test "return ref type is invalid" =
     let source = {|<?php // @pholyglot

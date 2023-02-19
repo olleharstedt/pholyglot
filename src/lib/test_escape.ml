@@ -1,4 +1,3 @@
-open Base
 module Log = Dolog.Log
 
 let%test_unit "trivial escape" =

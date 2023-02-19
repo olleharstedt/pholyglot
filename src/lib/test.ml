@@ -1,5 +1,4 @@
 open Printf
-open Base
 module Log = Dolog.Log
 
 (*
@@ -161,7 +160,7 @@ let%test_unit "trivial transpile" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function int
+    [%test_eq: Base.string] pholyglot_code {|#define function int
 function main()
 #undef function
 {
@@ -184,7 +183,7 @@ let%test_unit "trivial arith transpile" =
     let ast = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] pholyglot_code {|#define function int
+    [%test_eq: Base.string] pholyglot_code {|#define function int
 function main()
 #undef function
 {
@@ -267,7 +266,7 @@ let%test_unit "transpile concat" =
     let ast = Infer.run ns ast in
     let phast = Transpile.run ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
-    [%test_eq: string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
+    [%test_eq: Base.string] pholyglot_code {|//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
@@ -349,7 +348,7 @@ let%test_unit "two functions to pholyglot" =
         }
     ] |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: string] code {|#define function int
+    [%test_eq: Base.string] code {|#define function int
 function foo(int $c)
 #undef function
 {
@@ -367,19 +366,19 @@ function main()
 
 let%test_unit "infer_printf 1" =
     let t = Infer.infer_printf "%d" in
-    [%test_eq: Ast.typ list] t [Ast.Int]
+    [%test_eq: Ast.typ Base.list] t [Ast.Int]
 
 let%test_unit "infer_printf 2" =
     let t = Infer.infer_printf "%s" in
-    [%test_eq: Ast.typ list] t [Ast.String_literal]
+    [%test_eq: Ast.typ Base.list] t [Ast.String_literal]
 
 let%test_unit "infer_printf 3" =
     let t = Infer.infer_printf "%s %d" in
-    [%test_eq: Ast.typ list] t [Ast.String_literal; Ast.Int]
+    [%test_eq: Ast.typ Base.list] t [Ast.String_literal; Ast.Int]
 
 let%test_unit "infer_printf 4" =
     let t = Infer.infer_printf "Bla bla $something !!! %s moo foo %deee" in
-    [%test_eq: Ast.typ list] t [Ast.String_literal; Ast.Int]
+    [%test_eq: Ast.typ Base.list] t [Ast.String_literal; Ast.Int]
 
 let%test_unit "float printf" =
     let source = {|<?php // @pholyglot
@@ -612,7 +611,7 @@ let%test_unit "float to code test" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function int
+    [%test_eq: Base.string] code {|#define function int
 function main()
 #undef function
 {
@@ -748,7 +747,7 @@ let%test_unit "foreach to pholyglot" =
     } in
     let phast = Transpile.statement_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_statement phast in
-    [%test_eq: string] code {|#__C__ int
+    [%test_eq: Base.string] code {|#__C__ int
     $__i = 0;
     
         for (; $__i < count($arr); $__i = $__i + 1) {
@@ -850,7 +849,7 @@ let%test_unit "plusplus and minusminus pholyglot" =
     in
     let phast = Transpile.declaration_to_pholyglot ast in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function void
+    [%test_eq: Base.string] code {|#define function void
 function foo()
 #undef function
 {
@@ -903,7 +902,7 @@ let%test_unit "pluseq and minuseq pholyglot" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function void
+    [%test_eq: Base.string] code {|#define function void
 function foo()
 #undef function
 {
@@ -965,7 +964,7 @@ let%test_unit "do while pholyglot" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: string] code {|#define function void
+    [%test_eq: Base.string] code {|#define function void
 function foo()
 #undef function
 {
