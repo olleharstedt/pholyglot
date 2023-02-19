@@ -1043,6 +1043,7 @@ function main(): int
     *)
 
 (* TODO: *)
+(* $foo = /** @alloc stack */ new Foo(); *)
 (* Write shorter test for assignment + new + boehm in new test file; don't use inline tests? *)
 (* SplDoublyLinkedList as dlist, $list = new SplDoublyLinkedList(); $list[] = $item; *)
 (*   foreach works with SplDoublyLinkedList --> transpile to do-while $list->valid()
@@ -1086,7 +1087,6 @@ function main(): int
 (* function foo(): int { return "moo"; } Invalid return type *)
 (* Only one return statement per function allowed, must be last statement. Unless void type? *)
 (* Dynamic string on heap vs fixed string on stack (only works for string literal) *)
-(* $foo = /** @stack */ new Foo(); *)
 (* //21:42 < fizzie> struct Point *p = (struct Point[]){foo()};  // just to be silly *)
 (* Define memory model by interface? Pholly\Memory\RefCount. Or better to inject in constructor, to not lock it in? But then runtime? Or must be possible to infer at compile time? *)
 (* Cannot only use void-function as statements (no ignore()?) *)

@@ -116,7 +116,7 @@ and expression =
     | Array_init of expression list
     | Array_access of identifier * expression
     | Object_access of expression * expression
-    | New of typ * expression list
+    | New of allocation_strategy * typ * expression list
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Method_call of {
         return_type: typ;
@@ -182,7 +182,7 @@ let rec string_of_lvalue (l : lvalue) : string = match l with
         sprintf {|%s->%s|} id prop_name
     | Property_access n -> n
 
-let rec string_of_expression = function
+let rec string_of_expression : expression -> string = function
     | Num i -> Int.to_string i
     | Num_float f -> Float.to_string f
 	(* TODO: Problem with GString vs string for expressions, append vs use as function arg *)
@@ -202,13 +202,15 @@ let rec string_of_expression = function
     | Variable id ->
         let id = if id = "this" then "__self" else id in
         "$" ^ id
-    (* TODO: Alloc type, possibly done as Point__stack or Point__boehm + _Generic in C macro etc *)
-    (* TODO: Init function pointers *)
-    | New (Class_type (ct, alloc_strat), exprs) -> 
+    | New (alloc_strat, Class_type (ct, c_alloc_strat), exprs) -> begin
+        if not (Caml.(=) alloc_strat c_alloc_strat) then failwith "TODO";
         (*let t_text = show_typ t in*)
         (* TODO: Add alloc strat in new line #__C__ *)
-        sprintf {|new(%s)|}
+        sprintf {|new(%s
+#__C__ //TODO: gc_mem or arena_mem or memory context
+)|}
         ct
+    end
     | Array_init exprs -> sprintf {|array_make(%s)|}
         (concat ~sep:", " (List.map exprs ~f:string_of_expression))
     | Array_access (id, expr) ->

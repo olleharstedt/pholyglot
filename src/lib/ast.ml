@@ -17,11 +17,12 @@ and kind =
     | Infer_kind
 
 and allocation_strategy =
-    | Stack
-    | Arena
-    | Boehm
+    | Stack         (* alloca *)
+    | Arena         (* arena_mem *)
+    | Boehm         (* gc_mem *)
     | Malloc        (* From third-party libs like mysqli *)
     | Polymorph     (* Docblock params *)
+    | Memory_context of string (* Memory context is a variable from function argument *)
     | Infer_allocation_strategy
 
 (* TODO: Add alloc type? Heap vs stack vs pool/region *)
@@ -149,7 +150,7 @@ and expression =
     | Concat of expression * expression
     | Lessthan of expression * expression
     | Greaterthan of expression * expression
-    | New of typ * expression list
+    | New of allocation_strategy option * typ * expression list
     | Variable of identifier
     | Array_init of typ * int option * expression list
     | Array_access of identifier * expression

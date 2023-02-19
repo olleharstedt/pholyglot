@@ -96,7 +96,8 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
             left_hand = expression_to_pholyglot left_hand;
             args;
         }
-    | New (t, exprs) -> Pholyglot_ast.New (typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
+    | New (None, _, _) as e -> failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)
+    | New (Some alloc_strat, t, exprs) -> Pholyglot_ast.New (alloc_to_pholyglot alloc_strat, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
 
 let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l with
