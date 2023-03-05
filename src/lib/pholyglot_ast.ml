@@ -204,13 +204,13 @@ let rec string_of_expression : expression -> string = function
         let id = if id = "this" then "__self" else id in
         "$" ^ id
     | New (alloc_strat, Class_type (ct, c_alloc_strat), exprs) -> begin
-        if not (Caml.(=) alloc_strat c_alloc_strat) then failwith "TODO";
-        (*let t_text = show_typ t in*)
-        (* TODO: Add alloc strat in new line #__C__ *)
-        sprintf {|new(%s
-#__C__ //TODO: gc_mem or arena_mem or memory context
-)|}
-        ct
+        if not (Caml.(=) alloc_strat c_alloc_strat) then failwith "alloc_strat must equal c_alloc_strat";
+        let mem_f = match alloc_strat with
+            | Boehm -> "gc_mem"
+        in
+        [%string {|new($ct
+#__C__ $mem_f
+)|}]
     end
     | Array_init exprs -> sprintf {|array_make(%s)|}
         (Base.String.concat ~sep:", " (Base.List.map exprs ~f:string_of_expression))

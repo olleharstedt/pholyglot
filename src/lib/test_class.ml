@@ -219,7 +219,7 @@ let%test_unit "output object access" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Class_type ("Point", Boehm), Variable "p", (New (None, Class_type ("Point", Boehm), [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Some Boehm, Class_type ("Point", Boehm), [])));
                 Assignment (Int, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; Int]},
@@ -273,7 +273,9 @@ function main()
 #undef function
 {
     #__C__ Point
-    $p = new(Point);
+    $p = new(Point
+#__C__ gc_mem
+);
     $p->__prop_x = 1;
      printf("%ld", $p->__prop_x);
     return 0;
