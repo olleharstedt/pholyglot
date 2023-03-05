@@ -35,6 +35,9 @@ rule docblock = parse
   | "int"                { INT_TYPE }
   | "float"              { FLOAT_TYPE }
   | "string"             { STRING_TYPE }
+  | "boehm"              { ALLOC_BOEHM }
+  | "area"               { ALLOC_AREA }
+  | "stack"              { ALLOC_STACK }
   | "<"                  { LT }
   | ">"                  { GT }
   | ","                  { COMMA }
