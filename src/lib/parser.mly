@@ -221,6 +221,14 @@ expr:
   | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__prop_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {New (None, Class_type (s, Infer_allocation_strategy), [])}
-  (* TODO "new" /** @alloc stack */ *)
+  | doc=DOCBLOCK_AS_STR "new" s=CLASS_NAME "(" ")"                 {
+      let linebuf = Lexing.from_string doc in
+      let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in
+      let alloc_strat = match cb with
+        | [DocAlloc s] -> s
+        | _ -> failwith "Faulty docblock before 'new' keyword"
+      in
+      New (Some alloc_strat, Class_type (s, alloc_strat), [])
+  }
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init (Infer_me, None, array_init)}

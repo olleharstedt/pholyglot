@@ -55,6 +55,7 @@ and typ =
 
 and docblock_comment =
     | DocParam of identifier * typ
+    | DocAlloc of allocation_strategy
 
 (* Function argument types *)
 and param =

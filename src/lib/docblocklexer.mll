@@ -31,12 +31,13 @@ rule docblock = parse
   | class_name as n               { CLASS_NAME n}
   | '*'                  { docblock lexbuf }
   | "@param"             { DOCBLOCK_PARAM }
+  | "@alloc"             { DOCBLOCK_ALLOC }
   | "array"              { ARRAY_TYPE }
   | "int"                { INT_TYPE }
   | "float"              { FLOAT_TYPE }
   | "string"             { STRING_TYPE }
   | "boehm"              { ALLOC_BOEHM }
-  | "area"               { ALLOC_AREA }
+  | "arena"              { ALLOC_ARENA }
   | "stack"              { ALLOC_STACK }
   | "<"                  { LT }
   | ">"                  { GT }

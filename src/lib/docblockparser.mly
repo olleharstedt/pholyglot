@@ -4,11 +4,12 @@
 
 %token ARRAY_TYPE "array"
 %token DOCBLOCK_PARAM "@param"
+%token DOCBLOCK_ALLOC "@alloc"
 %token INT_TYPE "int"
 %token FLOAT_TYPE "float"
 %token STRING_TYPE "string"
 %token ALLOC_BOEHM "boehm"
-%token ALLOC_AREA "area"
+%token ALLOC_ARENA "arena"
 %token ALLOC_STACK "stack"
 %token LT "<"
 %token GT ">"
@@ -31,9 +32,15 @@ docblock_line:
   | "@param" t=typ s=VAR_NAME                 {DocParam (s, t) }
   | "@param" "array" s=VAR_NAME               { failwith "Must be more precise in docblock than just 'array'" }
   | "@param" "array" "<" t=typ ">" s=VAR_NAME {DocParam (s, Dynamic_array t) }
+  | "@alloc" at=alloc_typ                     {DocAlloc at}
 
 typ:
   | "int"      {Int : Ast.typ}
   | "float"    {Float : Ast.typ}
   | "string"   {String : Ast.typ}
   | s=CLASS_NAME {Class_type (s, Infer_allocation_strategy) : Ast.typ}
+
+alloc_typ:
+  | "boehm"     {Boehm}
+  | "arena"     {Arena}
+  | "stack"     {Stack}
