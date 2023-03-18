@@ -9,3 +9,4 @@ oop/oop
 _oop.c
 a.out
 *.s
+psalmtest/vendor/**
