@@ -1,17 +1,17 @@
-<?php
+<?php // @pholyglot
 
-define("SplDoublyLinkedList", "SplDoublyLinkedList");
-$list = new(SplDoublyLinkedList);
-$list->push(10);
-$list->push(20);
-$list->push(30);
-
-foreach ($list as $item) {
-    echo $item;
+class Point
+{
+    public int $x;
+    public int $y;
 }
 
-for ($i = 0; $i < count($list); $i++) {
-    //echo $list->get($i);
+/**
+ * @param SplDoublyLinkedList<Point> $list
+ */
+function printlist(SplDoublyLinkedList $list): void
+{
+    foreach ($list as $item) {
+        printf("Point x = %d\n", $item->x);
+    }
 }
-
-iterator_apply($list, function () { echo 'hej'; });
