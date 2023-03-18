@@ -6,6 +6,7 @@ open Ppx_compare_lib.Builtin
 open Sexplib.Std
 
 exception Parser_exception of string
+exception DocblockParseError of string
 
 type program = 
     | Declaration_list of declaration list

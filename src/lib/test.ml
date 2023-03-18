@@ -1042,7 +1042,6 @@ function main(): int
     *)
 
 (* TODO: *)
-(* $foo = /** @alloc stack */ new Foo(); *)
 (* Write shorter test for assignment + new + boehm in new test file; don't use inline tests? *)
 (* SplDoublyLinkedList as dlist, $list = new SplDoublyLinkedList(); $list[] = $item; *)
 (*   foreach works with SplDoublyLinkedList --> transpile to do-while $list->valid()

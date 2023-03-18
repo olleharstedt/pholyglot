@@ -44,3 +44,5 @@ alloc_typ:
   | "boehm"     {Boehm}
   | "arena"     {Arena}
   | "stack"     {Stack}
+  | s=NAME      {raise (Ast.DocblockParseError ("Invalid alloc type: " ^ s))}
+  (* TODO: Catch all strings except *\ *)
