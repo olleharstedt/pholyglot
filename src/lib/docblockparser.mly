@@ -6,6 +6,7 @@
 %token LIST_TYPE "SplDoublyLinkedList"
 %token DOCBLOCK_PARAM "@param"
 %token DOCBLOCK_ALLOC "@alloc"
+%token DOCBLOCK_VAR "@var"
 %token INT_TYPE "int"
 %token FLOAT_TYPE "float"
 %token STRING_TYPE "string"
@@ -29,12 +30,16 @@ docblock:
   | d=list(docblock_line) EOF {d}
 
 docblock_line:
-  (*| DOC_DOCBLOCK_PARAM DOC_INT_TYPE DOC_DOLLAR n=DOC_NAME {Param (n, Int) : Ast.docblock_comment }*)
-  | "@param" t=typ s=VAR_NAME                 {DocParam (s, t) }
-  | "@param" "array" s=VAR_NAME               { failwith "Must be more precise in docblock than just 'array'" }
-  | "@param" "array" "<" t=typ ">" s=VAR_NAME {DocParam (s, Dynamic_array t) }
+  (* TODO: Duplication *)
+  | "@param" t=typ s=VAR_NAME                  {DocParam (s, t) }
+  | "@param" "array" s=VAR_NAME                { failwith "Must be more precise in docblock than just 'array'" }
+  | "@param" "array" "<" t=typ ">" s=VAR_NAME  {DocParam (s, Dynamic_array t) }
   | "@param" "SplDoublyLinkedList" "<" t=typ ">" s=VAR_NAME {DocParam (s, List t) }
-  | "@alloc" at=alloc_typ                     {DocAlloc at}
+  | "@alloc" at=alloc_typ                      {DocAlloc at}
+  | "@var" t=typ                               {DocVar (None, t)}
+  | "@var" "array" s=VAR_NAME                  { failwith "Must be more precise in docblock than just 'array'" }
+  | "@var" "array" "<" t=typ ">"               {DocVar (None, Dynamic_array t) }
+  | "@var" "SplDoublyLinkedList" "<" t=typ ">" {DocVar (None, List t) }
 
 typ:
   | "int"      {Int : Ast.typ}

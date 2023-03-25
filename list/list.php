@@ -34,11 +34,13 @@ function additems(SplDoublyLinkedList $list, int $nr)
 
 function main(): int
 {
+    /** @var SplDoublyLinkedList<Point> */
     $list1 = /** @alloc arena */ new SplDoublyLinkedList();
     additems($list1, 10);
     printlist($list1);
 
     // Defaults to Boehm GC
+    /** @var SplDoublyLinkedList<Point> */
     $list2 = new SplDoublyLinkedList();
     additems($list2, 20);
     printlist($list2);

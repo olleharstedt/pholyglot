@@ -7,6 +7,8 @@ type t = {
     (* In PHP, you can have property and method with same name, so we need a triple instead of truple here *)
     classes     : (string, (kind * class_property list * function_def list)) Hashtbl.t;
     functions   : (string, typ) Hashtbl.t;
+    (* Consits of /** @var <typ> */ defs */ *)
+    var_defs    : (string, typ) Hashtbl.t
 }
 
 exception Namespace_error of string
@@ -15,6 +17,7 @@ let create () : t = {
     identifiers = Hashtbl.create 10;
     classes     = Hashtbl.create 10;
     functions   = Hashtbl.create 10;
+    var_defs    = Hashtbl.create 10;
 }
 
 (** Add value to namespace with key *)
