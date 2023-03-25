@@ -65,6 +65,7 @@ let get_class_methods elems =
 %token VOID_TYPE "void"
 %token STRING_TYPE "string"
 %token ARRAY_TYPE "array"
+%token LIST_TYPE "SplDoublyLinkedList"
 %token RETURN "return"
 %token NEW "new"
 %token FUNCTION "function"
@@ -220,7 +221,12 @@ expr:
   | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Method_call {return_type = Infer_me; method_name = m; args = args_list; left_hand = e}}
   | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__prop_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
-  | "new" s=CLASS_NAME "(" ")"                                   {New (None, Class_type (s, Infer_allocation_strategy), [])}
+  | "new" s=CLASS_NAME "(" ")"                                   {
+      if s = "SplDoublyLinkedList" then
+          List_init Infer_me
+      else
+          New (None, Class_type (s, Infer_allocation_strategy), [])
+  }
   | doc=DOCBLOCK_AS_STR "new" s=CLASS_NAME "(" ")"                 {
       let linebuf = Lexing.from_string doc in
       let cb = Docblockparser.docblock Docblocklexer.docblock linebuf in

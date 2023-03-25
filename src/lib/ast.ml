@@ -41,6 +41,7 @@ and typ =
     (* Fixed array can have Infer_me * None, when size is not yet known *)
     | Fixed_array of typ * int option
     | Dynamic_array of typ
+    | List of typ
     (*| Tuple of typ              (* Example: Fixed_array (Tuple Int) *) *)
     (*| Linked_list*)
     (*| Hash_table*)
@@ -156,6 +157,7 @@ and expression =
     | New of allocation_strategy option * typ * expression list
     | Variable of identifier
     | Array_init of typ * int option * expression list
+    | List_init of typ (* SplDoublyLinkedList *)
     | Array_access of identifier * expression
     (*
      * Examples:

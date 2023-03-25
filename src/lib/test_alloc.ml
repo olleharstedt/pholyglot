@@ -101,7 +101,6 @@ let%test "faulty alloc type" =
 $p = /** @alloc $list */ new Point(); // To use an existing context
 $p = /** @alloc stack */ new Point() + 1;
 $p = /** @alloc stack */ [new Point()]; // Not valid?
-return /** @alloc arena */ new Point();
+return /** @alloc arena */ new Point(); // ??
 default to Boehm
-
 *)

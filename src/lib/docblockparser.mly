@@ -3,6 +3,7 @@
 %}
 
 %token ARRAY_TYPE "array"
+%token LIST_TYPE "SplDoublyLinkedList"
 %token DOCBLOCK_PARAM "@param"
 %token DOCBLOCK_ALLOC "@alloc"
 %token INT_TYPE "int"
@@ -32,6 +33,7 @@ docblock_line:
   | "@param" t=typ s=VAR_NAME                 {DocParam (s, t) }
   | "@param" "array" s=VAR_NAME               { failwith "Must be more precise in docblock than just 'array'" }
   | "@param" "array" "<" t=typ ">" s=VAR_NAME {DocParam (s, Dynamic_array t) }
+  | "@param" "SplDoublyLinkedList" "<" t=typ ">" s=VAR_NAME {DocParam (s, List t) }
   | "@alloc" at=alloc_typ                     {DocAlloc at}
 
 typ:
