@@ -363,6 +363,11 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
+    | Assignment (t, Variable id, List_init _) ->
+        if t <> Infer_me then
+            Assignment (t, Variable id, List_init t)
+        else
+            failwith "infer_stmt: TODO"
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
