@@ -58,6 +58,7 @@ and typ =
 and docblock_comment =
     | DocParam of identifier * typ
     | DocAlloc of allocation_strategy
+    | DocVar of identifier option * typ
 
 (* Function argument types *)
 and param =

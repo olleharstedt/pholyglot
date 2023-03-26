@@ -120,6 +120,14 @@ declaration:
 
 statement: 
   | "return" e=expr ";"                                      {Return e}
+  | doc=DOCBLOCK_AS_STR v=lvalue "=" e=expr ";"                                  {
+        let linebuf = Lexing.from_string doc in
+        let cb = match Docblockparser.docblock Docblocklexer.docblock linebuf with
+            | [cb] -> cb
+            | _ -> failwith "Too many docblock comments before assignment"
+        in
+        Assignment (Infer.typ_of_docblock cb, v, e)
+  }
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | v=lvalue "++" ";"                                        {Plusplus v}
   | v=lvalue "--" ";"                                        {Minusminus v}

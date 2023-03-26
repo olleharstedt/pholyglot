@@ -16,6 +16,11 @@ exception Type_error of string
  *)
 let t_vars_tbl : (string, typ) Hashtbl.t = Hashtbl.create 10
 
+let typ_of_docblock d : typ = match d with
+    | DocParam (_ , t) -> t
+    | DocAlloc _ -> raise (Type_error "typ_of_docblock: Can't infer type from DocAlloc")
+    | DocVar (_, t) -> t
+
 let rec typ_of_lvalue ns lv : typ = 
     Log.debug "%s %s" "typ_of_lvalue" (show_lvalue lv);
     match lv with

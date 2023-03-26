@@ -34,12 +34,12 @@ docblock_line:
   | "@param" t=typ s=VAR_NAME                  {DocParam (s, t) }
   | "@param" "array" s=VAR_NAME                { failwith "Must be more precise in docblock than just 'array'" }
   | "@param" "array" "<" t=typ ">" s=VAR_NAME  {DocParam (s, Dynamic_array t) }
-  | "@param" "SplDoublyLinkedList" "<" t=typ ">" s=VAR_NAME {DocParam (s, List t) }
+  | "@param" LIST_TYPE "<" t=typ ">" s=VAR_NAME {DocParam (s, List t) }
   | "@alloc" at=alloc_typ                      {DocAlloc at}
   | "@var" t=typ                               {DocVar (None, t)}
   | "@var" "array" s=VAR_NAME                  { failwith "Must be more precise in docblock than just 'array'" }
   | "@var" "array" "<" t=typ ">"               {DocVar (None, Dynamic_array t) }
-  | "@var" "SplDoublyLinkedList" "<" t=typ ">" {DocVar (None, List t) }
+  | "@var" LIST_TYPE "<" t=typ ">" {DocVar (None, List t) }
 
 typ:
   | "int"      {Int : Ast.typ}

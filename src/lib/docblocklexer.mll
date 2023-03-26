@@ -28,10 +28,12 @@ rule docblock = parse
   | ""                  { docblock lexbuf }
   *)
   | whitespace_char_no_newline+   { docblock lexbuf }
+  | "SplDoublyLinkedList" { LIST_TYPE }
   | class_name as n               { CLASS_NAME n}
   | '*'                  { docblock lexbuf }
   | "@param"             { DOCBLOCK_PARAM }
   | "@alloc"             { DOCBLOCK_ALLOC }
+  | "@var"               { DOCBLOCK_VAR }
   | "array"              { ARRAY_TYPE }
   | "int"                { INT_TYPE }
   | "float"              { FLOAT_TYPE }
