@@ -274,8 +274,7 @@ let rec infer_expression ns expr : expression =
             "array_get",
             typ_to_constant t :: Variable id :: expr :: [];
         )
-    (* TODO: Memory context *)
-    (* TODO: /** @mem moo */ *)
+    (* TODO: Memory context = /** @alloc $variable */ *)
     | New (alloc_strat, Class_type (class_name, Infer_allocation_strategy), args) -> New (alloc_strat, Class_type (class_name, Boehm), args)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)

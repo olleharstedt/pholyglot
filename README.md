@@ -131,6 +131,8 @@ Some example code:
 
 ```php
 $arr = [1, 2, 3];     // Fixed size integer array
+/** @var int[42] */
+$arr = [];            // Fixed-size int array with size 42
 $arr[] = 4;           // Pushing a new element on top of $arr, so either dynamic vector or linked list
 $arr["moo"] = 5;      // Now it's a hash table
 $tuple = [1, "moo"];  // This could be a tuple, since it has different types

@@ -57,6 +57,28 @@ let%test_unit "trivial list infer 2" =
             docblock = [];
             params = [];
             stmts = [
+                Assignment (List (Class_type ("Point", Boehm)), Variable "list", List_init (List (Class_type ("Point", Boehm))));
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ])
+
+let%test_unit "trivial list infer class and allocation strat" =
+    let source = {|<?php // @pholyglot
+    function foo(): void {
+        /** @var SplDoublyLinkedList<Point> */
+        $list = /** @alloc arena */ new SplDoublyLinkedList();
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
                 Assignment (List (Class_type ("Point", Infer_allocation_strategy)), Variable "list", List_init (List (Class_type ("Point", Infer_allocation_strategy))));
             ];
             function_type = Function_type {return_type = Void; arguments = []}

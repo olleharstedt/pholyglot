@@ -25,7 +25,7 @@ function additems(SplDoublyLinkedList $list, int $nr)
     do {
         // Use same memory allocation as $list
         $p = /** @alloc $list */ new Point();
-        $p->x = 10;
+        $p->x = $a;
         $p->y = $a;
         $list->push($p);
         $a++;
@@ -42,8 +42,9 @@ function main(): int
     // Defaults to Boehm GC
     /** @var SplDoublyLinkedList<Point> */
     $list2 = new SplDoublyLinkedList();
-    additems($list2, 20);
+    additems($list2, 10);
     printlist($list2);
 
     return 0;
 }
+main();
