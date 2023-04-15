@@ -375,13 +375,14 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
     (* If t is not Infer_me, we have a @var annotation. Note that expr can still contain a @alloc annotation *)
-    | Assignment (t, Variable id, New (alloc, t2, [List_init t3])) ->
+    | Assignment (t, Variable id, New (alloc_opt, t2, [List_init t3])) ->
         (* t can be _partially_ inferred, e.g. missing alloc strat *)
         if t <> Infer_me then begin
-            let expr = infer_expression ns (New (alloc, t2, [List_init t3])) in
+            let expr = infer_expression ns (New (alloc_opt, t2, [List_init t3])) in
             let expr_t = typ_of_expression ns expr in
             if t <> expr_t then begin
                 print_endline (show_typ t);
+                print_endline (show_typ (infer_alloc t Boehm));
                 print_endline (show_typ expr_t);
             end;
             (*
@@ -392,7 +393,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             in
             print_endline (show_typ new_t);
             *)
-            let expr = New (alloc, t, [List_init t]) in
+            let expr = New (alloc_opt, t, [List_init t]) in
             Assignment (t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
