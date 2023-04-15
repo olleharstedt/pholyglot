@@ -243,7 +243,10 @@ expr:
         | [DocAlloc s] -> s
         | _ -> failwith "Faulty docblock before 'new' keyword"
       in
-      New (Some alloc_strat, Class_type (s, alloc_strat), [])
+      if s = "SplDoublyLinkedList" then
+          New (Some alloc_strat, Infer_me, [List_init Infer_me])
+      else
+          New (Some alloc_strat, Class_type (s, alloc_strat), [])
   }
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init (Infer_me, None, array_init)}

@@ -21,6 +21,14 @@ let typ_of_docblock d : typ = match d with
     | DocAlloc _ -> raise (Type_error "typ_of_docblock: Can't infer type from DocAlloc")
     | DocVar (_, t) -> t
 
+(**
+ *  Travers t and replace Infer_allocation_strategy with strat
+ *)
+let rec infer_alloc t strat = match t with
+    | Class_type (s, Infer_allocation_strategy) -> Class_type (s, strat)
+    | List t -> List (infer_alloc t strat)
+    | t -> t
+
 let rec typ_of_lvalue ns lv : typ = 
     Log.debug "%s %s" "typ_of_lvalue" (show_lvalue lv);
     match lv with
@@ -275,7 +283,11 @@ let rec infer_expression ns expr : expression =
             typ_to_constant t :: Variable id :: expr :: [];
         )
     (* TODO: Memory context = /** @alloc $variable */ *)
-    | New (alloc_strat, Class_type (class_name, Infer_allocation_strategy), args) -> New (alloc_strat, Class_type (class_name, Boehm), args)
+    (*| New (alloc_strat, Class_type (class_name, Infer_allocation_strategy), args) -> New (alloc_strat, Class_type (class_name, Boehm), args)*)
+    (* TODO: Hard-coded Boehm as default GC *)
+    | New (None, t, args) -> New (None, infer_alloc t Boehm, args)
+    (*| New (alloc_strat, List (Class_type (class_name, Infer_allocation_strategy)), args) -> New (alloc_strat, List (Class_type (class_name, Boehm)), args)*)
+    | List_init t -> List_init t
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 
@@ -363,10 +375,10 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
     (* If t is not Infer_me, we have a @var annotation. Note that expr can still contain a @alloc annotation *)
-    | Assignment (t, Variable id, New (alloc, _, [List_init _])) ->
-        let expr = New (alloc, t, [List_init t]) in
+    | Assignment (t, Variable id, New (alloc, t2, [List_init t3])) ->
         (* t can be _partially_ inferred, e.g. missing alloc strat *)
         if t <> Infer_me then begin
+            let expr = infer_expression ns (New (alloc, t2, [List_init t3])) in
             let expr_t = typ_of_expression ns expr in
             if t <> expr_t then begin
                 print_endline (show_typ t);
@@ -380,6 +392,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             in
             print_endline (show_typ new_t);
             *)
+            let expr = New (alloc, t, [List_init t]) in
             Assignment (t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"

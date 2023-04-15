@@ -41,7 +41,6 @@ let%test_unit "trivial list infer" =
         }
     ])
 
-(*
 let%test_unit "trivial list infer 2" =
     let source = {|<?php // @pholyglot
     function foo(): void {
@@ -64,6 +63,7 @@ let%test_unit "trivial list infer 2" =
         }
     ])
 
+(*
 let%test_unit "trivial list infer class and allocation strat" =
     let source = {|<?php // @pholyglot
     function foo(): void {
