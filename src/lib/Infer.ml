@@ -362,11 +362,27 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
-    | Assignment (t, Variable id, List_init _) ->
-        if t <> Infer_me then
-            Assignment (t, Variable id, List_init t)
-        else
-            failwith "infer_stmt: TODO"
+    (* If t is not Infer_me, we have a @var annotation. Note that expr can still contain a @alloc annotation *)
+    | Assignment (t, Variable id, New (alloc, _, [List_init _])) ->
+        let expr = New (alloc, t, [List_init t]) in
+        (* t can be _partially_ inferred, e.g. missing alloc strat *)
+        if t <> Infer_me then begin
+            let expr_t = typ_of_expression ns expr in
+            if t <> expr_t then begin
+                print_endline (show_typ t);
+                print_endline (show_typ expr_t);
+            end;
+            (*
+            let new_t = match t, expr_t with 
+                | List t, Infer_me -> List t
+                | Infer_me, _ -> failwith "Infer_me should not happen here"
+                | u, v ->failwith "Could not combine @var and expr type"
+            in
+            print_endline (show_typ new_t);
+            *)
+            Assignment (t, Variable id, expr)
+        end else
+            failwith "infer_stmt: impossible"
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->

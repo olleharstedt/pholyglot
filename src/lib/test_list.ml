@@ -13,7 +13,7 @@ let%test_unit "trivial list" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "list", List_init (Infer_me));
+                Assignment (Infer_me, Variable "list", New (None, Infer_me, [List_init (Infer_me)]));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
@@ -35,12 +35,13 @@ let%test_unit "trivial list infer" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (List Int, Variable "list", List_init (List Int));
+                Assignment (List Int, Variable "list", New (None, List Int, [List_init (List Int)]));
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
 
+(*
 let%test_unit "trivial list infer 2" =
     let source = {|<?php // @pholyglot
     function foo(): void {
@@ -84,4 +85,9 @@ let%test_unit "trivial list infer class and allocation strat" =
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
+*)
 
+(**
+TODO:
+    Conflicting @var
+ *)

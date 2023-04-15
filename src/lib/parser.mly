@@ -231,7 +231,8 @@ expr:
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {
       if s = "SplDoublyLinkedList" then
-          List_init Infer_me
+          (* TODO: Two Infer_me in same expression? *)
+          New (None,  Infer_me, [List_init Infer_me])
       else
           New (None, Class_type (s, Infer_allocation_strategy), [])
   }
