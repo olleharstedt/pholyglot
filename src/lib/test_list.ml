@@ -57,7 +57,12 @@ let%test_unit "trivial list infer 2" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (List (Class_type ("Point", Boehm)), Variable "list", List_init (List (Class_type ("Point", Boehm))));
+                Assignment (
+                    List (Class_type ("Point", Boehm)),
+                    Variable "list",
+                    New (Some Boehm, Class_type ("Point", Boehm), [List_init (List (Class_type ("Point", Boehm)))])
+                    (*Assignment (List Int, Variable "list", New (None, List Int, [List_init (List Int)]));*)
+                );
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
