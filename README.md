@@ -81,6 +81,7 @@ To include PHP which is ignored in C:
 * Curl call somewhere
 * Some mathematical thing (n-body problem?)
 * Export something big to CSV
+* IRC-bot
 
 ## Open questions
 
