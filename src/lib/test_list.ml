@@ -60,8 +60,8 @@ let%test_unit "trivial list infer 2" =
                 Assignment (
                     List (Class_type ("Point", Boehm)),
                     Variable "list",
-                    New (None, Class_type ("Point", Boehm), [List_init (List (Class_type ("Point", Boehm)))])
-                    (*Assignment (List Int, Variable "list", New (None, List Int, [List_init (List Int)]));*)
+                    (* TODO: Should None be Some Boehm? Needed? Duplication? *)
+                    New (None, List (Class_type ("Point", Boehm)), [List_init (List (Class_type ("Point", Boehm)))])
                 );
             ];
             function_type = Function_type {return_type = Void; arguments = []}

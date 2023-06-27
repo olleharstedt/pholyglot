@@ -393,7 +393,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             in
             print_endline ("new_t = " ^ show_typ new_t);
             let expr = New (alloc_opt, new_t, [List_init new_t]) in
-            Assignment (t, Variable id, expr)
+            Assignment (new_t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
     (* TODO: Generalize this with lvalue *)
