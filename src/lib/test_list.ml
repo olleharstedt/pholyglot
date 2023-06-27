@@ -60,7 +60,7 @@ let%test_unit "trivial list infer 2" =
                 Assignment (
                     List (Class_type ("Point", Boehm)),
                     Variable "list",
-                    New (Some Boehm, Class_type ("Point", Boehm), [List_init (List (Class_type ("Point", Boehm)))])
+                    New (None, Class_type ("Point", Boehm), [List_init (List (Class_type ("Point", Boehm)))])
                     (*Assignment (List Int, Variable "list", New (None, List Int, [List_init (List Int)]));*)
                 );
             ];
