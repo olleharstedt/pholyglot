@@ -68,7 +68,6 @@ let%test_unit "trivial list infer 2" =
         }
     ])
 
-(*
 let%test_unit "trivial list infer class and allocation strat" =
     let source = {|<?php // @pholyglot
     function foo(): void {
@@ -90,7 +89,6 @@ let%test_unit "trivial list infer class and allocation strat" =
             function_type = Function_type {return_type = Void; arguments = []}
         }
     ])
-*)
 
 (**
 TODO:
