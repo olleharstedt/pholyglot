@@ -37,6 +37,7 @@ and typ =
     | Var_args
     | Fixed_array of typ * int
     | Dynamic_array of typ
+    | List of typ
     | Function_type of {
 		return_type: typ;
         (* TODO: Not needed in Pholyglot_ast? *)
@@ -115,6 +116,7 @@ and expression =
     | Equal of expression * expression
     | Variable of identifier
     | Array_init of expression list
+    | List_init of typ (* SplDoublyLinkedList *)
     | Array_access of identifier * expression
     | Object_access of expression * expression
     | New of allocation_strategy * typ * expression list
@@ -154,6 +156,7 @@ let rec string_of_typ (t : typ) : string = match t with
     | Void -> "void"
     | Fixed_array (t, n) -> (*string_of_typ t*) "array"
     | Dynamic_array t -> (* string_of_typ t *) "array"
+    | List t -> "SplDoublyLinkedList"
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
     | Class_type (n, a) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
@@ -203,6 +206,22 @@ let rec string_of_expression : expression -> string = function
     | Variable id ->
         let id = if id = "this" then "__self" else id in
         "$" ^ id
+        (*
+"string_of_expression: (Pholyglot_ast.New (Pholyglot_ast.Arena,\
+   (Pholyglot_ast.List\
+      (Pholyglot_ast.Class_type (\"Point\", Pholyglot_ast.Boehm))),\
+   [(Pholyglot_ast.List_init\
+       (Pholyglot_ast.List\
+          (Pholyglot_ast.Class_type (\"Point\", Pholyglot_ast.Boehm))))\
+     ]\
+   ))").
+         *)
+    | New (alloc_strat, List (Class_type (name, _)), exprs) -> begin
+        let mem_f = "TODO_memf" in
+        [%string {|new(SplDoublyLinkedList
+#__C__ $mem_f
+)|}]
+    end
     | New (alloc_strat, Class_type (ct, c_alloc_strat), exprs) -> begin
         if not (Caml.(=) alloc_strat c_alloc_strat) then failwith "alloc_strat must equal c_alloc_strat";
         let mem_f = match alloc_strat with

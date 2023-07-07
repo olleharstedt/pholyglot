@@ -21,6 +21,7 @@ let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     | Constant -> Pholyglot_ast.Constant
     | Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
     | Dynamic_array t -> Pholyglot_ast.Dynamic_array (typ_to_pholyglot t)
+    | List t -> Pholyglot_ast.List (typ_to_pholyglot t)
     | Fixed_array (_, None) -> failwith "typ_to_pholyglot: array has size None, not fully inferred"
     | Void -> Pholyglot_ast.Void
     | Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
@@ -98,6 +99,7 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
         }
     | New (None, _, _) as e -> failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)
     | New (Some alloc_strat, t, exprs) -> Pholyglot_ast.New (alloc_to_pholyglot alloc_strat, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
+    | List_init t -> Pholyglot_ast.List_init (typ_to_pholyglot t)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
 
 let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l with
