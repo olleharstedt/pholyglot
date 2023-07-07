@@ -61,7 +61,11 @@ let%test_unit "trivial list infer 2" =
                     List (Class_type ("Point", Boehm)),
                     Variable "list",
                     (* TODO: Should None be Some Boehm? Needed? Duplication? *)
-                    New (None, List (Class_type ("Point", Boehm)), [List_init (List (Class_type ("Point", Boehm)))])
+                    New (
+                        None,
+                        List (Class_type ("Point", Boehm)),
+                        [List_init (List (Class_type ("Point", Boehm)))]
+                    )
                 );
             ];
             function_type = Function_type {return_type = Void; arguments = []}
@@ -84,7 +88,16 @@ let%test_unit "trivial list infer class and allocation strat" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (List (Class_type ("Point", Infer_allocation_strategy)), Variable "list", List_init (List (Class_type ("Point", Infer_allocation_strategy))));
+                Assignment (
+                    List (Class_type ("Point", Boehm)),
+                    Variable "list",
+                    (*| New of allocation_strategy option * typ * expression list*)
+                    New (
+                        Some Arena,
+                        List (Class_type ("Point", Boehm)),
+                        [List_init (List (Class_type ("Point", Boehm)))]
+                    );
+                );
             ];
             function_type = Function_type {return_type = Void; arguments = []}
         }
