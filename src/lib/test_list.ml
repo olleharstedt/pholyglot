@@ -145,7 +145,16 @@ let%test_unit "trivial list infer class and allocation strat to C" =
          |> Transpile.declarations_to_pholyglot
          |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: Base.string] code {||}
+    [%test_eq: Base.string] code {|#define function void
+function foo()
+#undef function
+{
+    #__C__ SplDoublyLinkedList
+    $list = new(SplDoublyLinkedList
+#__C__, arena_mem
+);
+    }
+|}
 
 (**
 TODO:

@@ -274,7 +274,7 @@ function main()
 {
     #__C__ Point
     $p = new(Point
-#__C__ gc_mem
+#__C__, gc_mem
 );
     $p->__prop_x = 1;
      printf("%ld", $p->__prop_x);

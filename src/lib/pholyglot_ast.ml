@@ -178,6 +178,11 @@ let string_of_param_without_ref (p : param) : string = match p with
     | Param (id, t)
     | RefParam (id, t) -> string_of_typ t ^ " $" ^ id
 
+let string_of_alloc_strat strat = match strat with
+    | Boehm -> "gc_mem"
+    | Arena -> "arena_mem"
+    | _ -> failwith "string_of_alloc_strat: Unknown allocation strat"
+
 let rec string_of_lvalue (l : lvalue) : string = match l with
     | Variable id -> id
     | Object_access (id, Property_access prop_name) ->
@@ -217,18 +222,16 @@ let rec string_of_expression : expression -> string = function
    ))").
          *)
     | New (alloc_strat, List (Class_type (name, _)), exprs) -> begin
-        let mem_f = "TODO_memf" in
+        let mem_f = string_of_alloc_strat alloc_strat in
         [%string {|new(SplDoublyLinkedList
-#__C__ $mem_f
+#__C__, $mem_f
 )|}]
     end
     | New (alloc_strat, Class_type (ct, c_alloc_strat), exprs) -> begin
         if not (Caml.(=) alloc_strat c_alloc_strat) then failwith "alloc_strat must equal c_alloc_strat";
-        let mem_f = match alloc_strat with
-            | Boehm -> "gc_mem"
-        in
+        let mem_f = string_of_alloc_strat alloc_strat in
         [%string {|new($ct
-#__C__ $mem_f
+#__C__, $mem_f
 )|}]
     end
     | Array_init exprs -> sprintf {|array_make(%s)|}
