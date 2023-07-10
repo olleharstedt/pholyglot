@@ -23,7 +23,7 @@ and allocation_strategy =
     | Arena         (* arena_mem *)
     | Boehm         (* gc_mem *)
     | Malloc        (* From third-party libs like mysqli *)
-    | Polymorph     (* Docblock params *)
+    | Memory_polymorph     (* Docblock params *)
     | Memory_context of string (* Memory context is a variable from function argument *)
     | Infer_allocation_strategy
 

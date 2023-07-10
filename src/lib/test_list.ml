@@ -159,7 +159,7 @@ function foo()
 let%test_unit "list memory context" =
     let source = {|<?php // @pholyglot
     function addItem(SplDoublyLinkedList $list): void {
-        $list = /** @alloc $list */ new Point();
+        $p = /** @alloc $list */ new Point();
     }
     |} in
     let linebuf = Lexing.from_string source in
@@ -170,4 +170,6 @@ let%test_unit "list memory context" =
 (**
 TODO:
     Conflicting @var
+    Menhir explan:
+        /home/olle/.opam/default/bin/menhir lib/parser.mly --base lib/parser --explain
  *)

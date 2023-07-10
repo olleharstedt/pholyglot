@@ -200,7 +200,13 @@ typ:
   | "string"                    {String : Ast.typ}
   | "void"                      {Void : Ast.typ}
   | "array"                     {Fixed_array (Infer_me, None) : Ast.typ}
-  | s=CLASS_NAME                {Class_type (s, Infer_allocation_strategy) : Ast.typ}
+
+  | s=CLASS_NAME                {
+      if s = "SplDoublyLinkedList" then
+          List Infer_me
+      else
+          Class_type (s, Infer_allocation_strategy) : Ast.typ
+  }
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                      {failwith ("Unknown type: " ^ s)}
 

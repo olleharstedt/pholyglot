@@ -150,7 +150,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
 
 (**
- * Params always have Polymorph alloc strategy for now.
+ * Params always have Memory_polymorph alloc strategy for now.
  *)
 and infer_arg_typ t def =
     Log.debug "infer_arg_typ %s" (show_typ t);
@@ -339,11 +339,11 @@ let unify_params_with_docblock (params : param list) (comments : docblock_commen
     let map = (fun p -> match p with
         | RefParam (id, Fixed_array (t, size_option)) ->
             begin match find_docblock comments id with
-                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_ Polymorph))
+                | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_ Memory_polymorph))
                 | None -> p
             end
-        | RefParam (id, t) -> RefParam (id, infer_arg_typ t Polymorph)
-        | Param (id, t) -> Param (id, infer_arg_typ t Polymorph)
+        | RefParam (id, t) -> RefParam (id, infer_arg_typ t Memory_polymorph)
+        | Param (id, t) -> Param (id, infer_arg_typ t Memory_polymorph)
     ) in
     List.map map params
 
@@ -352,10 +352,10 @@ let infer_arg_typ_param p : param =
     Log.debug "infer_arg_typ_param %s" (show_param p);
     match p with
     | Param (id, t) ->
-        let new_t = infer_arg_typ t Polymorph in
+        let new_t = infer_arg_typ t Memory_polymorph in
         Param (id, new_t)
     | RefParam (id, t) ->
-        let new_t = infer_arg_typ t Polymorph in
+        let new_t = infer_arg_typ t Memory_polymorph in
         RefParam (id, new_t)
 
 
@@ -535,7 +535,7 @@ let unify_params_with_function_type params (Function_type {return_type; argument
     let map = (fun param arg ->
         let param = infer_arg_typ_param param in
         Log.debug "unify_params_with_function_type inferred param = %s" (show_param param);
-        let arg = infer_arg_typ arg Polymorph in
+        let arg = infer_arg_typ arg Memory_polymorph in
         Log.debug "unify_params_with_function_type inferred arg = %s" (show_typ arg);
         match param, arg with
         (* Dynamic_array from docblock always wins over non-yet inferred Fixed_array *)
@@ -556,7 +556,7 @@ let unify_params_with_function_type params (Function_type {return_type; argument
  *)
 let infer_docblock d : docblock_comment =
     match d with
-    | DocParam (id, t) -> DocParam (id, infer_arg_typ t Polymorph)
+    | DocParam (id, t) -> DocParam (id, infer_arg_typ t Memory_polymorph)
 
 (**
  * Replace Infer_me inside statements in method.

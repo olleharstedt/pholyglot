@@ -311,7 +311,7 @@ function foo(Thing $t): void {
         Function { 
             name = "foo";
             docblock = [];
-            params = [Param ("t", Class_type ("Thing", Polymorph))];
+            params = [Param ("t", Class_type ("Thing", Memory_polymorph))];
             stmts = [
                 Function_call (
                     Function_type {return_type = Void; arguments = [String_literal; String_literal]},
@@ -319,7 +319,7 @@ function foo(Thing $t): void {
                     [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__prop_name"))]
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Polymorph)]}
+            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Memory_polymorph)]}
         };
     ])
 
