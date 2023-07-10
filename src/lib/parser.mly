@@ -200,8 +200,8 @@ typ:
   | "string"                    {String : Ast.typ}
   | "void"                      {Void : Ast.typ}
   | "array"                     {Fixed_array (Infer_me, None) : Ast.typ}
-
   | s=CLASS_NAME                {
+      (* TODO: Wasn't able to put this in the list above :( *)
       if s = "SplDoublyLinkedList" then
           List Infer_me
       else
