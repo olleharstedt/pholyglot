@@ -156,6 +156,17 @@ function foo()
     }
 |}
 
+let%test_unit "list memory context" =
+    let source = {|<?php // @pholyglot
+    function addItem(SplDoublyLinkedList $list): void {
+        $list = /** @alloc $list */ new Point();
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    [%test_eq: Ast.program] ast (Declaration_list [])
+
 (**
 TODO:
     Conflicting @var
