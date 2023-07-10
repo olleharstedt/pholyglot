@@ -165,7 +165,25 @@ let%test_unit "list memory context" =
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    [%test_eq: Ast.program] ast (Declaration_list [])
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "addItem";
+            docblock = [];
+            params = [Param ("list", List Infer_me)];
+            stmts = [
+                Assignment (
+                    Class_type ("Point", Boehm),
+                    Variable "p",
+                    New (
+                        Some (Memory_context "list"),
+                        Class_type ("Point", Memory_context "list"),
+                        []
+                    );
+                );
+            ];
+            function_type = Function_type {return_type = Void; arguments = [List Infer_me]}
+        }
+    ])
 
 (**
 TODO:
