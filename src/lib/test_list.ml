@@ -240,16 +240,24 @@ let%test_unit "output list memory context" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [List Infer_me]}
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
         }
     ]
          |> Transpile.declarations_to_pholyglot
          |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: Base.string] code {||}
+    [%test_eq: Base.string] code {|#define function void
+function addItem(SplDoublyLinkedList $list)
+#undef function
+{
+    #__C__ Point
+    $p = new(Point
+#__C__, $list->mem
+);
+    }
+|}
 
-
-(**
+(*
 TODO:
     Conflicting @var
     Menhir explan:

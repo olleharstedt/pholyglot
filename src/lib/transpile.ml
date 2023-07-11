@@ -10,6 +10,8 @@ let alloc_to_pholyglot (a : Ast.allocation_strategy) : Pholyglot_ast.allocation_
     | Stack -> Stack
     | Boehm -> Boehm
     | Arena -> Arena
+    | Memory_context var -> Pholyglot_ast.Memory_context var
+    | Memory_polymorph -> Pholyglot_ast.Memory_polymorph
     | Infer_allocation_strategy -> failwith "alloc_to_pholyglot: Must infer allocation strategy before transpile"
 
 (** Transpile from Pholly AST to Pholyglot AST *)
