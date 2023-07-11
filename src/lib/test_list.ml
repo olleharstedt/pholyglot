@@ -188,7 +188,7 @@ let%test_unit "list memory context" =
 (* TODO: Memory_context can only be class or list, not basic types such as int or string *)
 let%test_unit "list memory context" =
     let source = {|<?php // @pholyglot
-    function addItem(int $list): void {
+    function addItem(SplDoublyLinkedList $list): void {
         $p = /** @alloc $list */ new Point();
     }
     |} in
