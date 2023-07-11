@@ -197,12 +197,7 @@ let%test_unit "list memory context" =
     |} in
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
-    Log.set_log_level Log.DEBUG;
-    (* Location becomes ./_build/default/lib/debug.txt *)
-    Log.set_output (open_out "listmemorycontext.txt");
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
     [%test_eq: Ast.program] ast (Declaration_list [
         Function {
             name = "addItem";
@@ -256,6 +251,24 @@ function addItem(SplDoublyLinkedList $list)
 );
     }
 |}
+
+let%test_unit "add items" =
+    let source = {|<?php // @pholyglot
+/**
+ * @param SplDoublyLinkedList<Point> $list
+ */
+function printlist(SplDoublyLinkedList $list): void
+{
+    foreach ($list as $item) {
+        printf("Point x = %d\n", $item->x);
+    }
+}
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    (*[%test_eq: Base.string] code {||}*)
+    [%test_eq: Ast.program] ast (Declaration_list [])
 
 (*
 TODO:
