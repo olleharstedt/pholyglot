@@ -26,7 +26,7 @@ let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     | Void -> Pholyglot_ast.Void
     | Function_type {return_type; arguments} -> Pholyglot_ast.Function_type {return_type = typ_to_pholyglot return_type; arguments = List.map typ_to_pholyglot arguments}
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
-    | Infer_me -> failwith "Infer before transpiling"
+    | Infer_me -> failwith "typ_to_pholyglot: Infer before transpiling"
     | Class_type (n, a) -> Pholyglot_ast.Class_type (n, alloc_to_pholyglot a)
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 

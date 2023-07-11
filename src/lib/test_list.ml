@@ -1,3 +1,4 @@
+module Log = Dolog.Log
 
 let%test_unit "trivial list" =
     let source = {|<?php // @pholyglot
@@ -185,21 +186,49 @@ let%test_unit "list memory context" =
         }
     ])
 
-(* TODO: Memory_context can only be class or list, not basic types such as int or string *)
 let%test_unit "list memory context" =
     let source = {|<?php // @pholyglot
+    /**
+     * @param SplDoublyLinkedList<Point> $list
+     */
     function addItem(SplDoublyLinkedList $list): void {
         $p = /** @alloc $list */ new Point();
     }
     |} in
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
+    Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/debug.txt *)
+    Log.set_output (open_out "listmemorycontext.txt");
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
     [%test_eq: Ast.program] ast (Declaration_list [
         Function {
             name = "addItem";
-            docblock = [];
-            params = [Param ("list", List Infer_me)];
+            docblock = [DocParam ("list", List (Class_type ("Point", Memory_polymorph)))];
+            params = [Param ("list", List (Class_type ("Point", Memory_polymorph)))];
+            stmts = [
+                Assignment (
+                    Class_type ("Point", Boehm),
+                    Variable "p",
+                    New (
+                        Some (Memory_context "list"),
+                        Class_type ("Point", Memory_context "list"),
+                        []
+                    );
+                );
+            ];
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
+        }
+    ])
+
+let%test_unit "output list memory context" =
+    let code = [
+        Ast.Function {
+            name = "addItem";
+            docblock = [DocParam ("list", List (Class_type ("Point", Memory_polymorph)))];
+            params = [Param ("list", List (Class_type ("Point", Memory_polymorph)))];
             stmts = [
                 Assignment (
                     Class_type ("Point", Boehm),
@@ -213,11 +242,17 @@ let%test_unit "list memory context" =
             ];
             function_type = Function_type {return_type = Void; arguments = [List Infer_me]}
         }
-    ])
+    ]
+         |> Transpile.declarations_to_pholyglot
+         |> Pholyglot_ast.string_of_declares
+    in
+    [%test_eq: Base.string] code {||}
+
 
 (**
 TODO:
     Conflicting @var
     Menhir explan:
         /home/olle/.opam/default/bin/menhir lib/parser.mly --base lib/parser --explain
- *)
+    Memory_context can only be class or list, not basic types such as int or string
+*)

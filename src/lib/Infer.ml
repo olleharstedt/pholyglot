@@ -151,8 +151,12 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
 
 (**
  * Params always have Memory_polymorph alloc strategy for now.
+ *
+ * @param t
+ * @param def ??
+ * @return t
  *)
-and infer_arg_typ t def =
+and infer_arg_typ t def : typ =
     Log.debug "infer_arg_typ %s" (show_typ t);
     match t with
     | Class_type (s, alloc_strat) -> begin
@@ -161,6 +165,7 @@ and infer_arg_typ t def =
     end
     | Fixed_array (t, n) -> Fixed_array (infer_arg_typ t def, n)
     | Dynamic_array t -> Dynamic_array (infer_arg_typ t def)
+    | List t -> List (infer_arg_typ t def)
     | t -> t
 
 
@@ -332,18 +337,27 @@ let find_docblock (l : docblock_comment list) (id : string) : docblock_comment o
     ) l
 
 (**
- * docblock takes precedence, because it's more precise, unless there's a conflict
+ * The docblock takes precedence, because it's more precise, unless there's a conflict
+ *
+ * @param params
+ * @param comments
+ * @return
  *)
 let unify_params_with_docblock (params : param list) (comments : docblock_comment list) : param list =
     (* Are all params represented in the docblock? *)
-    let map = (fun p -> match p with
+    let map = (fun p -> 
+        match p with
         | RefParam (id, Fixed_array (t, size_option)) ->
             begin match find_docblock comments id with
                 | Some (DocParam (_, Dynamic_array (t_))) -> RefParam (id, Dynamic_array (infer_arg_typ t_ Memory_polymorph))
                 | None -> p
             end
         | RefParam (id, t) -> RefParam (id, infer_arg_typ t Memory_polymorph)
-        | Param (id, t) -> Param (id, infer_arg_typ t Memory_polymorph)
+        | Param (id, t) ->
+            begin match find_docblock comments id with
+                | Some (DocParam (_, doc_t)) -> Param (id, doc_t)
+                | None -> Param (id, infer_arg_typ t Memory_polymorph)
+            end
     ) in
     List.map map params
 
@@ -544,6 +558,7 @@ let unify_params_with_function_type params (Function_type {return_type; argument
             Dynamic_array (t)
         end
         | _, Fixed_array (Infer_me, _) -> arg
+        | Param (_, List t), _ -> List t
         | _, _ -> arg
     ) in
     Function_type {

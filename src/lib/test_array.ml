@@ -184,18 +184,11 @@ let%test_unit "infer docblock object array" =
     function foo(array &$bodies, float $dt): void {
     }
     " in
-    Log.set_log_level Log.DEBUG;
-    (* Location becomes ./_build/default/lib/debug.txt *)
-    Log.set_output (open_out "inferdocblock.txt");
     let ast =
         Lexing.from_string source |>
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    Log.debug "ast = %s" (Ast.show_program ast);
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
-    Log.debug "should not be visible";
     [%test_eq: Ast.program] ast (Declaration_list [
         Class {
             name = "Body";
