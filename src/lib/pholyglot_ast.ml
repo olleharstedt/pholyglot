@@ -133,6 +133,8 @@ and expression =
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
     | Self
+    | List_valid of string    (* do {} while ($list->valid(#__C__ $list)) *)
+    | List_current of string  (* #__C__ Point $tmp = $list->current(#__C__ $list); *)
 
 and includes =
     | Include of include_lib

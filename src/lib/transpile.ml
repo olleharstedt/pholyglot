@@ -147,6 +147,39 @@ let rec statement_to_pholyglot s = match s with
                 )
                 :: List.map statement_to_pholyglot body;
         }
+    | Ast.Foreach_list {arr = Variable arr_; key; value = Variable value_var; value_typ; body;} ->
+        let value_typ = typ_to_pholyglot value_typ in
+        Pholyglot_ast.Dowhile {
+            condition = List_valid arr_;
+            body = [
+                Assignment (
+                    value_typ,
+                    Variable value_var,
+                    List_current arr_
+                );
+            ];
+        }
+(*
+    $list->rewind(
+        #__C__ $list
+    );
+    do {
+        #__C__ Point
+        $tmp = $list->current(
+            #__C__ $list
+        );
+        if ($tmp) {
+            printf("Current point x = %ld\n", $tmp->x);
+        } else {
+            printf("No current :(\n");
+        }   
+        $list->next(
+            #__C__ $list
+        );
+    } while ($list->valid(
+        #__C__ $list
+    ));
+*)
     | Dowhile {condition; body;} -> Pholyglot_ast.Dowhile {condition = expression_to_pholyglot condition; body = List.map statement_to_pholyglot body;}
 
 let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with

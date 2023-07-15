@@ -304,6 +304,34 @@ function printlist(SplDoublyLinkedList $list): void
         }
     ])
 
+let%test_unit "foreach list code" =
+    let code = [
+        Ast.Function {
+            name = "foo";
+            docblock = [];
+            params = [];
+            stmts = [
+                Foreach_list {
+                    arr = Variable "list";
+                    key = None;
+                    value = Variable "item";
+                    value_typ = Class_type ("Point", Memory_polymorph);
+                    body = [
+                        Assignment (
+                            Int,
+                            Variable "x",
+                            Object_access (Variable "item", Property_access "__prop_x");
+                        );
+                    ];
+                };
+            ];
+            function_type = Function_type {return_type = Void; arguments = []}
+        }
+    ]
+         |> Transpile.declarations_to_pholyglot
+         |> Pholyglot_ast.string_of_declares
+    in
+    [%test_eq: Base.string] code {||}
 (*
 TODO:
     Conflicting @var
