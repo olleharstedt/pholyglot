@@ -134,11 +134,12 @@ and expression =
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
     | Self
-    (* These method calls are hard-coded, since their signature cannot be similar between PHP and Pholyglot (self argument) *)
-    (* TODO: General problem with PHP extension lib? *)
-    | List_valid of string    (* do {} while ($list->valid(#__C__ $list)) *)
-    | List_current of string  (* #__C__ Point $tmp = $list->current(#__C__ $list); *)
-    | List_rewind of string   (* $list->rewind(#__C__ $list); *)
+    (* Lib object calls must include the self in Pholyglot, so function signature will be different *)
+    (* TODO: Might need to extend this with function arguments. *)
+    | Lib_method_call of {
+        function_name: string;
+        variable_name: string;
+    }
 
 and includes =
     | Include of include_lib
@@ -268,6 +269,11 @@ let rec string_of_expression : expression -> string = function
         {|%s(%s)|}
         name
         (Base.String.concat ~sep:", " (Base.List.map param_exprs ~f:string_of_expression))
+    | Lib_method_call {variable_name; function_name} ->
+        [%string {|$$$variable_name->$function_name(
+#__C__ $$$variable_name
+)
+|}]
     (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 
@@ -318,10 +324,12 @@ let rec string_of_statement = function
             $stmts_s
         }
     |}]
-    | Dowhile {condition; body;} ->
+    | Dowhile {condition; body; before;} ->
+        let before_expr = match before with Some b -> string_of_expression b  ^ ";" | None -> "" in
         let condition_s = string_of_expression condition in
         let body_s      = Base.String.concat (Base.List.map body ~f:string_of_statement) in
-        [%string {|do {
+        [%string {|$before_expr
+do {
 $body_s} while ($condition_s);
 |}]
     | s -> failwith ("Pholyglot_ast.string_of_statement: Unsupported statement: " ^ show_statement s)

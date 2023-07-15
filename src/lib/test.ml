@@ -970,7 +970,8 @@ function foo()
 {
     #__C__ int
     $a = 10;
-    do {
+    
+do {
 $a--;
 } while ($a > 0);
 }

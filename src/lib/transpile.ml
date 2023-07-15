@@ -150,13 +150,24 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Foreach_list {arr = Variable arr_; key; value = Variable value_var; value_typ; body;} ->
         let value_typ = typ_to_pholyglot value_typ in
         Pholyglot_ast.Dowhile {
-            before = List_rewind arr_;
-            condition = List_valid arr_;
+            before = Some (
+                Lib_method_call {
+                    function_name = "rewind";
+                    variable_name = arr_;
+                }
+            );
+            condition = Lib_method_call {
+                function_name = "valid";
+                variable_name = arr_;
+            };
             body = [
                 Assignment (
                     value_typ,
                     Variable value_var,
-                    List_current arr_
+                    Lib_method_call {
+                        function_name = "current";
+                        variable_name = arr_;
+                    };
                 );
             ];
         }
