@@ -86,7 +86,8 @@ let%test_unit "trivial array infer and print" =
 function main()
 #undef function
 {
-    #__C__ array
+    #__C__ GC_INIT();
+#__C__ array
     $arr = array_make(int, 3, 1, 2, 3);
      printf("%ld", array_get(int, $arr, 0));
     return 0;

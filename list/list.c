@@ -88,6 +88,7 @@ function additems(SplDoublyLinkedList $list, int $nr)
  * gcc -g -Wno-incompatible-pointer-types list.c
  * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc - -lgc
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
+ * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -lgc -I.
  * This line might have weird result with valgrind (swallowing stderr and stdout):
  *   cat list.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address -lgc
  */
@@ -100,8 +101,6 @@ function main()
     #__C__ arena_init(__a, malloc(256), 256);
     #__C__ arena_mem.alloc = &arena_alloc;
     #__C__ arena_mem.arena = __a;
-    #__C__ gc_mem.alloc = &gc_malloc;
-    #__C__ gc_mem.arena = NULL;
 
     // TODO: Always require length to fgets to simplify buffer
     // TODO: Always glib string

@@ -164,7 +164,8 @@ let%test_unit "trivial transpile" =
 function main()
 #undef function
 {
-    return 0;
+    #__C__ GC_INIT();
+return 0;
 }
 |}
 
@@ -187,7 +188,8 @@ let%test_unit "trivial arith transpile" =
 function main()
 #undef function
 {
-    #__C__ int
+    #__C__ GC_INIT();
+#__C__ int
     $a = 0;
     return $a + 1 - 1 * 1 / 1;
 }
@@ -289,7 +291,8 @@ function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args
 function main()
 #undef function
 {
-    #__C__ GString*
+    #__C__ GC_INIT();
+#__C__ GString*
     $str = g_string_append(g_string_append(g_string_new("Hello"), g_string_new(" world")->str), g_string_new("!")->str);
     return 0;
 }
@@ -358,7 +361,8 @@ function foo(int $c)
 function main()
 #undef function
 {
-    #__C__ int
+    #__C__ GC_INIT();
+#__C__ int
     $b = foo(10 + 20);
     return $b + 30;
 }
@@ -615,7 +619,8 @@ let%test_unit "float to code test" =
 function main()
 #undef function
 {
-    #__C__ float
+    #__C__ GC_INIT();
+#__C__ float
     $a = 1. + 2. - 3.25;
     return 0;
 }

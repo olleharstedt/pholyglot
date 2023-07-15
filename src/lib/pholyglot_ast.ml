@@ -102,6 +102,8 @@ and statement =
         function_name: string;
         variable_name: string;
     }
+    | C_only of statement (* Used for #__C__ GC_INIT() etc *)
+    | C_only_string of string
 
 and lvalue =
     | Variable of identifier
@@ -341,6 +343,7 @@ let rec string_of_statement = function
 do {
 $body_s} while ($condition_s);
 |}]
+    | C_only_string s -> s
     | s -> failwith ("Pholyglot_ast.string_of_statement: Unsupported statement: " ^ show_statement s)
 
 
@@ -414,6 +417,7 @@ let string_of_declare (d : declaration) : string = match d with
         stmts;
         function_type = typ
     } ->
+        let stmts = if function_name = "main" then C_only_string "#__C__ GC_INIT();\n" :: stmts else stmts in
         let typ_s = string_of_typ typ in
         let params_s = Base.String.concat ~sep:", " (Base.List.map params ~f:string_of_param) in
         let stmts_s = (Base.String.concat (Base.List.map stmts ~f:string_of_statement)) in

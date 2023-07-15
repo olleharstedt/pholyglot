@@ -272,7 +272,8 @@ Point Point__constructor(Point $p)
 function main()
 #undef function
 {
-    #__C__ Point
+    #__C__ GC_INIT();
+#__C__ Point
     $p = new(Point
 #__C__, gc_mem
 );
