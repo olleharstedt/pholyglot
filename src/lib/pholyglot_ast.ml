@@ -272,8 +272,7 @@ let rec string_of_expression : expression -> string = function
     | Lib_method_call {variable_name; function_name} ->
         [%string {|$$$variable_name->$function_name(
 #__C__ $$$variable_name
-)
-|}]
+)|}]
     (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
 

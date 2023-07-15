@@ -42,7 +42,7 @@ define("gc_mem", "gc_mem");
 #endif
 
 #define function void
-function printlist(SplDoublyLinkedList $list)
+function printlist2(SplDoublyLinkedList $list)
 #undef function
 {
     $list->rewind(
@@ -64,7 +64,23 @@ function printlist(SplDoublyLinkedList $list)
     } while ($list->valid(
         #__C__ $list
     ));
+}
 
+#define function void
+function printlist(SplDoublyLinkedList $list)
+#undef function
+{
+	$list->rewind(
+		#__C__ $list
+	);
+	do {
+		#__C__ Point
+		$item = $list->current(
+			#__C__ $list
+		);
+	} while ($list->valid(
+		#__C__ $list
+	));
 }
 
 #define function void
