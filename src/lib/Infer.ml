@@ -473,24 +473,38 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             | _ -> failwith ("found no function declared with name " ^ id)
         in
         Function_call (t, id, infer_expressions ns e)
-    | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> begin
+    | Foreach {arr (* Array expression *) ; key; value = Variable value_name; body = stmts} as e -> (
         let t = typ_of_expression ns arr in
-        begin match t with 
+        let f = fun s -> infer_stmt s ns in
+        (match t with 
             | Fixed_array _
+            | List _
             | Dynamic_array _ -> ()
             | _ -> raise (Type_error ("Array given to foreach does not have an array type, but instead " ^ show_typ t))
-        end;
-        let array_internal_type = match t with 
-            | Fixed_array (t, _) -> t
-            | Dynamic_array t -> t
-        in
-        (* NB: Since PHP lack block scope, we don't have to clone the namespace or remove variable after *)
-        Namespace.add_identifier ns value_name array_internal_type;
-        begin match key with Some (Variable s) -> Namespace.add_identifier ns s Int | _ -> () end;
-        let f = fun s -> infer_stmt s ns in
-        let value_typ = typ_of_expression ns (Variable value_name) in
-        Foreach {arr; key; value = Variable value_name; value_typ; value_typ_constant = typ_to_constant value_typ; body = List.map f stmts}
-    end
+        );
+        (match t with 
+            | Fixed_array (array_internal_type, _)
+            | Dynamic_array array_internal_type -> (
+                (* NB: Since PHP lack block scope, we don't have to clone the namespace or remove variable after *)
+                Namespace.add_identifier ns value_name array_internal_type;
+                (match key with Some (Variable s) -> Namespace.add_identifier ns s Int | _ -> ());
+                let value_typ = typ_of_expression ns (Variable value_name) in
+                Foreach {arr; key; value = Variable value_name; value_typ; value_typ_constant = typ_to_constant value_typ; body = List.map f stmts}
+            )
+            | List array_internal_type -> begin
+                Namespace.add_identifier ns value_name array_internal_type;
+                (match key with Some (Variable s) -> Namespace.add_identifier ns s Int | _ -> ());
+                let value_typ = typ_of_expression ns (Variable value_name) in
+                Foreach_list {
+                    arr;
+                    key;
+                    value = Variable value_name;
+                    value_typ;
+                    body = List.map f stmts;
+                }
+            end
+        )
+    )
     | Dowhile {condition; body;} ->
         let inf = fun s -> infer_stmt s ns in
         let new_body = List.map inf body in

@@ -121,7 +121,14 @@ and statement =
         key:       expression option; (* Must be Variable if it exists *)
         value:     expression; (* Must be Variable *)
         value_typ: typ;
-        value_typ_constant: expression;
+        value_typ_constant: expression; (** Needed because of array_get? *)
+        body:      statement list;
+    }
+    | Foreach_list of {
+        arr:       expression;
+        key:       expression option;
+        value:     expression;
+        value_typ: typ;
         body:      statement list;
     }
     | Dowhile of {

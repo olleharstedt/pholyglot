@@ -254,13 +254,17 @@ function addItem(SplDoublyLinkedList $list)
 
 let%test_unit "add items" =
     let source = {|<?php // @pholyglot
+class Point {
+    public int $x;
+}
+
 /**
  * @param SplDoublyLinkedList<Point> $list
  */
 function printlist(SplDoublyLinkedList $list): void
 {
     foreach ($list as $item) {
-        printf("Point x = %d\n", $item->x);
+        $x = $item->x;
     }
 }
     |} in
@@ -268,7 +272,37 @@ function printlist(SplDoublyLinkedList $list): void
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     (*[%test_eq: Base.string] code {||}*)
-    [%test_eq: Ast.program] ast (Declaration_list [])
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name= "Point";
+            kind = Val;
+            properties = [
+                ("__prop_x", Int);
+            ];
+            methods = [];
+        };
+        Function {
+            name = "printlist";
+            docblock = [DocParam ("list", List (Class_type ("Point", Memory_polymorph)))];
+            params = [Param ("list", List (Class_type ("Point", Memory_polymorph)))];
+            stmts = [
+                Foreach_list {
+                    arr = Variable "list";
+                    key = None;
+                    value = Variable "item";
+                    value_typ = Class_type ("Point", Memory_polymorph);
+                    body = [
+                        Assignment (
+                            Int,
+                            Variable "x",
+                            Object_access (Variable "item", Property_access "__prop_x");
+                        );
+                    ];
+                };
+            ];
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
+        }
+    ])
 
 (*
 TODO:
