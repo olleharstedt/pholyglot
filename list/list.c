@@ -88,7 +88,8 @@ function additems(SplDoublyLinkedList $list, int $nr)
  * gcc -g -Wno-incompatible-pointer-types list.c
  * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc - -lgc
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
- * cat list.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address -lgc
+ * This line might have weird result with valgrind (swallowing stderr and stdout):
+ *   cat list.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address -lgc
  */
 #define function int
 function main()
