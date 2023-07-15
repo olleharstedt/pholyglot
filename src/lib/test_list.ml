@@ -80,24 +80,6 @@ let%test_unit "trivial list infer class and allocation strat" =
         $list = /** @alloc arena */ new SplDoublyLinkedList();
     }
     |} in
-    (*
-#define function void
-function foo()
-#undef function
-{
-    #__C__ Arena __a = malloc(sizeof(struct Arena));
-    #__C__ arena_init(__a, malloc(256), 256);
-    #__C__ arena_mem.alloc = &arena_alloc;
-    #__C__ arena_mem.arena = __a;
-    #__C__ gc_mem.alloc = &gc_malloc;
-    #__C__ gc_mem.arena = NULL;
-
-    #__C__ SplDoublyLinkedList
-    $list = new(SplDoublyLinkedList
-        #__C__, arena_mem
-    );
-}
-     *)
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
@@ -343,7 +325,12 @@ do {
     $item = $list->current(
 #__C__ $list
 );
-    } while ($list->valid(
+    #__C__ int
+    $x = $item->__prop_x;
+    $list->next(
+    #__C__ $list
+);
+} while ($list->valid(
 #__C__ $list
 ));
 }

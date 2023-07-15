@@ -42,31 +42,6 @@ define("gc_mem", "gc_mem");
 #endif
 
 #define function void
-function printlist2(SplDoublyLinkedList $list)
-#undef function
-{
-    $list->rewind(
-        #__C__ $list
-    );
-    do {
-        #__C__ Point
-        $tmp = $list->current(
-            #__C__ $list
-        );
-        if ($tmp) {
-            printf("Current point x = %ld\n", $tmp->x);
-        } else {
-            printf("No current :(\n");
-        }   
-        $list->next(
-            #__C__ $list
-        );
-    } while ($list->valid(
-        #__C__ $list
-    ));
-}
-
-#define function void
 function printlist(SplDoublyLinkedList $list)
 #undef function
 {
@@ -76,6 +51,10 @@ function printlist(SplDoublyLinkedList $list)
 	do {
 		#__C__ Point
 		$item = $list->current(
+			#__C__ $list
+		);
+        printf("Current point x = %ld\n", $item->x);
+		$list->next(
 			#__C__ $list
 		);
 	} while ($list->valid(
@@ -140,7 +119,7 @@ function main()
 
     #__C__ SplDoublyLinkedList
     $list2 = new(SplDoublyLinkedList
-        #__C__ , gc_mem
+        #__C__, gc_mem
     );
 
     additems($list2, 10);

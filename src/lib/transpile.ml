@@ -160,7 +160,7 @@ let rec statement_to_pholyglot s = match s with
                 function_name = "valid";
                 variable_name = arr_;
             };
-            body = [
+            body =
                 Assignment (
                     value_typ,
                     Variable value_var,
@@ -168,8 +168,13 @@ let rec statement_to_pholyglot s = match s with
                         function_name = "current";
                         variable_name = arr_;
                     };
-                );
-            ];
+                )
+            :: (List.map statement_to_pholyglot body @
+                [Lib_method_call {
+                    function_name = "next";
+                    variable_name = arr_
+                }]
+            )
         }
 (*
     $list->rewind(

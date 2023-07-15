@@ -98,6 +98,10 @@ and statement =
         condition: expression;
         body:      statement list;
     }
+    | Lib_method_call of {
+        function_name: string;
+        variable_name: string;
+    }
 
 and lvalue =
     | Variable of identifier
@@ -301,6 +305,12 @@ let rec string_of_statement = function
         let args_s   = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
         [%string {|$$$id->$m($args_s);
 |}]
+    | Lib_method_call {variable_name; function_name} ->
+        [%string {|$$$variable_name->$function_name(
+    #__C__ $$$variable_name
+);
+|}]
+
     | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
     $%s %s= %s;
     |}
