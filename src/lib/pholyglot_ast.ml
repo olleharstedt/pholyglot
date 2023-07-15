@@ -94,6 +94,7 @@ and statement =
         stmts:     statement list;
     }
     | Dowhile of {
+        before:    expression option; (* To traverse SplDoublyLinkedList you need to call reset before the loop. *)
         condition: expression;
         body:      statement list;
     }
@@ -133,8 +134,11 @@ and expression =
     | Function_call of typ * identifier * expression list
     | Coerce of typ * expression
     | Self
+    (* These method calls are hard-coded, since their signature cannot be similar between PHP and Pholyglot (self argument) *)
+    (* TODO: General problem with PHP extension lib? *)
     | List_valid of string    (* do {} while ($list->valid(#__C__ $list)) *)
     | List_current of string  (* #__C__ Point $tmp = $list->current(#__C__ $list); *)
+    | List_rewind of string   (* $list->rewind(#__C__ $list); *)
 
 and includes =
     | Include of include_lib

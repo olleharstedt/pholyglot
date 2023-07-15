@@ -150,6 +150,7 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Foreach_list {arr = Variable arr_; key; value = Variable value_var; value_typ; body;} ->
         let value_typ = typ_to_pholyglot value_typ in
         Pholyglot_ast.Dowhile {
+            before = List_rewind arr_;
             condition = List_valid arr_;
             body = [
                 Assignment (
@@ -180,7 +181,11 @@ let rec statement_to_pholyglot s = match s with
         #__C__ $list
     ));
 *)
-    | Dowhile {condition; body;} -> Pholyglot_ast.Dowhile {condition = expression_to_pholyglot condition; body = List.map statement_to_pholyglot body;}
+    | Dowhile {condition; body;} -> Pholyglot_ast.Dowhile {
+        before    = None;
+        condition = expression_to_pholyglot condition;
+        body      = List.map statement_to_pholyglot body;
+    }
 
 let prop_to_pholyglot p : Pholyglot_ast.class_property = match p with
     | (name, t) -> (name, typ_to_pholyglot t)
