@@ -418,6 +418,7 @@ let string_of_declare (d : declaration) : string = match d with
         function_type = typ
     } ->
         let stmts = if function_name = "main" then C_only_string "#__C__ GC_INIT();\n" :: stmts else stmts in
+        (* TODO: Find out if stmts contain any arena alloc *)
         let typ_s = string_of_typ typ in
         let params_s = Base.String.concat ~sep:", " (Base.List.map params ~f:string_of_param) in
         let stmts_s = (Base.String.concat (Base.List.map stmts ~f:string_of_statement)) in

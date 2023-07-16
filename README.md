@@ -1,3 +1,10 @@
+## Blog posts
+
+For information about the project, see the following blog posts:
+
+* http://olleharstedt.github.io/programming/2022/12/12/nbody-benchmark-in-php-c-polyglot-pholyglot.html
+* http://olleharstedt.github.io/programming/2022/06/11/pholyglot-php-to-php-c-transpiler.html
+
 ## IRC
 
     ,cc int $a = 10; printf("%d", $a); // Now I'm curious
