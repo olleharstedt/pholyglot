@@ -1108,3 +1108,4 @@ function main(): int
 (* Use dune watch file to auto run tests *)
 (* Configure dune to run both inline test and ounit *)
 (* A-star/A* algorithm with arena allocator? *)
+(* Rename mem to __mem for internal class variable *)

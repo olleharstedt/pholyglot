@@ -249,6 +249,7 @@ class Point {
     public $__prop_y;
 #undef public
 
+    #__C__ struct mem mem;
     
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
@@ -410,6 +411,7 @@ class Point {
     public $__prop_x;
 #undef public
 
+    #__C__ struct mem mem;
     #__C__ int (*getX) (Point $__self); 
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
@@ -518,6 +520,7 @@ class Body {
     public $__prop_vx;
 #undef public
 
+    #__C__ struct mem mem;
     #__C__ void (*offsetMomentum) (Body $__self, float $px); 
 // End of C struct def. Class methods are outside the struct.
 #__C__ };

@@ -451,6 +451,7 @@ function $function_name($params_s): $typ_s
 #__C__ typedef struct $class_name* $class_name;
 class $class_name {
     $props
+    #__C__ struct mem mem;
     $function_pointers
 // End of C struct def. Class methods are outside the struct.
 #__C__ };
