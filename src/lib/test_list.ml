@@ -340,6 +340,7 @@ do {
 TODO:
     Include Arena in function init (only if arena is used?)
     Default to Boehm gc if none is given
+    ArgumentCountError: SplDoublyLinkedList::push() expects exactly 1 argument, 2 given in /home/olle/kod/pholyglot/list/tmp.c:88
     Conflicting @var
     Menhir explan:
         /home/olle/.opam/default/bin/menhir lib/parser.mly --base lib/parser --explain
