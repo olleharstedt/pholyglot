@@ -91,6 +91,7 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Coerce (t, e) -> Pholyglot_ast.Coerce (typ_to_pholyglot t, expression_to_pholyglot e)
     | Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, expression_to_pholyglot lvalue)
     | Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
+    (* TODO: Check Builtin_method_call here, to hide self variable *)
     | Method_call {return_type; method_name; left_hand; args} ->
         let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {

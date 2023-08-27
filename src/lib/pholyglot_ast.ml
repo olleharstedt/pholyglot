@@ -87,6 +87,10 @@ and statement =
         lvalue: lvalue;
         args:   expression list;
     }
+    | Builtin_method_call of {
+        lvalue: lvalue;
+        args:   expression list;
+    }
     | For of {
         init:      statement;       (* Init happens outside the for-statement *)
         condition: expression;
@@ -132,6 +136,12 @@ and expression =
     | New of allocation_strategy * typ * expression list
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Method_call of {
+        return_type: typ;
+        method_name: string;
+        left_hand: expression;
+        args: expression list;
+    }
+    | Builtin_method_call of {
         return_type: typ;
         method_name: string;
         left_hand: expression;
