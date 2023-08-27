@@ -282,6 +282,7 @@ function g_string_append(GString $s1, string $s2) { return new GString($s1->str 
 define("int", "int");
 define("float", "float");
 define("string", "string");
+define("SplDoublyLinkedList", "SplDoublyLinkedList");
 function array_get($type, $arr, $i) { return $arr[$i]; }
 function array_make($type, $length, ...$values) { return $values; }
 function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }

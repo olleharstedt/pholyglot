@@ -295,6 +295,7 @@ let run (ast : Ast.program) : Pholyglot_ast.program = match ast with
             {|define("int", "int");|} ^ "\n";
             {|define("float", "float");|} ^ "\n";
             {|define("string", "string");|} ^ "\n";
+            {|define("SplDoublyLinkedList", "SplDoublyLinkedList");|} ^ "\n";
             "function array_get($type, $arr, $i) { return $arr[$i]; }\n";
             "function array_make($type, $length, ...$values) { return $values; }\n";
             "function pprintf($format, ...$args) { fwrite( STDOUT, sprintf( $format, ...$args)); }\n";
