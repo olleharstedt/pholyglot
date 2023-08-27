@@ -338,6 +338,7 @@ do {
 
 (*
 TODO:
+    Include Arena in function init (only if arena is used?)
     Conflicting @var
     Menhir explan:
         /home/olle/.opam/default/bin/menhir lib/parser.mly --base lib/parser --explain

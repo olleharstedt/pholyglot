@@ -24,6 +24,12 @@ struct mem {
     uintptr_t* (*alloc) (void* a, size_t size);
     void* arena;
 };
+struct mem arena_mem = {0};
+void* gc_malloc(void* throw_away, size_t size)
+{
+    return GC_MALLOC(size);
+}
+struct mem gc_mem = {.alloc = &gc_malloc, .arena = NULL};
 typedef struct array array;
 struct array {
     uintptr_t* thing;
@@ -207,9 +213,4 @@ void arena_free(Arena a) {
     }
     free(a->buf);
     free(a);
-}
-
-void* gc_malloc(void* throw_away, size_t size)
-{
-    return GC_MALLOC(size);
 }
