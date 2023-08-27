@@ -464,9 +464,10 @@ define("$class_name", "$class_name");
 #endif
 //?>
 // Function pointer init
-$class_name $(class_name)__constructor($class_name $$p)
+$class_name $(class_name)__constructor($class_name $$p, struct mem m)
 {
     $function_pointers_init
+    $$p->mem = m;
     return $$p;
 }
 //<?php

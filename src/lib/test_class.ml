@@ -262,9 +262,10 @@ define("Point", "Point");
 #endif
 //?>
 // Function pointer init
-Point Point__constructor(Point $p)
+Point Point__constructor(Point $p, struct mem m)
 {
     
+    $p->mem = m;
     return $p;
 }
 //<?php
@@ -431,10 +432,11 @@ define("Point", "Point");
 #endif
 //?>
 // Function pointer init
-Point Point__constructor(Point $p)
+Point Point__constructor(Point $p, struct mem m)
 {
     $p->getX = &Point__getX;
 
+    $p->mem = m;
     return $p;
 }
 //<?php
@@ -540,10 +542,11 @@ define("Body", "Body");
 #endif
 //?>
 // Function pointer init
-Body Body__constructor(Body $p)
+Body Body__constructor(Body $p, struct mem m)
 {
     $p->offsetMomentum = &Body__offsetMomentum;
 
+    $p->mem = m;
     return $p;
 }
 //<?php

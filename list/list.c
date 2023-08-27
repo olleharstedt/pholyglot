@@ -91,6 +91,10 @@ function additems(SplDoublyLinkedList $list, int $nr)
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -lgc -I.
  * This line might have weird result with valgrind (swallowing stderr and stdout):
  *   cat list.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address -lgc
+ *
+ * Compile from PHP:
+ *   ../src/_build/install/default/bin/pholyglot list.php > tmp.c
+ *   cat tmp.c | sed -e "s/#__C__//g" | gcc -xc - -lgc -I. -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/
  */
 #define function int
 function main()

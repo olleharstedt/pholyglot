@@ -14,6 +14,7 @@
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
 #define class struct
 #define __PHP__ 0
+#define new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
 #define array(...) {__VA_ARGS__}
 #define array_make(type, i, ...) {.thing = (type[]) array(__VA_ARGS__), .length = i}
 #define array_get(type, arr, i) ((type*) arr.thing)[i]

@@ -19,7 +19,7 @@ function printlist(SplDoublyLinkedList $list): void
 /**
  * @param SplDoublyLinkedList<Point> $list
  */
-function additems(SplDoublyLinkedList $list, int $nr)
+function additems(SplDoublyLinkedList $list, int $nr): void
 {
     $a = 0;
     do {
@@ -41,10 +41,9 @@ function main(): int
 
     // Defaults to Boehm GC
     /** @var SplDoublyLinkedList<Point> */
-    $list2 = new SplDoublyLinkedList();
+    $list2 = /** @alloc boehm */ new SplDoublyLinkedList();
     additems($list2, 10);
     printlist($list2);
 
     return 0;
 }
-main();

@@ -395,17 +395,21 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             let expr = infer_expression ns (New (alloc_opt, t2, [List_init t3])) in
             let expr_t = typ_of_expression ns expr in
             if t <> expr_t then begin
+                (*
                 print_endline "383: t <> expr_t";
                 print_endline ("t = " ^ show_typ t);
                 print_endline ("infer_alloc t Boehm = " ^ show_typ (infer_alloc t Boehm));
                 print_endline ("expr_t = " ^ show_typ expr_t);
+                *)
             end;
             let new_t = match t, expr_t with 
                 | List t, Infer_me -> List (infer_alloc t Boehm)
                 | Infer_me, _ -> failwith "Infer_me should not happen here"
                 | u, v ->failwith "Could not combine @var and expr type"
             in
+            (*
             print_endline ("new_t = " ^ show_typ new_t);
+            *)
             let expr = New (alloc_opt, new_t, [List_init new_t]) in
             Assignment (new_t, Variable id, expr)
         end else
