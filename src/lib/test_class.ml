@@ -688,9 +688,9 @@ let%test_unit "infer method call" =
     } in
     Namespace.add_class_type ns c;
     Namespace.add_identifier ns "p" (Class_type ("Point", Boehm));
-    let expr : Ast.expression = Object_access (Variable "p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; left_hand = Variable "p"}) in
+    let expr : Ast.expression = Object_access (Variable "p", Method_call {return_type = Infer_me; method_name = "getX"; args = []; left_hand = Variable "p"; left_hand_t = Infer_me}) in
     let ast = Infer.infer_expression ns expr in
-    [%test_eq: Ast.expression] ast (Object_access (Variable "p", Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"}))
+    [%test_eq: Ast.expression] ast (Object_access (Variable "p", Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"; left_hand_t = Infer_me}))
 
 let%test_unit "infer method" =
     let source = {|<?php // @pholyglot
@@ -748,7 +748,7 @@ function main(): int
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
-                        Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"};
+                        Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"; left_hand_t = Infer_me};
                     ]
                 );
                 Return (Num 0)

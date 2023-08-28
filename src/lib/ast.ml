@@ -180,6 +180,7 @@ and expression =
         return_type: typ;
         method_name: string;
         left_hand: expression; (* left side of arrow, $obj in $obj->foo() *)
+        left_hand_t: typ;      (* Needed to figure out if we need to use Builtin_method_call *)
         args: expression list;
     }
     | Function_call of typ * identifier * expression list

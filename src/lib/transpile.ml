@@ -93,6 +93,9 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
     (* TODO: Check Builtin_method_call here, to hide self variable *)
     | Method_call {return_type; method_name; left_hand; args} ->
+        (* Get type of left hand *)
+        (* If type is builtin, use Builtin_method_call instead *)
+        (*let left_hand_t = Infer.typ_of_expression left_hand in*)
         let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {
             return_type = typ_to_pholyglot return_type;

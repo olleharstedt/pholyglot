@@ -259,7 +259,7 @@ let rec infer_expression ns expr : expression =
     end
     | Method_call {return_type = Infer_me; method_name; left_hand = Variable object_name; args} as e -> begin
         let t = typ_of_expression ns e in
-        Method_call {return_type = t; method_name; left_hand = Variable object_name; args}
+        Method_call {return_type = t; method_name; left_hand = Variable object_name; left_hand_t = typ_of_expression ns (Variable object_name); args}
     end
     | Object_access (leftside_expr, expr) -> Object_access (infer_expression ns leftside_expr, infer_expression ns expr)
     | Array_init (Infer_me, _, exprs) as e ->
