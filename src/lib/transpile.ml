@@ -44,6 +44,11 @@ let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | RefParam (id, typ) -> Pholyglot_ast.RefParam (id, typ_to_pholyglot typ)
     | t -> raise (Transpile_error ("param_to_pholyglot: " ^ Ast.show_param t))
 
+(** TODO: Don't hardcode *)
+let is_builtin t = match t with
+    Class_type ("SplDoublyLinkedList", _) -> true
+    | _ -> false
+
 let rec lvalue_to_pholyglot lvalue = match lvalue with
     | Ast.Variable id -> Pholyglot_ast.Variable id
     | Ast.Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
@@ -95,7 +100,9 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Method_call {return_type; method_name; left_hand; args} ->
         (* Get type of left hand *)
         (* If type is builtin, use Builtin_method_call instead *)
-        (*let left_hand_t = Infer.typ_of_expression left_hand in*)
+        if is_builtin left_hand_t then
+            Pholyglot_ast.Builtin_method_call { return_type = typ_to_pholyglot return_type}
+        else begin
         let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {
             return_type = typ_to_pholyglot return_type;
@@ -103,6 +110,7 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
             left_hand = expression_to_pholyglot left_hand;
             args;
         }
+        end
     | New (None, _, _) as e -> failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)
     | New (Some alloc_strat, t, exprs) -> Pholyglot_ast.New (alloc_to_pholyglot alloc_strat, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | List_init t -> Pholyglot_ast.List_init (typ_to_pholyglot t)
