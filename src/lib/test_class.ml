@@ -748,7 +748,7 @@ function main(): int
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
-                        Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"; left_hand_t = Infer_me};
+                        Method_call {return_type = Int; method_name = "getX"; args = []; left_hand = Variable "p"; left_hand_t = Class_type ("Point", Boehm)};
                     ]
                 );
                 Return (Num 0)
