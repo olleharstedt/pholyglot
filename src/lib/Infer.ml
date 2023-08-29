@@ -41,8 +41,8 @@ let rec typ_of_lvalue ns lv : typ =
     (* TODO: id is expression? *)
     | Object_access (id, Property_access prop_name) ->
         let class_type_name = match Namespace.find_identifier ns id with
+            | Some (List (Class_type (c, a))) -> "SplDoublyLinkedList"
             | Some (Class_type (c, a)) -> c
-            | Some _ -> failwith "FIX ME"
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
         in
         let (k, props, methods) = match Namespace.find_class ns class_type_name with
