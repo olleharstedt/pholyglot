@@ -336,6 +336,25 @@ do {
 }
 |}
 
+let%test_unit "push item" =
+    let source = {|<?php // @pholyglot
+class Points {}
+/**
+ * @param SplDoublyLinkedList<Point> $list
+ */
+function additems(SplDoublyLinkedList $list, Point $p): void
+{
+    $list->push($p);
+}
+|}
+    in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    (*[%test_eq: Base.string] code {||}*)
+    [%test_eq: Ast.program] ast (Declaration_list [])
+
+
 (*
 TODO:
     Include Arena in function init (only if arena is used?)
