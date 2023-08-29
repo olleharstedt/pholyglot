@@ -84,12 +84,9 @@ and statement =
     | Assignment of typ * lvalue * expression
     | Function_call of typ * identifier * expression list
     | Method_call of {
-        lvalue: lvalue;
-        args:   expression list;
-    }
-    | Builtin_method_call of {
-        lvalue: lvalue;
-        args:   expression list;
+        lvalue:  lvalue;
+        args:    expression list;
+        builtin: bool;
     }
     | For of {
         init:      statement;       (* Init happens outside the for-statement *)
@@ -138,8 +135,9 @@ and expression =
     | Method_call of {
         return_type: typ;
         method_name: string;
-        left_hand: expression;
-        args: expression list;
+        left_hand:   expression;
+        args:        expression list;
+        builtin:     bool;
     }
     | Builtin_method_call of {
         return_type: typ;

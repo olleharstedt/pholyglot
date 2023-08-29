@@ -136,8 +136,9 @@ statement:
   | v=lvalue "(" args_list=separated_list(COMMA, expr) ")" ";" 
         {
             Method_call {
-                lvalue = v;
-                args   = args_list;
+                lvalue    = v;
+                lvalue_t  = Infer_me;
+                args      = args_list;
             }
         }
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")" ";" {Function_call (Infer_me, n, args_list)}
@@ -232,7 +233,15 @@ expr:
   | e=expr ">" f=expr                                            {Greaterthan (e, f)} 
   | n=NAME "(" args_list=separated_list(COMMA, expr) ")"         {Function_call (Infer_me, n, args_list)}
   | n=VAR_NAME "[" e=expr "]"                                    {Array_access (n, e)}
-  | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {Method_call {return_type = Infer_me; method_name = m; args = args_list; left_hand = e; left_hand_t = Infer_me}}
+  | e=expr "->" m=NAME "(" args_list=separated_list(COMMA, expr) ")" {
+      Method_call {
+          return_type = Infer_me;
+          method_name = m;
+          args        = args_list;
+          left_hand   = e;
+          left_hand_t = Infer_me;
+      }
+  }
   | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__prop_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {

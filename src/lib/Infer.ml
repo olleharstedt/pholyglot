@@ -259,7 +259,13 @@ let rec infer_expression ns expr : expression =
     end
     | Method_call {return_type = Infer_me; method_name; left_hand = Variable object_name; args} as e -> begin
         let t = typ_of_expression ns e in
-        Method_call {return_type = t; method_name; left_hand = Variable object_name; left_hand_t = typ_of_expression ns (Variable object_name); args}
+        Method_call {
+            return_type = t;
+            method_name;
+            left_hand = Variable object_name;
+            left_hand_t = typ_of_expression ns (Variable object_name);
+            args
+        }
     end
     | Object_access (leftside_expr, expr) -> Object_access (infer_expression ns leftside_expr, infer_expression ns expr)
     | Array_init (Infer_me, _, exprs) as e ->
@@ -513,6 +519,13 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let inf = fun s -> infer_stmt s ns in
         let new_body = List.map inf body in
         Dowhile {condition = infer_expression ns condition; body = new_body;}
+    | Method_call {lvalue; lvalue_t = Infer_me; args} ->
+        let lvalue_t = typ_of_lvalue ns lvalue in
+        Method_call {
+            lvalue;
+            lvalue_t;
+            args;
+        }
     (** TODO: This is not so good *)
     | s -> s
 

@@ -113,8 +113,9 @@ and statement =
     | Pluseq of lvalue * expression
     | Function_call of typ * identifier * expression list
     | Method_call of {
-        lvalue: lvalue;
-        args:   expression list;
+        lvalue:   lvalue;
+        lvalue_t: typ;
+        args:     expression list;
     }
     | Foreach of {
         arr:       expression; (* Must be Variable expression TODO: Should support inline foreach([1 2 3] ...) *)

@@ -45,8 +45,8 @@ let param_to_pholyglot (p: Ast.param) : Pholyglot_ast.param = match p with
     | t -> raise (Transpile_error ("param_to_pholyglot: " ^ Ast.show_param t))
 
 (** TODO: Don't hardcode *)
-let is_builtin t = match t with
-    Class_type ("SplDoublyLinkedList", _) -> true
+let is_builtin (t : Ast.typ) : bool = match t with
+    Ast.Class_type ("SplDoublyLinkedList", _) -> true
     | _ -> false
 
 let rec lvalue_to_pholyglot lvalue = match lvalue with
@@ -97,20 +97,15 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Object_access (expr, lvalue) -> Pholyglot_ast.Object_access (expression_to_pholyglot expr, expression_to_pholyglot lvalue)
     | Property_access class_property_name -> Pholyglot_ast.Property_access class_property_name
     (* TODO: Check Builtin_method_call here, to hide self variable *)
-    | Method_call {return_type; method_name; left_hand; args} ->
-        (* Get type of left hand *)
-        (* If type is builtin, use Builtin_method_call instead *)
-        if is_builtin left_hand_t then
-            Pholyglot_ast.Builtin_method_call { return_type = typ_to_pholyglot return_type}
-        else begin
+    | Method_call {return_type; method_name; left_hand; left_hand_t; args} ->
         let args = List.map expression_to_pholyglot args in
         Pholyglot_ast.Method_call {
             return_type = typ_to_pholyglot return_type;
             method_name;
             left_hand = expression_to_pholyglot left_hand;
             args;
+            builtin = is_builtin left_hand_t
         }
-        end
     | New (None, _, _) as e -> failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)
     | New (Some alloc_strat, t, exprs) -> Pholyglot_ast.New (alloc_to_pholyglot alloc_strat, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | List_init t -> Pholyglot_ast.List_init (typ_to_pholyglot t)
@@ -128,7 +123,12 @@ let rec statement_to_pholyglot s = match s with
     | Ast.Pluseq (v, e) -> Pholyglot_ast.Pluseq (lvalue_to_pholyglot v, expression_to_pholyglot e)
     | Ast.Minuseq (v, e) -> Pholyglot_ast.Minuseq (lvalue_to_pholyglot v, expression_to_pholyglot e)
     | Ast.Assignment (typ, lvalue, expr) -> Pholyglot_ast.Assignment (typ_to_pholyglot typ, lvalue_to_pholyglot lvalue, expression_to_pholyglot expr)
-    | Ast.Method_call {lvalue; args} -> Pholyglot_ast.Method_call {lvalue = lvalue_to_pholyglot lvalue; args = List.map expression_to_pholyglot args}
+    | Ast.Method_call {lvalue; lvalue_t; args} ->
+        Pholyglot_ast.Method_call {
+            lvalue  = lvalue_to_pholyglot lvalue;
+            args    = List.map expression_to_pholyglot args;
+            builtin = is_builtin lvalue_t;
+        }
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     (* TODO: foreach ([1, 2, 3] as $i) { ... } *)
     | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->
