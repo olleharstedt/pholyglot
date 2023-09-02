@@ -108,7 +108,22 @@ let populate (t : t) : t=
     add_function_type_ignore t "array_slice" (Function_type {return_type = Dynamic_array (Type_variable "A"); arguments = [Dynamic_array (Type_variable "A"); Int]});
     add_function_type_ignore t "sqrt" (Function_type {return_type = Float; arguments = [Float]});
     (* TODO: SplDoublyLinkedList? *)
-    add_class_type_ignore t (Class {name = "SplDoublyLinkedList"; methods = []; kind = Ref; properties = []});
+    add_class_type_ignore t (
+        Class {
+            name       = "SplDoublyLinkedList";
+            methods    = [
+                {
+                    name = "push";
+                    docblock = [];
+                    params = [Param ("", Infer_me)];
+                    stmts = [];
+                    function_type = Function_type {return_type = Void; arguments = []};
+                }
+            ];
+            kind       = Ref;
+            properties = []
+        }
+    );
     (*add_function_type_ignore t "array_make" (Function_type {return_type = Fixed_array (Type_variable "A"); arguments = [String; Int; Variadic]});*)
     t
 

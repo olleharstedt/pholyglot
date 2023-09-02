@@ -38,6 +38,7 @@ let rec typ_of_lvalue ns lv : typ =
         | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find function type %s in namespace" id))
         end
     (* TODO: Access chain like $a->b->c *)
+    (* TODO: Property_access is also method call? *)
     (* TODO: id is expression? *)
     | Object_access (id, Property_access prop_name) ->
         let class_type_name = match Namespace.find_identifier ns id with
