@@ -521,10 +521,12 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let inf = fun s -> infer_stmt s ns in
         let new_body = List.map inf body in
         Dowhile {condition = infer_expression ns condition; body = new_body;}
-    | Method_call {lvalue; lvalue_t = Infer_me; args} ->
-        let lvalue_t = typ_of_lvalue ns lvalue in
+    (* TODO: Can't deal with $arr[0]->push($point) *)
+    | Method_call {lvalue = Object_access (id, etc) ; lvalue_t = Infer_me; args} ->
+        let lvalue_t = typ_of_expression ns (Variable id) in
+        if lvalue_t = Infer_me then failwith ("lvalue_t is still Infer_me after typ_of_lvalue of id " ^ id);
         Method_call {
-            lvalue;
+            lvalue = Object_access (id, etc);
             lvalue_t;
             args;
         }

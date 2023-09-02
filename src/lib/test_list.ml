@@ -341,6 +341,7 @@ let%test_unit "push item" =
 class Points {}
 /**
  * @param SplDoublyLinkedList<Point> $list
+ * @param Point $p
  */
 function additems(SplDoublyLinkedList $list, Point $p): void
 {
