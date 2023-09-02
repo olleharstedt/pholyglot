@@ -382,10 +382,8 @@ function additems(SplDoublyLinkedList $list, Point $p): void
 
 (*
 TODO:
-    Include Arena in function init (only if arena is used?)
+    Include Arena in function init (only if arena is used? mut field in namespace?)
     Default to Boehm gc if none is given
-    ArgumentCountError: SplDoublyLinkedList::push() expects exactly 1 argument, 2 given in /home/olle/kod/pholyglot/list/tmp.c:88
-        Only happens with built-in libs, since I can't control function sig
     Conflicting @var
     Menhir explan:
         /home/olle/.opam/default/bin/menhir lib/parser.mly --base lib/parser --explain
