@@ -338,7 +338,6 @@ do {
 
 let%test_unit "push item" =
     let source = {|<?php // @pholyglot
-class Points {}
 /**
  * @param SplDoublyLinkedList<Point> $list
  * @param Point $p
