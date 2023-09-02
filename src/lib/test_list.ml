@@ -380,6 +380,38 @@ function additems(SplDoublyLinkedList $list, Point $p): void
         }
     ])
 
+let%test_unit "push item code" =
+    let ast = [
+        Ast.Function {
+            name = "additems";
+            docblock = [
+                DocParam ("list", List (Class_type ("Point", Memory_polymorph)));
+                DocParam ("p", Class_type ("Point", Memory_polymorph));
+            ];
+            params = [
+                Param ("list", List (Class_type ("Point", Memory_polymorph)));
+                Param ("p", Class_type ("Point", Memory_polymorph));
+            ];
+            stmts = [
+                Method_call {
+                    lvalue   = Object_access ("list", Property_access "__prop_push");
+                    lvalue_t = List (Class_type ("Point", Memory_polymorph));
+                    args     = [Variable "p"];
+                }
+            ];
+            function_type = Function_type {
+                return_type = Void;
+                arguments = [
+                    List (Class_type ("Point", Memory_polymorph));
+                    Class_type ("Point", Memory_polymorph);
+                ];
+            }
+        }
+    ]
+         |> Transpile.declarations_to_pholyglot
+         |> Pholyglot_ast.string_of_declares
+    in
+    [%test_eq: Base.string] ast {|#define function void|}
 (*
 TODO:
     Include Arena in function init (only if arena is used? mut field in namespace?)
