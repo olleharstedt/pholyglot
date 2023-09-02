@@ -55,6 +55,12 @@ let add_class_type t (c : Ast.declaration) = match c with
         else
         Hashtbl.add t.classes name (kind, props, methods)
 
+let add_class_type_ignore t (c : Ast.declaration) = 
+    match c with
+    | Class {name; kind; properties = props; methods} ->
+        if Hashtbl.mem t.classes name then ()
+        else Hashtbl.add t.classes name (kind, props, methods)
+
 let add_function_type t name (typ : Ast.typ) =
     if Hashtbl.mem t.functions name then
         raise (Namespace_error (sprintf "add_function_type: Function name '%s' already exists in functions namespace" name))
@@ -62,7 +68,7 @@ let add_function_type t name (typ : Ast.typ) =
         Hashtbl.add t.functions name typ
 
 (** As add_function_type but does nothing if the function already exists *)
-let add_function_type_ignore t name (typ : Ast.typ) =
+let add_function_type_ignore t name typ =
     if Hashtbl.mem t.functions name then ()
     else Hashtbl.add t.functions name typ
 
@@ -102,7 +108,7 @@ let populate (t : t) : t=
     add_function_type_ignore t "array_slice" (Function_type {return_type = Dynamic_array (Type_variable "A"); arguments = [Dynamic_array (Type_variable "A"); Int]});
     add_function_type_ignore t "sqrt" (Function_type {return_type = Float; arguments = [Float]});
     (* TODO: SplDoublyLinkedList? *)
-    add_class_type t (Class {name = "SplDoublyLinkedList"; methods = []; kind = Ref; properties = []});
+    add_class_type_ignore t (Class {name = "SplDoublyLinkedList"; methods = []; kind = Ref; properties = []});
     (*add_function_type_ignore t "array_make" (Function_type {return_type = Fixed_array (Type_variable "A"); arguments = [String; Int; Variadic]});*)
     t
 

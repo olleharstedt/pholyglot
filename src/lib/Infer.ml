@@ -51,7 +51,7 @@ let rec typ_of_lvalue ns lv : typ =
         in
         match List.find_opt (fun (name, t) -> prop_name = name) props with
             | Some (n, t) -> t
-            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find propert with name %s in class %s" prop_name id))
+            | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find property with name %s in class %s" prop_name id))
 
 let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ = 
     Log.debug "%s %s" "typ_of_expression" (show_expression expr);
