@@ -352,8 +352,33 @@ function additems(SplDoublyLinkedList $list, Point $p): void
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     (*[%test_eq: Base.string] code {||}*)
-    [%test_eq: Ast.program] ast (Declaration_list [])
-
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+            name = "additems";
+            docblock = [
+                DocParam ("list", List (Class_type ("Point", Memory_polymorph)));
+                DocParam ("p", Class_type ("Point", Memory_polymorph));
+            ];
+            params = [
+                Param ("list", List (Class_type ("Point", Memory_polymorph)));
+                Param ("p", Class_type ("Point", Memory_polymorph));
+            ];
+            stmts = [
+                Method_call {
+                    lvalue   = Object_access ("list", Property_access "__prop_push");
+                    lvalue_t = List (Class_type ("Point", Memory_polymorph));
+                    args     = [Variable "p"];
+                }
+            ];
+            function_type = Function_type {
+                return_type = Void;
+                arguments = [
+                    List (Class_type ("Point", Memory_polymorph));
+                    Class_type ("Point", Memory_polymorph);
+                ];
+            }
+        }
+    ])
 
 (*
 TODO:
