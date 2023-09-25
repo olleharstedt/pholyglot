@@ -98,7 +98,7 @@ let%test_unit "trivial main" =
             stmts = [
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -120,7 +120,7 @@ let%test_unit "trivial assignment" =
                 Assignment (Infer_me, Variable "a", Num 0);
                 Return (Variable "a");
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -142,7 +142,7 @@ let%test_unit "trivial arith" =
                 Assignment (Infer_me, Variable "a", Num 0);
                 Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -155,7 +155,7 @@ let%test_unit "trivial transpile" =
             stmts = [
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     in
     let phast = Transpile.declaration_to_pholyglot ast in
@@ -179,7 +179,7 @@ let%test_unit "trivial arith transpile" =
                 Assignment (Infer_me, Variable "a", Num 0);
                 Return (Minus (Plus (Variable "a", Num 1), (Div (Times (Num 1, Num 1), (Num 1)))))
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
     } in
     let ast = Infer.infer_declaration fn (Namespace.create ()) in
     let phast = Transpile.declaration_to_pholyglot ast in
@@ -213,7 +213,7 @@ let%test_unit "trivial string" =
                 Assignment (Infer_me, Variable "str", String "\"Hello\"");
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -235,7 +235,7 @@ let%test_unit "trivial concat" =
                 Assignment (Infer_me, Variable "str", Concat (String "\"Hello\"", String "\"world\""));
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -319,17 +319,17 @@ function main(): int {
             docblock = [];
             params = [Param ("c", Int)];
             stmts = [Return (Plus ((Variable "c"), (Num 20)))];
-            function_type = Function_type {return_type = Int; arguments = [Int]}
+            function_type = Function_type {return_type = Int; arguments = [Int]; uses_arena = false}
         };
         Function { 
             name = "main";
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Int, Variable "b", Function_call (Function_type {return_type = Int; arguments = [Int]}, "foo", [Plus ((Num 10), (Num 20))]));
+                Assignment (Int, Variable "b", Function_call (Function_type {return_type = Int; arguments = [Int]; uses_arena = false}, "foo", [Plus ((Num 10), (Num 20))]));
                 Return (Plus (Variable "b", Num 30))
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -402,7 +402,7 @@ let%test_unit "float printf" =
             params = [];
             stmts = [
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; String_literal; Int]; uses_arena = false},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%s %ld\"");
@@ -412,7 +412,7 @@ let%test_unit "float printf" =
                 );
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -440,7 +440,7 @@ let%test_unit "alias check" =
                 Assignment (Int, Variable "b", Variable "a");
                 Return (Variable "b");
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -512,7 +512,7 @@ let%test_unit "multiline comment inline" =
             stmts = [
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -533,7 +533,7 @@ let%test_unit "docblock int" =
             docblock = [DocParam ("i", Int)];
             params = [Param ("i", Int)];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Int]}
+            function_type = Function_type {return_type = Void; arguments = [Int]; uses_arena = false}
         }
     ])
 
@@ -557,7 +557,7 @@ let%test_unit "infer docblock int and string" =
             docblock = [DocParam ("string", String); DocParam ("int", Int)];
             params = [Param ("string", String); Param ("int", Int)];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [String; Int]}
+            function_type = Function_type {return_type = Void; arguments = [String; Int]; uses_arena = false}
         }
     ])
 
@@ -582,7 +582,7 @@ let%test_unit "float test" =
                 Assignment (Float, Variable "a", (Minus (Plus ((Num_float 1.0), (Num_float 2.0)), (Num_float 3.25))));
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -611,7 +611,7 @@ let%test_unit "float to code test" =
                 Assignment (Float, Variable "a", (Minus (Plus ((Num_float 1.0), (Num_float 2.0)), (Num_float 3.25))));
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     in
     let phast = Transpile.declaration_to_pholyglot fn in
@@ -647,12 +647,12 @@ let%test_unit "printf float" =
             stmts = [
                 Assignment (Float, Variable "a", (Plus ((Num_float 1.0), (Num_float 2.5))));
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Float]},
+                    Function_type {return_type = Void; arguments = [String_literal; Float]; uses_arena = false},
                     "printf",
                     [Coerce (String_literal, String "\"%f\""); Variable ("a")];
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -679,7 +679,7 @@ let%test_unit "negative int" =
                 Assignment (Int, Variable "y", Times (Num 10, Num (-10)));
                 Assignment (Float, Variable "f", Div (Num_float (-1.15), Num_float (-2.)));
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -705,7 +705,7 @@ let%test_unit "infer foreach" =
             stmts = [
                 Assignment (Fixed_array (Int, Some 3), Variable "arr", 
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]; uses_arena = false},
                         "array_make",
                         [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
@@ -718,7 +718,7 @@ let%test_unit "infer foreach" =
                     value_typ_constant = Constant "int";
                     body = [
                         Function_call (
-                            Function_type {return_type = Void; arguments = [String_literal; Int]},
+                            Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                             "printf",
                             [
                                 Coerce (String_literal, String "\"%ld\"");
@@ -728,7 +728,7 @@ let%test_unit "infer foreach" =
                     ];
                 };
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -742,7 +742,7 @@ let%test_unit "foreach to pholyglot" =
         value_typ_constant = Constant "int";
         body = [
             Function_call (
-                Function_type {return_type = Void; arguments = [String_literal; Int]},
+                Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                 "printf",
                 [
                     Coerce (String_literal, String "\"%ld\"");
@@ -786,7 +786,7 @@ let%test_unit "infer foreach with key" =
             stmts = [
                 Assignment (Fixed_array (Int, Some 3), Variable "arr", 
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]; uses_arena = false},
                         "array_make",
                         [Constant "int"; Num 3; Num 2; Num 3; Num 4]
                     )
@@ -799,7 +799,7 @@ let%test_unit "infer foreach with key" =
                     value_typ_constant = Constant "int";
                     body = [
                         Function_call (
-                            Function_type {return_type = Void; arguments = [String_literal; Int]},
+                            Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                             "printf",
                             [
                                 Coerce (String_literal, String "\"%ld\"");
@@ -809,7 +809,7 @@ let%test_unit "infer foreach with key" =
                     ];
                 };
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -831,7 +831,7 @@ let%test_unit "plusplus and minusminus" =
             name = "foo";
             docblock = [];
             params = [];
-            function_type = Function_type {return_type = Void; arguments = []};
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false};
             stmts = [
                 Assignment (Int, Variable "a", Num 10);
                 Plusplus (Variable "a");
@@ -845,7 +845,7 @@ let%test_unit "plusplus and minusminus pholyglot" =
             name = "foo";
             docblock = [];
             params = [];
-            function_type = Function_type {return_type = Void; arguments = []};
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false};
             stmts = [
                 Assignment (Int, Variable "a", Num 10);
                 Plusplus (Variable "a");
@@ -884,7 +884,7 @@ let%test_unit "pluseq and minuseq" =
             name = "foo";
             docblock = [];
             params = [];
-            function_type = Function_type {return_type = Void; arguments = []};
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false};
             stmts = [
                 Assignment (Int, Variable "a", Num 10);
                 Pluseq (Variable "a", Num 10);
@@ -898,7 +898,7 @@ let%test_unit "pluseq and minuseq pholyglot" =
         name = "foo";
         docblock = [];
         params = [];
-        function_type = Function_type {return_type = Void; arguments = []};
+        function_type = Function_type {return_type = Void; arguments = []; uses_arena = false};
         stmts = [
             Assignment (Int, Variable "a", Num 10);
             Pluseq (Variable "a", Num 10);
@@ -938,7 +938,7 @@ let%test_unit "do while" =
             name = "foo";
             docblock = [];
             params = [];
-            function_type = Function_type {return_type = Void; arguments = []};
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false};
             stmts = [
                 Assignment (Int, Variable "a", Num 10);
                 Dowhile {
@@ -956,7 +956,7 @@ let%test_unit "do while pholyglot" =
         name = "foo";
         docblock = [];
         params = [];
-        function_type = Function_type {return_type = Void; arguments = []};
+        function_type = Function_type {return_type = Void; arguments = []; uses_arena = false};
         stmts = [
             Assignment (Int, Variable "a", Num 10);
             Dowhile {

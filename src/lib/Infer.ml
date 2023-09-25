@@ -199,10 +199,11 @@ let rec get_type_variable (t : typ): string option = match t with
 let rec replace_type_variables t : typ =
     Log.debug "replace_type_variables %s" (show_typ t);
     match t with
-    | Function_type {return_type; arguments} ->
+    | Function_type {return_type; arguments; uses_arena} ->
         Function_type {
             return_type = replace_type_variables return_type;
             arguments   = List.map (fun a -> replace_type_variables a) arguments;
+            uses_arena;
         }
     | Type_variable s -> begin
         match Hashtbl.find_opt t_vars_tbl s with
@@ -280,7 +281,8 @@ let rec infer_expression ns expr : expression =
         Function_call (
             Function_type {
                 return_type = t;
-                arguments = Constant :: Int :: exprs_types;
+                arguments   = Constant :: Int :: exprs_types;
+                uses_arena  = false;
             },
             "array_make",
             typ_to_constant tt :: Num length :: exprs
@@ -290,7 +292,8 @@ let rec infer_expression ns expr : expression =
         Function_call (
             Function_type {
                 return_type = t;
-                arguments = Constant :: Dynamic_array t :: Int :: [];
+                arguments   = Constant :: Dynamic_array t :: Int :: [];
+                uses_arena  = false;
             },
             "array_get",
             typ_to_constant t :: Variable id :: expr :: [];
@@ -475,7 +478,15 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
                 | _ -> infer_expression ns e
             end
         ) xs expected_types in
-        Function_call (Function_type {return_type = Void; arguments = String_literal :: expected_types}, "printf", exprs)
+        Function_call (
+            Function_type {
+                return_type = Void;
+                arguments   = String_literal :: expected_types;
+                uses_arena  = false;
+            },
+            "printf",
+            exprs
+        )
     | Function_call (Infer_me, "printf", _ :: xs) ->
         failwith "infer_stmt: printf must have a string literal as first argument"
     | Function_call (Infer_me, id, e) ->
@@ -597,7 +608,7 @@ let check_return_type ns stmt typ =
 (**
  * Infer and resolve conflicts between docblock, params and function type.
  *)
-let unify_params_with_function_type params (Function_type {return_type; arguments}) =
+let unify_params_with_function_type params (Function_type {return_type; arguments; uses_arena}) =
     Log.debug "unify_params_with_function_type";
     let map = (fun param arg ->
         let param = infer_arg_typ_param param in
@@ -617,6 +628,7 @@ let unify_params_with_function_type params (Function_type {return_type; argument
     Function_type {
         return_type;
         arguments = List.map2 map params arguments;
+        uses_arena;
     }
 
 (**
@@ -635,14 +647,14 @@ let infer_method (c_orig : Ast.declaration) meth ns : function_def = match meth 
         docblock;
         params;
         stmts;
-        function_type = Function_type {return_type; arguments};
+        function_type = Function_type {return_type; arguments; uses_arena};
     } ->
         let class_name = match c_orig with Class {name;} -> name in
         let params : Ast.param list = unify_params_with_docblock params docblock in
         let ftyp =
             unify_params_with_function_type
             params
-            (Function_type {return_type; arguments})
+            (Function_type {return_type; arguments; uses_arena})
         in
         let ns = Namespace.reset_identifiers ns in
         (* Add method args to namespace *)
@@ -669,7 +681,7 @@ let infer_declaration decl ns : declaration =
         docblock;
         params;
         stmts;
-        function_type = Function_type {return_type; arguments};
+        function_type = Function_type {return_type; arguments; uses_arena};
     } ->
         if (kind_of_typ ns return_type) = Ref then raise (Type_error "A function cannot have a Ref kind as return type");
         let docblock = List.map infer_docblock docblock in
@@ -677,7 +689,7 @@ let infer_declaration decl ns : declaration =
         let ftyp =
             unify_params_with_function_type
             params
-            (Function_type {return_type; arguments})
+            (Function_type {return_type; arguments; uses_arena})
         in
         Log.debug "infer_declaration: ftyp = %s" (show_typ ftyp);
         Namespace.add_function_type ns name ftyp;

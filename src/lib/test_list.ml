@@ -16,7 +16,7 @@ let%test_unit "trivial list" =
             stmts = [
                 Assignment (Infer_me, Variable "list", New (None, Infer_me, [List_init (Infer_me)]));
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -38,7 +38,7 @@ let%test_unit "trivial list infer" =
             stmts = [
                 Assignment (List Int, Variable "list", New (None, List Int, [List_init (List Int)]));
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -69,7 +69,7 @@ let%test_unit "trivial list infer 2" =
                     )
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -100,7 +100,7 @@ let%test_unit "trivial list infer class and allocation strat" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -122,7 +122,7 @@ let%test_unit "trivial list infer class and allocation strat to C" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ]
          |> Transpile.declarations_to_pholyglot
@@ -164,7 +164,7 @@ let%test_unit "list memory context" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [List Infer_me]}
+            function_type = Function_type {return_type = Void; arguments = [List Infer_me]; uses_arena = false}
         }
     ])
 
@@ -196,7 +196,7 @@ let%test_unit "list memory context" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]; uses_arena = false}
         }
     ])
 
@@ -217,7 +217,7 @@ let%test_unit "output list memory context" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]; uses_arena = false}
         }
     ]
          |> Transpile.declarations_to_pholyglot
@@ -283,7 +283,7 @@ function printlist(SplDoublyLinkedList $list): void
                     ];
                 };
             ];
-            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]; uses_arena = false}
         }
     ])
 
@@ -308,7 +308,7 @@ let%test_unit "foreach list code" =
                     ];
                 };
             ];
-            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]}
+            function_type = Function_type {return_type = Void; arguments = [List (Class_type ("Point", Memory_polymorph))]; uses_arena = false}
         }
     ]
          |> Transpile.declarations_to_pholyglot
@@ -385,6 +385,7 @@ function additems(SplDoublyLinkedList $list, Point $p): void
                     List (Class_type ("Point", Memory_polymorph));
                     Class_type ("Point", Memory_polymorph);
                 ];
+                uses_arena  = false;
             }
         }
     ])
@@ -414,6 +415,7 @@ let%test_unit "push item code" =
                     List (Class_type ("Point", Memory_polymorph));
                     Class_type ("Point", Memory_polymorph);
                 ];
+                uses_arena  = false;
             }
         }
     ]
@@ -432,6 +434,9 @@ function additems(SplDoublyLinkedList $list, Point $p)
 (*
 TODO:
     Include Arena in function init (only if arena is used? mut field in namespace?)
+        Write to namespace mut field when arena alloc is detected
+        When writing method or function to C, append arena init
+
     Default to Boehm gc if none is given
     Conflicting @var
     Menhir explan:

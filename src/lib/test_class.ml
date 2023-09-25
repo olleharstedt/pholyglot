@@ -34,7 +34,7 @@ let%test_unit "trivial class declare" =
             stmts = [
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -70,7 +70,7 @@ let%test_unit "class new" =
                 Assignment (Infer_me, Variable "p", (New (None, Class_type ("Point", Infer_allocation_strategy), [])));
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -108,7 +108,7 @@ let%test_unit "object lvalue assignment" =
                 Assignment (Infer_me, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -148,7 +148,7 @@ let%test_unit "object object access in expression" =
                 Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "__prop_x")]);
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -175,7 +175,7 @@ let%test_unit "infer object access" =
                 Function_call (Infer_me, "printf", [String "\"%d\""; Object_access (Variable "p", Property_access "x")]);
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ]   |>
         Infer.run ns
@@ -199,13 +199,13 @@ let%test_unit "infer object access" =
                 Assignment (Class_type ("Point", Boehm), Variable "p", (New (None, Class_type ("Point", Boehm), [])));
                 Assignment (Int, Object_access ("p", Property_access "x"), (Num 1));
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                     "printf",
                     [Coerce (String_literal, String "\"%ld\""); Object_access (Variable "p", Property_access "x")]
                 );
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -229,7 +229,7 @@ let%test_unit "output object access" =
                 Assignment (Class_type ("Point", Boehm), Variable "p", (New (Some Boehm, Class_type ("Point", Boehm), [])));
                 Assignment (Int, Object_access ("p", Property_access "__prop_x"), (Num 1));
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
@@ -238,7 +238,7 @@ let%test_unit "output object access" =
                 );
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ]
          |> Transpile.declarations_to_pholyglot
@@ -325,12 +325,12 @@ function foo(Thing $t): void {
             params = [Param ("t", Class_type ("Thing", Memory_polymorph))];
             stmts = [
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; String_literal]},
+                    Function_type {return_type = Void; arguments = [String_literal; String_literal]; uses_arena = false},
                     "printf",
                     [Coerce (String_literal, String "\"%s\""); Coerce (String_literal, Object_access (Variable "t", Property_access "__prop_name"))]
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Memory_polymorph)]}
+            function_type = Function_type {return_type = Void; arguments = [Class_type ("Thing", Memory_polymorph)]; uses_arena = false}
         };
     ])
 
@@ -384,7 +384,7 @@ class Point
                     stmts = [
                         Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
-                    function_type = Function_type {return_type = Int; arguments = []}
+                    function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
                 }
             ];
             builtin_class = false;
@@ -404,7 +404,7 @@ let%test_unit "simple getter pholyglot" =
                     stmts = [
                         Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
-                    function_type = Function_type {return_type = Int; arguments = []}
+                    function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
                 }
             ];
             builtin_class = false;
@@ -491,7 +491,7 @@ class Body
                             Object_access ("this", (Property_access "__prop_vx")),
                             Div ((Variable "px"), (Variable "solarmass")))
                     ];
-                    function_type = Function_type {return_type = Void; arguments = [Float]}
+                    function_type = Function_type {return_type = Void; arguments = [Float]; uses_arena = false}
                 }
             ];
             builtin_class = false;
@@ -517,7 +517,7 @@ let%test_unit "offsetMomentum method pholyglot" =
                             Object_access ("this", (Property_access "__prop_vx")),
                             Div ((Variable "px"), (Variable "solarmass")))
                     ];
-                    function_type = Function_type {return_type = Void; arguments = [Float]}
+                    function_type = Function_type {return_type = Void; arguments = [Float]; uses_arena = false}
                 }
             ]
         }
@@ -671,13 +671,13 @@ class Point
                     params = [];
                     stmts = [
                         Function_call (
-                            Function_type {return_type = Void; arguments = [String_literal]},
+                            Function_type {return_type = Void; arguments = [String_literal]; uses_arena = false},
                             "printf",
                             [Coerce (String_literal, String "\"Hello\"")]
                         );
                         Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
-                    function_type = Function_type {return_type = Int; arguments = []}
+                    function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
                 }
             ]
         }
@@ -696,7 +696,7 @@ let%test_unit "infer method call" =
                 docblock      = [];
                 params        = [];
                 stmts         = [];
-                function_type = Function_type {return_type = Int; arguments = []}
+                function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
             }
         ];
     } in
@@ -742,13 +742,13 @@ function main(): int
                     params = [];
                     stmts = [
                         Function_call (
-                            Function_type {return_type = Void; arguments = [String_literal]},
+                            Function_type {return_type = Void; arguments = [String_literal]; uses_arena = false},
                             "printf",
                             [Coerce (String_literal, String "\"Hello\"")]
                         );
                         Return (Object_access (Variable "this", Property_access "__prop_x"))
                     ];
-                    function_type = Function_type {return_type = Int; arguments = []}
+                    function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
                 }
             ]
         };
@@ -759,7 +759,7 @@ function main(): int
             stmts = [
                 Assignment (Class_type ("Point", Boehm), Variable "p", (New (None, Class_type ("Point", Boehm), [])));
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
@@ -768,7 +768,7 @@ function main(): int
                 );
                 Return (Num 0)
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -776,7 +776,7 @@ function main(): int
 let%test_unit "transpile method" =
     let ast : Ast.expression =
         Function_call (
-            Function_type {return_type = Void; arguments = [String_literal; Int]},
+            Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
             "printf",
             [
                 Coerce (String_literal, String "\"%ld\"");

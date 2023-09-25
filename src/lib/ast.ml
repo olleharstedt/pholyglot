@@ -51,6 +51,7 @@ and typ =
     | Function_type of {
         return_type: typ;
         arguments: typ list;
+        uses_arena: bool;
     }
     | Void
     | Variadic (* Used by array_make *)

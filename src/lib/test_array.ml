@@ -18,7 +18,7 @@ let%test_unit "trivial array" =
                 Assignment (Infer_me, Variable "arr", Array_init (Infer_me, None, [Num 1; Num 2; Num 3]));
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -43,18 +43,18 @@ let%test_unit "trivial array infer" =
                     Fixed_array (Int, Some 3),
                     Variable "arr",
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]; uses_arena = false},
                         "array_make",
                         [Constant "int"; Num 3; Num 1; Num 2; Num 3;]
                     )
                 );
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
                         Function_call (
-                            Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
+                            Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]; uses_arena = false},
                             "array_get",
                             [Constant "int"; Variable "arr"; Num 0]
                         );
@@ -62,7 +62,7 @@ let%test_unit "trivial array infer" =
                 );
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     ])
 
@@ -76,7 +76,7 @@ let%test_unit "trivial array infer and print" =
                 Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
                 Return (Num 0);
             ];
-            function_type = Function_type {return_type = Int; arguments = []}
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         }
     in
     let fn = Infer.infer_declaration fn (Namespace.create ()) in
@@ -125,7 +125,7 @@ let%test_unit "docblock int array" =
             docblock = [DocParam ("ints", Dynamic_array (Int))];
             params = [RefParam ("ints", Fixed_array (Infer_me, None))];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Fixed_array (Infer_me, None)]}
+            function_type = Function_type {return_type = Void; arguments = [Fixed_array (Infer_me, None)]; uses_arena = false}
         }
     ])
 
@@ -148,7 +148,7 @@ let%test_unit "infer docblock int array" =
             docblock = [DocParam ("ints", Dynamic_array (Int))];
             params = [RefParam ("ints", Dynamic_array (Int))];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Int)]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Int)]; uses_arena = false}
         }
     ])
 
@@ -171,7 +171,7 @@ let%test_unit "infer docblock string array" =
             docblock = [DocParam ("strings", Dynamic_array (String))];
             params = [RefParam ("strings", Dynamic_array (String))];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (String)]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (String)]; uses_arena = false}
         }
     ])
 
@@ -209,7 +209,7 @@ let%test_unit "infer docblock object array" =
                 Param ("dt", Float);
             ];
             stmts = [];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Memory_polymorph)); Float]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Memory_polymorph)); Float]; uses_arena = false}
         }
     ])
 
@@ -228,7 +228,7 @@ let%test_unit "transpile docblock object array" =
             stmts = [
                 Assignment (Int, Variable "a", Num 123);
             ];
-            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Boehm)); Float]}
+            function_type = Function_type {return_type = Void; arguments = [Dynamic_array (Class_type ("Body", Boehm)); Float]; uses_arena = false}
         }
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
@@ -272,27 +272,27 @@ let%test_unit "array slice test" =
             stmts = [
                 Assignment (Fixed_array (Int, Some 3), Variable "arr", 
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]; uses_arena = false},
                         "array_make",
                         [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Fixed_array (Int, Some 3); Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Fixed_array (Int, Some 3); Int]; uses_arena = false},
                         "array_slice",
                         [Variable "arr"; Num 1]
                     )
                 );
                 Assignment (Int, Variable "i",
                     Function_call (
-                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
+                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]; uses_arena = false},
                         "array_get",
                         [Constant "int"; Variable "arr2"; Num 0]
                     )
                 );
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
@@ -300,7 +300,7 @@ let%test_unit "array slice test" =
                     ]
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -312,27 +312,27 @@ let%test_unit "array slice pholyglot code" =
             stmts = [
                 Assignment (Fixed_array (Int, Some 3), Variable "arr", 
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Constant; Int; Int; Int; Int]; uses_arena = false},
                         "array_make",
                         [Constant "int"; Num 3; Num 1; Num 2; Num 3]
                     )
                 );
                 Assignment (Fixed_array (Int, Some 3), Variable "arr2", 
                     Function_call (
-                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Fixed_array (Int, Some 3); Int]},
+                        Function_type {return_type = Fixed_array (Int, Some 3); arguments = [Fixed_array (Int, Some 3); Int]; uses_arena = false},
                         "array_slice",
                         [Variable "arr"; Num 1]
                     )
                 );
                 Assignment (Int, Variable "i",
                     Function_call (
-                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]},
+                        Function_type {return_type = Int; arguments = [Constant; Dynamic_array Int; Int]; uses_arena = false},
                         "array_get",
                         [Constant "int"; Variable "arr2"; Num 0]
                     )
                 );
                 Function_call (
-                    Function_type {return_type = Void; arguments = [String_literal; Int]},
+                    Function_type {return_type = Void; arguments = [String_literal; Int]; uses_arena = false},
                     "printf",
                     [
                         Coerce (String_literal, String "\"%ld\"");
@@ -340,7 +340,7 @@ let%test_unit "array slice pholyglot code" =
                     ]
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     in
     let phast = Transpile.declaration_to_pholyglot ast in

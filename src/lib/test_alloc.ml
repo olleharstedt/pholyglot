@@ -25,7 +25,7 @@ let%test_unit "alloc boehm" =
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Some Boehm, Class_type ("Point", Boehm), [])));
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -53,7 +53,7 @@ let%test_unit "alloc arena" =
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Some Arena, Class_type ("Point", Arena), [])));
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 
@@ -81,7 +81,7 @@ let%test_unit "alloc stack" =
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Some Stack, Class_type ("Point", Stack), [])));
             ];
-            function_type = Function_type {return_type = Void; arguments = []}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
     ])
 

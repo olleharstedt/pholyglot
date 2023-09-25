@@ -102,7 +102,7 @@ declaration:
             docblock = [];
             params;
             stmts;
-            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params; uses_arena = false};
         }
     }
     | doc=DOCBLOCK_AS_STR "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
@@ -113,7 +113,7 @@ declaration:
             docblock = cb;
             params;
             stmts;
-            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params; uses_arena = false};
         }
     }
     | "class" s=CLASS_NAME "{" elems=list(class_element) "}" {
@@ -164,7 +164,7 @@ class_element:
             docblock = [];
             params;
             stmts;
-            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params; uses_arena = false};
         }
     }
   | doc=DOCBLOCK_AS_STR property_modifier "function" name=NAME "(" params=separated_list(COMMA, arg_decl) ")" ":" t=typ "{" stmts=list(statement) "}" {
@@ -175,7 +175,7 @@ class_element:
             docblock = cb;
             params;
             stmts;
-            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params; uses_arena = false};
         }
     }
 
@@ -190,7 +190,7 @@ method_:
             docblock = [];
             params;
             stmts;
-            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
+            function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params; uses_arena = false};
         }
     }
 
