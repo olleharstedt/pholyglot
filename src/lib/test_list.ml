@@ -439,13 +439,9 @@ function additems(SplDoublyLinkedList $list, Point $p)
 |}
 (*
 TODO:
-    Include Arena in function init (only if arena is used? mut field in namespace?)
-        Write to namespace mut field when arena alloc is detected
-        When writing method or function to C, append arena init
-
     Default to Boehm gc if none is given
     Conflicting @var
-    Menhir explan:
+    Menhir explain:
         /home/olle/.opam/default/bin/menhir lib/parser.mly --base lib/parser --explain
     Memory_context can only be class or list, not basic types such as int or string
 *)
