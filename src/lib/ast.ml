@@ -107,6 +107,7 @@ and statement =
     (* Internal statement used by region pass *)
     (*| Struct_pool_alloc of region_name * typ * identifier * struct_init*)
     (* let a = ...; *)
+    | Init_arena
     (* TODO: $a->b->c = ... *)
     | Assignment of typ * lvalue * expression
     (* return ...; *)

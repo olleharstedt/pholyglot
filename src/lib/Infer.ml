@@ -401,6 +401,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Assignment (t, Variable id, expr)
     (* If t is not Infer_me, we have a @var annotation. Note that expr can still contain a @alloc annotation *)
     | Assignment (t, Variable id, New (alloc_opt, t2, [List_init t3])) ->
+        if match alloc_opt with | Some Arena -> true | _ -> false then ns.uses_arena <- true;
         (* t can be _partially_ inferred, e.g. missing alloc strat *)
         if t <> Infer_me then begin
             let expr = infer_expression ns (New (alloc_opt, t2, [List_init t3])) in
@@ -695,10 +696,22 @@ let infer_declaration decl ns : declaration =
         Namespace.add_function_type ns name ftyp;
         let ns = Namespace.reset_identifiers ns in
         Namespace.add_params ns params;
+        ns.uses_arena <- false;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
+        let new_stmts = if ns.uses_arena then 
+            Init_arena :: new_stmts
+        else
+            new_stmts
+        in
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
-        Function {name; docblock; params; stmts = new_stmts; function_type = ftyp}
+        Function {
+            name;
+            docblock;
+            params;
+            stmts = new_stmts;
+            function_type = ftyp;
+        }
     | Function {function_type = ftyp} -> failwith ("infer_declaration function typ " ^ show_typ ftyp)
     | Class {name; kind; properties = props; methods; builtin_class} as c_orig when kind = Infer_kind -> 
         (* Temporary class type during inference *)

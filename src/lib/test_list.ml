@@ -89,6 +89,7 @@ let%test_unit "trivial list infer class and allocation strat" =
             docblock = [];
             params = [];
             stmts = [
+                Init_arena;
                 Assignment (
                     List (Class_type ("Point", Boehm)),
                     Variable "list",

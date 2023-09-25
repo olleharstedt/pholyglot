@@ -11,7 +11,7 @@ type t = {
     (* Consits of /** @var <typ> */ defs */ *)
     var_defs    : (string, typ) Hashtbl.t;
     (* True if this function namespace uses arena *)
-    uses_arena  : mut bool;
+    mutable uses_arena  : bool;
 }
 
 exception Namespace_error of string
@@ -21,6 +21,7 @@ let create () : t = {
     classes     = Hashtbl.create 10;
     functions   = Hashtbl.create 10;
     var_defs    = Hashtbl.create 10;
+    uses_arena  = false;
 }
 
 (** Add value to namespace with key *)
