@@ -117,6 +117,12 @@ let rec lvalue_to_pholyglot (l : Ast.lvalue) : Pholyglot_ast.lvalue = match l wi
     | Ast.Object_access (identifier,  lvalue) -> Pholyglot_ast.Object_access (identifier, lvalue_to_pholyglot lvalue)
 
 let rec statement_to_pholyglot s = match s with
+    (* TODO: Configurable size of arena *)
+    | Ast.Init_arena -> Pholyglot_ast.C_only_string {|#__C__ Arena __a = malloc(sizeof(struct Arena));
+    #__C__ arena_init(__a, malloc(256), 256);
+    #__C__ arena_mem.alloc = &arena_alloc;
+    #__C__ arena_mem.arena = __a;
+|}
     | Ast.Return exp -> Pholyglot_ast.Return (expression_to_pholyglot exp)
     | Ast.Plusplus v -> Pholyglot_ast.Plusplus (lvalue_to_pholyglot v)
     | Ast.Minusminus v -> Pholyglot_ast.Minusminus (lvalue_to_pholyglot v)

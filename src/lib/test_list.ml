@@ -112,6 +112,7 @@ let%test_unit "trivial list infer class and allocation strat to C" =
             docblock = [];
             params = [];
             stmts = [
+                Init_arena;
                 Assignment (
                     List (Class_type ("Point", Boehm)),
                     Variable "list",
@@ -133,7 +134,11 @@ let%test_unit "trivial list infer class and allocation strat to C" =
 function foo()
 #undef function
 {
-    #__C__ SplDoublyLinkedList
+    #__C__ Arena __a = malloc(sizeof(struct Arena));
+    #__C__ arena_init(__a, malloc(256), 256);
+    #__C__ arena_mem.alloc = &arena_alloc;
+    #__C__ arena_mem.arena = __a;
+#__C__ SplDoublyLinkedList
     $list = new(SplDoublyLinkedList
 #__C__, arena_mem
 );
