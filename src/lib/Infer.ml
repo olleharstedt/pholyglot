@@ -526,7 +526,8 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         let lvalue_t = typ_of_expression ns (Variable id) in
         if lvalue_t = Infer_me then failwith ("lvalue_t is still Infer_me after typ_of_lvalue of id " ^ id);
         let builtin_class = begin match lvalue_t with 
-            | List (Class_type (s, _))
+            (* List is SplDoublyLinkedList, so always built-in *)
+            | List _ -> true
             | Class_type (s, _) -> begin
                 match Namespace.find_class ns s with
                 | Some (_, _, _, builtin_class) -> builtin_class
@@ -535,11 +536,18 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             | _ -> failwith "lvalue_t is not class"
         end
         in
-        Method_call {
-            lvalue = Object_access (id, etc);
-            lvalue_t;
-            args;
-        }
+        if builtin_class then
+            Lib_method_call {
+                lvalue = Object_access (id, etc);
+                lvalue_t;
+                args;
+            }
+        else
+            Method_call {
+                lvalue = Object_access (id, etc);
+                lvalue_t;
+                args;
+            }
     (** TODO: This is not so good *)
     | s -> s
 

@@ -129,6 +129,12 @@ let rec statement_to_pholyglot s = match s with
             args    = List.map expression_to_pholyglot args;
             builtin = is_builtin lvalue_t;
         }
+    | Ast.Lib_method_call {lvalue; lvalue_t; args} ->
+        Pholyglot_ast.Lib_method_call {
+            lvalue  = lvalue_to_pholyglot lvalue;
+            args    = List.map expression_to_pholyglot args;
+            builtin = is_builtin lvalue_t;
+        }
     | Ast.Function_call (typ, identifier, exprs) -> Pholyglot_ast.Function_call (typ_to_pholyglot typ, identifier, List.map expression_to_pholyglot exprs)
     (* TODO: foreach ([1, 2, 3] as $i) { ... } *)
     | Ast.Foreach {arr = Variable arr_; key; value = Variable value_var; value_typ; value_typ_constant; body;} ->
@@ -163,28 +169,32 @@ let rec statement_to_pholyglot s = match s with
         let value_typ = typ_to_pholyglot value_typ in
         Pholyglot_ast.Dowhile {
             before = Some (
-                Lib_method_call {
-                    function_name = "rewind";
-                    variable_name = arr_;
+                Pholyglot_ast.Lib_method_call {
+                    lvalue = Object_access (arr_, Property_access "rewind");
+                    args = [];
+                    builtin = true;
                 }
             );
             condition = Lib_method_call {
-                function_name = "valid";
-                variable_name = arr_;
+                lvalue = Object_access (arr_, Property_access "valid");
+                args = [];
+                builtin = true;
             };
             body =
                 Assignment (
                     value_typ,
                     Variable value_var,
                     Lib_method_call {
-                        function_name = "current";
-                        variable_name = arr_;
+                        lvalue = Object_access (arr_, Property_access "current");
+                        args = [];
+                        builtin = true;
                     };
                 )
             :: (List.map statement_to_pholyglot body @
                 [Lib_method_call {
-                    function_name = "next";
-                    variable_name = arr_
+                    lvalue = Object_access (arr_, Property_access "next");
+                    args = [];
+                    builtin = true;
                 }]
             )
         }

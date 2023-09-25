@@ -402,7 +402,7 @@ let%test_unit "push item code" =
                 Param ("p", Class_type ("Point", Memory_polymorph));
             ];
             stmts = [
-                Method_call {
+                Lib_method_call {
                     lvalue   = Object_access ("list", Property_access "__prop_push");
                     lvalue_t = List (Class_type ("Point", Memory_polymorph));
                     args     = [Variable "p"];
@@ -423,10 +423,10 @@ let%test_unit "push item code" =
     [%test_eq: Base.string] ast {|#define function void
 function additems(SplDoublyLinkedList $list, Point $p)
 #undef function
-{\
+{
     $list->push(
-        #__C__ $list,
-        $p);
+    #__C__ $list,
+    $p);
 }
 |}
 (*

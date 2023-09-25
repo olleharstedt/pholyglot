@@ -88,6 +88,11 @@ and statement =
         args:    expression list;
         builtin: bool;
     }
+    | Lib_method_call of {
+        lvalue:  lvalue;
+        args:    expression list;
+        builtin: bool;
+    }
     | For of {
         init:      statement;       (* Init happens outside the for-statement *)
         condition: expression;
@@ -98,10 +103,6 @@ and statement =
         before:    expression option; (* To traverse SplDoublyLinkedList you need to call reset before the loop. *)
         condition: expression;
         body:      statement list;
-    }
-    | Lib_method_call of {
-        function_name: string;
-        variable_name: string;
     }
     | C_only of statement (* Used for #__C__ GC_INIT() etc *)
     | C_only_string of string
@@ -151,8 +152,9 @@ and expression =
     (* Lib object calls must include the self in Pholyglot, so function signature will be different *)
     (* TODO: Might need to extend this with function arguments. *)
     | Lib_method_call of {
-        function_name: string;
-        variable_name: string;
+        lvalue:  lvalue;
+        args:    expression list;
+        builtin: bool;
     }
 
 and includes =
@@ -283,9 +285,9 @@ let rec string_of_expression : expression -> string = function
         {|%s(%s)|}
         name
         (Base.String.concat ~sep:", " (Base.List.map param_exprs ~f:string_of_expression))
-    | Lib_method_call {variable_name; function_name} ->
-        [%string {|$$$variable_name->$function_name(
-#__C__ $$$variable_name
+    | Lib_method_call {lvalue = Object_access (id, Property_access m); args} ->
+        [%string {|$$$id->$m(
+#__C__ $$$id
 )|}]
     (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
@@ -315,12 +317,14 @@ let rec string_of_statement = function
         let args_s   = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
         [%string {|$$$id->$m($args_s);
 |}]
-    | Lib_method_call {variable_name; function_name} ->
-        [%string {|$$$variable_name->$function_name(
-    #__C__ $$$variable_name
-);
+    | Lib_method_call {lvalue = Object_access (id, Property_access m); args} ->
+        (** TODO: Ugle hack to remove __prop_ - shouldn't be here in the first place *)
+        let m = Str.global_replace (Str.regexp "__prop_") "" m in
+        let args_s   = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
+        [%string {|$$$id->$m(
+    #__C__ $$$id,
+    $args_s);
 |}]
-
     | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
     $%s %s= %s;
     |}
