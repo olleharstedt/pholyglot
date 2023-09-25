@@ -321,9 +321,15 @@ let rec string_of_statement = function
         (** TODO: Ugle hack to remove __prop_ - shouldn't be here in the first place *)
         let m = Str.global_replace (Str.regexp "__prop_") "" m in
         let args_s   = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
+        if List.length args > 0 then
         [%string {|$$$id->$m(
     #__C__ $$$id,
     $args_s);
+|}]
+        else
+        [%string {|$$$id->$m(
+    #__C__ $$$id
+    );
 |}]
     | Assignment (typ, Variable v, expr) -> sprintf {|#__C__ %s
     $%s %s= %s;

@@ -330,7 +330,7 @@ do {
     $x = $item->__prop_x;
     $list->next(
     #__C__ $list
-);
+    );
 } while ($list->valid(
 #__C__ $list
 ));
