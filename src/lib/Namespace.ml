@@ -5,7 +5,8 @@ type t = {
     (* Variables go in identifiers bucket *)
     identifiers : (string, typ) Hashtbl.t;
     (* In PHP, you can have property and method with same name, so we need a triple instead of truple here *)
-    classes     : (string, (kind * class_property list * function_def list)) Hashtbl.t;
+    (* TODO: Record instead of tuple *)
+    classes     : (string, (kind * class_property list * function_def list * bool)) Hashtbl.t;
     functions   : (string, typ) Hashtbl.t;
     (* Consits of /** @var <typ> */ defs */ *)
     var_defs    : (string, typ) Hashtbl.t
@@ -49,17 +50,17 @@ let remove_class_type t c =
  * @return unit
  *)
 let add_class_type t (c : Ast.declaration) = match c with
-    | Class {name; kind; properties = props; methods} ->
+    | Class {name; kind; properties = props; methods; builtin_class} ->
         if Hashtbl.mem t.classes name then
             raise (Namespace_error (sprintf "add_class_type: Class name '%s' already exists in classes namespace" name))
         else
-        Hashtbl.add t.classes name (kind, props, methods)
+        Hashtbl.add t.classes name (kind, props, methods, builtin_class)
 
 let add_class_type_ignore t (c : Ast.declaration) = 
     match c with
-    | Class {name; kind; properties = props; methods} ->
+    | Class {name; kind; properties = props; methods; builtin_class} ->
         if Hashtbl.mem t.classes name then ()
-        else Hashtbl.add t.classes name (kind, props, methods)
+        else Hashtbl.add t.classes name (kind, props, methods, builtin_class)
 
 let add_function_type t name (typ : Ast.typ) =
     if Hashtbl.mem t.functions name then
@@ -75,7 +76,7 @@ let add_function_type_ignore t name typ =
 let find_identifier t key : typ option =
     Hashtbl.find_opt t.identifiers key
 
-let find_class t id : (kind * class_property list * function_def list) option = 
+let find_class t id : (kind * class_property list * function_def list * bool) option = 
     Hashtbl.find_opt t.classes id
 
 let find_function t id : typ option =
@@ -115,13 +116,17 @@ let populate (t : t) : t=
                 {
                     name = "push";
                     docblock = [];
-                    params = [Param ("", Infer_me)];
+                    params = [
+                        Param ("", Infer_me);
+                        Param ("", Infer_me);
+                    ];
                     stmts = [];
                     function_type = Function_type {return_type = Void; arguments = []};
                 }
             ];
             kind       = Ref;
-            properties = []
+            properties = [];
+            builtin_class = true;
         }
     );
     (*add_function_type_ignore t "array_make" (Function_type {return_type = Fixed_array (Type_variable "A"); arguments = [String; Int; Variadic]});*)

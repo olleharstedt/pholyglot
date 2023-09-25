@@ -16,6 +16,7 @@ let%test_unit "alloc boehm" =
             kind = Infer_kind;
             properties = [];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "foo";
@@ -43,6 +44,7 @@ let%test_unit "alloc arena" =
             kind = Infer_kind;
             properties = [];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "foo";
@@ -70,6 +72,7 @@ let%test_unit "alloc stack" =
             kind = Infer_kind;
             properties = [];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "foo";

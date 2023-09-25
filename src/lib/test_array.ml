@@ -196,6 +196,7 @@ let%test_unit "infer docblock object array" =
             kind = Val;
             properties = [];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "foo";

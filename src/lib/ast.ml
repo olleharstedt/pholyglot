@@ -65,6 +65,7 @@ and param =
     | Param of identifier * typ
     (* For params with &$foo notation. Should only be allowed by arrays. *)
     | RefParam of identifier * typ
+    | C_only_param of identifier * typ
 
 and function_def = {
         name:           function_name;
@@ -83,10 +84,12 @@ and class_elements =
 and declaration =
     | Function of function_def
     | Class of {
-        name:       string; 
-        kind:       kind; 
-        properties: class_property list;
-        methods:    function_def list;
+        name:          string; 
+        kind:          kind; 
+        properties:    class_property list;
+        methods:       function_def list;
+        (** True if this class is built-in *)
+        builtin_class: bool;
     }
 
 and function_name = string
@@ -131,6 +134,11 @@ and statement =
         value:     expression;
         value_typ: typ;
         body:      statement list;
+    }
+    | Lib_method_call of {
+        lvalue:   lvalue;
+        lvalue_t: typ;
+        args:     expression list;
     }
     | Dowhile of {
         condition: expression;     (* Must have boolean type *)

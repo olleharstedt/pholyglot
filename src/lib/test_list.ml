@@ -262,6 +262,7 @@ function printlist(SplDoublyLinkedList $list): void
                 ("__prop_x", Int);
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "printlist";
@@ -338,6 +339,7 @@ do {
 
 let%test_unit "push item" =
     let source = {|<?php // @pholyglot
+class Point {}
 /**
  * @param SplDoublyLinkedList<Point> $list
  * @param Point $p
@@ -353,6 +355,13 @@ function additems(SplDoublyLinkedList $list, Point $p): void
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     (*[%test_eq: Base.string] code {||}*)
     [%test_eq: Ast.program] ast (Declaration_list [
+        Class {
+            name= "Point";
+            kind = Val;
+            properties = [];
+            methods = [];
+            builtin_class = false;
+        };
         Function {
             name = "additems";
             docblock = [
@@ -364,7 +373,7 @@ function additems(SplDoublyLinkedList $list, Point $p): void
                 Param ("p", Class_type ("Point", Memory_polymorph));
             ];
             stmts = [
-                Method_call {
+                Lib_method_call {
                     lvalue   = Object_access ("list", Property_access "__prop_push");
                     lvalue_t = List (Class_type ("Point", Memory_polymorph));
                     args     = [Variable "p"];
@@ -411,7 +420,15 @@ let%test_unit "push item code" =
          |> Transpile.declarations_to_pholyglot
          |> Pholyglot_ast.string_of_declares
     in
-    [%test_eq: Base.string] ast {|#define function void|}
+    [%test_eq: Base.string] ast {|#define function void
+function additems(SplDoublyLinkedList $list, Point $p)
+#undef function
+{\
+    $list->push(
+        #__C__ $list,
+        $p);
+}
+|}
 (*
 TODO:
     Include Arena in function init (only if arena is used? mut field in namespace?)

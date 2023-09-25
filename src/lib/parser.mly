@@ -116,7 +116,15 @@ declaration:
             function_type = Function_type {return_type = t; arguments = get_arg_types_from_args params};
         }
     }
-    | "class" s=CLASS_NAME "{" elems=list(class_element) "}" {Class {name = s; kind = Infer_kind; properties = get_class_properties(elems); methods = get_class_methods(elems)}}
+    | "class" s=CLASS_NAME "{" elems=list(class_element) "}" {
+        Class {
+            name          = s;
+            kind          = Infer_kind;
+            properties    = get_class_properties(elems);
+            methods       = get_class_methods(elems);
+            builtin_class = false;
+        }
+    }
 
 statement: 
   | "return" e=expr ";"                                      {Return e}

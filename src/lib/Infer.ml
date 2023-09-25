@@ -46,7 +46,7 @@ let rec typ_of_lvalue ns lv : typ =
             | Some (Class_type (c, a)) -> c
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Could not find class type %s in namespace" id))
         in
-        let (k, props, methods) = match Namespace.find_class ns class_type_name with
+        let (k, props, methods, builtin_class) = match Namespace.find_class ns class_type_name with
             | Some p -> p
             | None -> raise (Type_error (sprintf "typ_of_lvalue: Found no class declarion %s in namespace" class_type_name))
         in
@@ -98,7 +98,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         match Namespace.find_identifier ns id with
             | Some (Fixed_array (Class_type (class_type_name, _), _))
             | Some (Class_type (class_type_name, _)) -> begin
-                let (k, props, methods) = match Namespace.find_class ns class_type_name with
+                let (k, props, methods, builtin_class) = match Namespace.find_class ns class_type_name with
                     | Some p -> p
                     | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
                 in
@@ -118,7 +118,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
                 raise (Type_error (sprintf "typ_of_expression method call: Could not find identifier %s in namespace" class_name))
             end
         in
-        let (k, props, methods) = match Namespace.find_class ns class_type_name with
+        let (k, props, methods, builtin_class) = match Namespace.find_class ns class_type_name with
             | Some class_decl -> class_decl
             | None -> raise (Type_error (sprintf "typ_of_expression: Found no class declarion %s in namespace" class_type_name))
         in
@@ -431,7 +431,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             | Some (Class_type (s, alloc_strat)) -> s
             | None -> failwith ("infer_stmt: Could not find identifier " ^ variable_name)
         in
-        let (k, props, methods) = match Namespace.find_class ns class_name with
+        let (k, props, methods, builtin_class) = match Namespace.find_class ns class_name with
             | Some v -> v
             | None -> failwith ("infer_stmt: Could not find class type " ^ class_name)
         in
@@ -525,6 +525,16 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     | Method_call {lvalue = Object_access (id, etc) ; lvalue_t = Infer_me; args} ->
         let lvalue_t = typ_of_expression ns (Variable id) in
         if lvalue_t = Infer_me then failwith ("lvalue_t is still Infer_me after typ_of_lvalue of id " ^ id);
+        let builtin_class = begin match lvalue_t with 
+            | List (Class_type (s, _))
+            | Class_type (s, _) -> begin
+                match Namespace.find_class ns s with
+                | Some (_, _, _, builtin_class) -> builtin_class
+                | _ -> failwith ("Found no class " ^ s)
+            end
+            | _ -> failwith "lvalue_t is not class"
+        end
+        in
         Method_call {
             lvalue = Object_access (id, etc);
             lvalue_t;
@@ -538,8 +548,8 @@ let rec kind_of_typ ns t : kind = match t with
     | String -> Ref
     | Class_type (s, alloc_strat) -> begin
         match Namespace.find_class ns s with
-        | Some (Infer_kind, props, methods) -> infer_kind ns Infer_kind props
-        | Some (k, _, _) -> k
+        | Some (Infer_kind, props, methods, builtin_class) -> infer_kind ns Infer_kind props
+        | Some (k, _, _, _) -> k
         | None -> failwith ("kind_of_typ: Cannot find class " ^ s)
     end
     | t -> failwith ("kind_of_typ: " ^ show_typ t)
@@ -631,6 +641,7 @@ let infer_method (c_orig : Ast.declaration) meth ns : function_def = match meth 
         List.iter (fun p -> match p with
             | Param (id, typ)
             | RefParam (id, typ) -> Namespace.add_identifier ns id typ
+            | C_only_param (id, typ) -> failwith "here"
         ) params;
         (* TODO: Does alloc strat matter here? *)
         Namespace.add_identifier ns "this" (Class_type (class_name, Boehm));
@@ -669,16 +680,16 @@ let infer_declaration decl ns : declaration =
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
         Function {name; docblock; params; stmts = new_stmts; function_type = ftyp}
     | Function {function_type = ftyp} -> failwith ("infer_declaration function typ " ^ show_typ ftyp)
-    | Class {name; kind; properties = props; methods} as c_orig when kind = Infer_kind -> 
+    | Class {name; kind; properties = props; methods; builtin_class} as c_orig when kind = Infer_kind -> 
         (* Temporary class type during inference *)
         Namespace.add_class_type ns c_orig;
         let k = infer_kind ns Infer_kind props in
         let methods = List.map (fun m -> infer_method c_orig m ns) methods in
-        let c = Class {name; kind = k; properties = props; methods} in
+        let c = Class {name; kind = k; properties = props; methods; builtin_class} in
         Namespace.remove_class_type ns c;
         Namespace.add_class_type ns c;
         c
-    | Class {name; kind; properties; methods} -> failwith ("infer_declaration: Class with kind " ^ show_kind kind ^ " " ^ name)
+    | Class {name; kind; properties; methods; builtin_class} -> failwith ("infer_declaration: Class with kind " ^ show_kind kind ^ " " ^ name)
 
 let run (ns : Namespace.t) (p : program): program = 
     Log.debug "Infer.run";

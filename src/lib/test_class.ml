@@ -25,6 +25,7 @@ let%test_unit "trivial class declare" =
                 ("__prop_y", Float);
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "main";
@@ -59,6 +60,7 @@ let%test_unit "class new" =
                 ("__prop_y", Int)
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "main";
@@ -95,6 +97,7 @@ let%test_unit "object lvalue assignment" =
                 ("__prop_y", Int)
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "main";
@@ -133,6 +136,7 @@ let%test_unit "object object access in expression" =
                 ("__prop_y", Int)
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "main";
@@ -159,6 +163,7 @@ let%test_unit "infer object access" =
                 ("y", Int);
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "main";
@@ -184,6 +189,7 @@ let%test_unit "infer object access" =
                 ("y", Int);
             ];
             methods = [];
+            builtin_class = false;
         };
         Function {
             name = "main";
@@ -213,6 +219,7 @@ let%test_unit "output object access" =
                 ("__prop_y", Int)
             ];
             methods = [];
+            builtin_class = false;
         };
         Ast.Function {
             name = "main";
@@ -310,6 +317,7 @@ function foo(Thing $t): void {
                 ("__prop_name", String);
             ];
             methods = [];
+            builtin_class = false;
         };
         Function { 
             name = "foo";
@@ -378,7 +386,8 @@ class Point
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
-            ]
+            ];
+            builtin_class = false;
         }
     ])
 
@@ -397,7 +406,8 @@ let%test_unit "simple getter pholyglot" =
                     ];
                     function_type = Function_type {return_type = Int; arguments = []}
                 }
-            ]
+            ];
+            builtin_class = false;
         }
          |> Transpile.declaration_to_pholyglot
          |> Pholyglot_ast.string_of_declare
@@ -483,7 +493,8 @@ class Body
                     ];
                     function_type = Function_type {return_type = Void; arguments = [Float]}
                 }
-            ]
+            ];
+            builtin_class = false;
         }
     ])
 
@@ -493,6 +504,7 @@ let%test_unit "offsetMomentum method pholyglot" =
             name = "Body";
             kind = Val;
             properties = [("__prop_vx", Float)];
+            builtin_class = false;
             methods = [
                 {
                     name = "offsetMomentum";
@@ -651,6 +663,7 @@ class Point
             name = "Point";
             kind = Val;
             properties = [("__prop_x", Int)];
+            builtin_class = false;
             methods = [
                 {
                     name = "getX";
@@ -676,6 +689,7 @@ let%test_unit "infer method call" =
         name = "Point";
         kind = Val;
         properties = [];
+        builtin_class = false;
         methods = [
             {
                 name          = "getX";
@@ -720,6 +734,7 @@ function main(): int
             name = "Point";
             kind = Val;
             properties = [("__prop_x", Int)];
+            builtin_class = false;
             methods = [
                 {
                     name = "getX";
@@ -811,6 +826,7 @@ let%test_unit "object access inside array access" =
             name = "Body";
             kind = Val;
             properties = [("__prop_x", Int)];
+            builtin_class = false;
             methods = []
         };
         Function {
@@ -919,6 +935,7 @@ function foo(): void {
             name = "Body";
             kind = Val;
             properties = [];
+            builtin_class = false;
             methods = [
                 {
                     name = "doSomething";
