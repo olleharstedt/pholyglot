@@ -9,7 +9,9 @@ type t = {
     classes     : (string, (kind * class_property list * function_def list * bool)) Hashtbl.t;
     functions   : (string, typ) Hashtbl.t;
     (* Consits of /** @var <typ> */ defs */ *)
-    var_defs    : (string, typ) Hashtbl.t
+    var_defs    : (string, typ) Hashtbl.t;
+    (* True if this function namespace uses arena *)
+    uses_arena  : mut bool;
 }
 
 exception Namespace_error of string
