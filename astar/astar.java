@@ -90,6 +90,7 @@ class AStar {
             if(isNodeILegal(stateNode, stateNode.expandDirection())){     
                 exploreNodes.add(stateNode.expandDirection());
          }
+        }
      }
 
     /*
@@ -112,6 +113,7 @@ class AStar {
                 System.out.println(explored.size());
                 System.exit(-1);
             }
+        }
      }
     /*
     ** Second method.
