@@ -35,7 +35,8 @@ bool compare_string(struct Result r, char* val)
 }
 
 #define DO_OP(a, op) a op a
-#define COMPARE_MIXED(res, val, op) _Generic(val, int: (res.t == BOOL && res.b op val),\
+#define COMPARE_MIXED(res, val, op) _Generic(val,\
+    int: (res.t == BOOL && res.b op val),\
     char*: (res.t == STRING && strcmp(res.str, val) == 0)\
     )
 
