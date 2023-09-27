@@ -5,6 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include "php_streams.h"
 
 char* file_get_contents(char* filename)
 {
@@ -19,6 +20,7 @@ char* file_get_contents(char* filename)
 	zend_string *contents;
 
 	/* Parse arguments */
+    /*
 	ZEND_PARSE_PARAMETERS_START(1, 5)
 		Z_PARAM_PATH(filename, filename_len)
 		Z_PARAM_OPTIONAL
@@ -27,6 +29,7 @@ char* file_get_contents(char* filename)
 		Z_PARAM_LONG(offset)
 		Z_PARAM_LONG_OR_NULL(maxlen, maxlen_is_null)
 	ZEND_PARSE_PARAMETERS_END();
+    */
 
 	if (maxlen_is_null) {
 		maxlen = (ssize_t) PHP_STREAM_COPY_ALL;

@@ -1108,5 +1108,6 @@ function main(): int
 (* Create composer package that install binary on Linux. https://github.com/bamarni/composer-bin-plugin https://github.com/ENM1989/chromedriver *)
 (* Use dune watch file to auto run tests *)
 (* Configure dune to run both inline test and ounit *)
-(* A-star/A* algorithm with arena allocator? *)
+(* A-star/A* algorithm with arena allocator? Unsure which implementation to copy. Java? *)
 (* Rename mem to __mem for internal class variable *)
+(* https://www.rosettacode.org/wiki/Anagrams#PHP *)

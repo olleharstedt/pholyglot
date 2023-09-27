@@ -1,8 +1,14 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdbool.h>
+#include <stdint.h>
+
+typedef struct _php_stream php_stream;
 struct _php_stream  {
-	const php_stream_ops *ops;
+	//const php_stream_ops *ops;
 	void *abstract;			/* convenience pointer for abstraction */
 
-	php_stream_filter_chain readfilters, writefilters;
+	//php_stream_filter_chain readfilters, writefilters;
 
 	php_stream_wrapper *wrapper; /* which wrapper was used to open the stream */
 	void *wrapperthis;		/* convenience pointer for an instance of a wrapper */
