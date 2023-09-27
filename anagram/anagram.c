@@ -31,26 +31,33 @@ union Result
 };
 
 int compare_string(union Result res, struct smartstr val) {
-    return 0;
+    printf("compare_string\n");
+    printf("%s\n", res.string.str);
+    printf("%s\n", val.str);
+    return strcmp(res.string.str, val.str) == 0;
 }
 
 int compare_int(union Result res, int val) {
-    return 0;
+    printf("compare_int\n");
+    return res.b == val;
 }
 
 // TODO: Should be able to return false
 char* file_get_contents(char* filename)
 {
+    return "";
 }
 
 int main()
 {
-    //union Result r;
-    //r.b = true;
-    //if (COMPARE_MIXED(r, true)) {
-        //printf("Hello\n");
-    //}
+    union Result r;
+    r.b = true;
+    if (COMPARE_MIXED(true)(r, true)) {
+        printf("Hello\n");
+    }
     union Result r2;
+    struct smartstr s1 = {.str = "moo", .len = 3};
+    r2.string = s1;
     //r2.string = {.str = "moo", .len = 3};
     struct smartstr s2 = {.str = "moo", .len = 3};
     if (COMPARE_MIXED(s2)(r2, s2)) {
