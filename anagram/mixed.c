@@ -21,14 +21,12 @@ struct Result
 
 struct Result file_get_contents(char* filename)
 {
-    struct Result r = {.t = BOOL, .b = false};
+    //struct Result r = {.t = BOOL, .b = false};
+    char* s = malloc(4);
+    strcpy(s, "hej");
+    struct Result r = {.t = STRING, .str = s};
     return r;
 }
-
-#define COMPARE_MIXED(val) _Generic(val, \
-    char*: compare_string,\
-    int: compare_int\
-	)
 
 bool compare_string(struct Result r, char* val)
 {
@@ -36,15 +34,10 @@ bool compare_string(struct Result r, char* val)
     return false;
 }
 
-bool compare_int(struct Result r, int val)
-{
-    printf("compare_int\n");
-    return false;
-}
-
 #define DO_OP(a, op) a op a
-#define COMPARE(res, val, op) _Generic(val,\
-    int: (res.t == BOOL && res.b op val)\
+#define COMPARE_MIXED(res, val, op) _Generic(val,\
+    int: (res.t == BOOL && res.b op val),\
+    char*: (res.t == STRING && strcmp(res.str, val) == 0)\
     )
 
 #define OP_EQUALS ==
@@ -53,7 +46,7 @@ bool compare_int(struct Result r, int val)
 #if __PHP__//<?php
 define("OP_EQUALS", "==");
 define("OP_PLUS", "+");
-function compare($res, $val, $op)
+function COMPARE_MIXED($res, $val, $op)
 {
     switch ($op) {
         case OP_EQUALS:
@@ -74,9 +67,11 @@ function main()
 #undef function
 {
     #__C__ struct Result
-    $r = file_get_contents("moo");
-    if (COMPARE($r, false, OP_EQUALS)) {
-        printf("Is false 2\n");
+    $r = file_get_contents("moo.txt");
+    if (COMPARE_MIXED($r, false, OP_EQUALS)) {
+        printf("Is false\n");
+    } else if (COMPARE_MIXED($r, "hej", OP_EQUALS)) {
+        printf("Is hej\n");
     }
     return 0;
 }
