@@ -43,25 +43,41 @@ bool compare_int(struct Result r, int val)
 }
 
 #define DO_OP(a, op) a op a
-#define IS_FALSE(val) (val.t == BOOL && val.b == false)
 #define COMPARE(res, val, op) _Generic(val,\
     int: (res.t == BOOL && res.b op val)\
     )
 
+#define OP_EQUALS ==
+#define OP_PLUS +
+
+#if __PHP__//<?php
+define("OP_EQUALS", "==");
+define("OP_PLUS", "+");
+function compare($res, $val, $op)
+{
+    switch ($op) {
+        case OP_EQUALS:
+            return $res == $val;
+            break;
+        default:
+            assert(false, 'Unkown operation');
+    }
+}
+#endif
 //<?php
+/**
+ * Compile with
+ *   cat mixed.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc - -lgc
+ */
 #define function int
 function main()
 #undef function
 {
     #__C__ struct Result
     $r = file_get_contents("moo");
-    if (IS_FALSE($r)) {
-        printf("Is false\n");
-    }
-    if (COMPARE($r, false, ==)) {
+    if (COMPARE($r, false, OP_EQUALS)) {
         printf("Is false 2\n");
     }
-    printf("%d\n", DO_OP(10, +));
     return 0;
 }
 //?>
