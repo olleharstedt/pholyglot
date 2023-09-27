@@ -2,6 +2,7 @@
 
 // strtok
 // fgets
+// TODO: Return string|false? Union struct? But not polyglot?
 $words = explode("\n", file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt'));
 foreach ($words as $word) {
     // string to array, but string is already array in C
