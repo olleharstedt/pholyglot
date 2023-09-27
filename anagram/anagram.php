@@ -2,6 +2,7 @@
 
 // strtok
 // fgets
+// curl to get url content to string
 // TODO: Return string|false? Union struct? But not polyglot?
 $words = explode("\n", file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt'));
 foreach ($words as $word) {

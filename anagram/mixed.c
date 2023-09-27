@@ -23,7 +23,7 @@ struct Result file_get_contents(char* filename)
 {
     //struct Result r = {.t = BOOL, .b = false};
     char* s = malloc(4);
-    strcpy(s, "hej");
+    strcpy(s, "hej\n");
     struct Result r = {.t = STRING, .str = s};
     return r;
 }
@@ -35,8 +35,7 @@ bool compare_string(struct Result r, char* val)
 }
 
 #define DO_OP(a, op) a op a
-#define COMPARE_MIXED(res, val, op) _Generic(val,\
-    int: (res.t == BOOL && res.b op val),\
+#define COMPARE_MIXED(res, val, op) _Generic(val, int: (res.t == BOOL && res.b op val),\
     char*: (res.t == STRING && strcmp(res.str, val) == 0)\
     )
 
@@ -70,7 +69,7 @@ function main()
     $r = file_get_contents("moo.txt");
     if (COMPARE_MIXED($r, false, OP_EQUALS)) {
         printf("Is false\n");
-    } else if (COMPARE_MIXED($r, "hej", OP_EQUALS)) {
+    } else if (COMPARE_MIXED($r, "hej\n", OP_EQUALS)) {
         printf("Is hej\n");
     }
     return 0;
