@@ -1,3 +1,4 @@
+//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -20,7 +21,7 @@ struct Result
 
 struct Result file_get_contents(char* filename)
 {
-    struct Result r = {.t = STRING, .b = false};
+    struct Result r = {.t = BOOL, .b = false};
     return r;
 }
 
@@ -42,12 +43,26 @@ bool compare_int(struct Result r, int val)
 }
 
 #define DO_OP(a, op) a op a
+#define IS_FALSE(val) (val.t == BOOL && val.b == false)
+#define COMPARE(res, val, op) _Generic(val,\
+    int: (res.t == BOOL && res.b op val)\
+    )
 
-int main()
+//<?php
+#define function int
+function main()
+#undef function
 {
-    struct Result r = file_get_contents("moo");
-    if (COMPARE_MIXED(false)(r, false)) {
+    #__C__ struct Result
+    $r = file_get_contents("moo");
+    if (IS_FALSE($r)) {
+        printf("Is false\n");
+    }
+    if (COMPARE($r, false, ==)) {
+        printf("Is false 2\n");
     }
     printf("%d\n", DO_OP(10, +));
     return 0;
 }
+//?>
+//<?php ob_end_clean(); main();
