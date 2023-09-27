@@ -53,7 +53,7 @@ int main()
     union Result r2;
     //r2.string = {.str = "moo", .len = 3};
     struct smartstr s2 = {.str = "moo", .len = 3};
-    if (COMPARE_MIXED(s2)) {
+    if (COMPARE_MIXED(s2)(r2, s2)) {
         printf("Hello 2\n");
     }
     return 0;

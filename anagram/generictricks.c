@@ -1,5 +1,6 @@
 #include <limits.h>
 #include <stdio.h>
+#include <assert.h>
 
 #define G_FORCE(T, V) _Generic((V), T: (V), default: (T){0})
 
