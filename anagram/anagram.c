@@ -42,10 +42,19 @@ int compare_int(union Result res, int val) {
     return res.b == val;
 }
 
-// TODO: Should be able to return false
-char* file_get_contents(char* filename)
+union Result file_get_contents(char* filename)
 {
-    return "";
+    printf("file_get_contents\n");
+    union Result r;
+    if (strcmp(filename, "moo") == 0) {
+        r.b = false;
+    } else {
+        struct smartstr* sm = malloc(sizeof(struct smartstr));
+        sm->str = malloc(4);
+        strcpy(sm->str, "asd");
+        r.string = *sm;
+    }
+    return r;
 }
 
 int main()
@@ -63,5 +72,10 @@ int main()
     if (COMPARE_MIXED(s2)(r2, s2)) {
         printf("Hello 2\n");
     }
+
+    union Result r3 = file_get_contents("moo");
+    if (COMPARE_MIXED(false)(r3, false)) {
+    }
+
     return 0;
 }
