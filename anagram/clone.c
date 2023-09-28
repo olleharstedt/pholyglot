@@ -54,6 +54,7 @@ Point Point__clone(Point self, struct mem m)
     Point clone = (Point) m.alloc(NULL, sizeof (struct Point));
     memcpy(clone, self, sizeof (struct Point));
     // TODO: Recursively copy other stuff that's not scalar.
+    // TODO: Call any custom self->__clone() if present.
     return clone;
 }
 //<?php
