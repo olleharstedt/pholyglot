@@ -12,8 +12,6 @@
 typedef struct Point* Point;
 #define class struct
 #define public
-struct mem arena_mem = {0};
-struct mem gc_mem = {.alloc = &gc_malloc, .arena = NULL};
 //<?php
 class Point
 {

@@ -30,6 +30,7 @@ void* gc_malloc(void* throw_away, size_t size)
     return GC_MALLOC(size);
 }
 struct mem gc_mem = {.alloc = &gc_malloc, .arena = NULL};
+struct mem heap_mem = {.alloc = &malloc, .arena = NULL};
 typedef struct array array;
 struct array {
     uintptr_t* thing;
