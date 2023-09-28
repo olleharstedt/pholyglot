@@ -133,6 +133,7 @@ and expression =
     | Array_access of identifier * expression
     | Object_access of expression * expression
     | New of allocation_strategy * typ * expression list
+    | Clone of {variable_name: string; typ: typ; alloc_strat: allocation_strategy}
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Method_call of {
         return_type: typ;
