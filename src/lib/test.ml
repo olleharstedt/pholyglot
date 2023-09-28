@@ -1110,4 +1110,5 @@ function main(): int
 (* Configure dune to run both inline test and ounit *)
 (* A-star/A* algorithm with arena allocator? Unsure which implementation to copy. Java? *)
 (* Rename mem to __mem for internal class variable *)
+(* __clone and other magic functions must be disallowed *)
 (* https://www.rosettacode.org/wiki/Anagrams#PHP *)
