@@ -18,6 +18,12 @@ void* clone(void* x, size_t s, struct mem m)
  * Shallow or recursive clone of struct?
  *   keyword clone
  *   __clone magic function
+ *
+ * Compile with:
+ *   cat clone.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -lgc
+ *
+ * Using "-fsanitize=undefined -fsanitize=address" swallows output when running with valgrind.
+ * 21:04 < twkm> combining "sanitizers" with valgrind often produces odd results.
  */
 typedef struct Point* Point;
 #define class struct
