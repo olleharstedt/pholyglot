@@ -4,7 +4,11 @@
 // fgets
 // curl to get url content to string
 // TODO: Return string|false? Union struct? But not polyglot?
-$words = explode("\n", file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt'));
+// TODO: Must malloc third-party or core lib memory, so free at end of scope
+// TODO: Insert free() before every return. inject_before_return recursively
+$contents = file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt');
+$words = explode("\n", $contents);
+$anagram = new SplDoublyLinkedList();
 foreach ($words as $word) {
     // string to array, but string is already array in C
     $chars = str_split($word);
@@ -12,7 +16,8 @@ foreach ($words as $word) {
     sort($chars);
     // implode, but string is already an array
     // $anagram is SplDoublyLinkedList<String>
-    $anagram[implode($chars)][] = $word;
+    //$anagram[implode($chars)][] = $word;
+    $anagram->push($word);
 }
 
 // No stdlib map
@@ -26,10 +31,10 @@ int *map(int *array, int size, int (*fn)(int)) {
 }
 */
 // fmax from math.h
-// define("count", "count");
+define("count", "count");
 // array_map(count, $anagram) might work if count() is already define, and array_map expect proper function pointer
 // But can use void* function pointers too
-$best = max(array_map('count', $anagram));
+$best = max(array_map(count, $anagram));
 foreach ($anagram as $ana) {
     if (count($ana) == $best) {
         // Do something else than print_r here
