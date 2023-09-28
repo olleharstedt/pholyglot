@@ -73,4 +73,7 @@ function foo()
 (* TODO
  * malloc is not allowed to escape
  *   shortcut without escape analysis? Not allowed on right-hand side without a mem clone/copy
+ * clone with arena?
+ * clone with malloc? to what?
+ * clone string??
  *)

@@ -8,7 +8,12 @@
 #include <gc.h>
 #define new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
 // alloc new space and copy struct to it
-#define clone(x, m) memcpy(x)
+void* clone(void* x, size_t s, struct mem m)
+{
+    void* new_ = m.alloc(m.arena, s);
+    memcpy(new_, x, s);
+    return new_;
+}
 //<?php
 /**
  * Shallow or recursive clone of struct?
@@ -47,9 +52,10 @@ function main()
 
     #__C__ Point
     $r = clone($p
-    #__C__, heap_mem
+    #__C__, sizeof(struct Point), gc_mem
     );
     printf("%d\n", $r->x);
+    free($p);
 }
 //?>
 //<?php ob_end_clean(); main();
