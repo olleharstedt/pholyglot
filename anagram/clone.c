@@ -58,7 +58,7 @@ define("heap_mem", "heap_mem");
 function main()
 #undef function
 {
-    fprintf(stderr, "start\n");
+    fprintf(STDERR, "start\n");
     #__C__ Point
     $p = new(Point
         #__C__, heap_mem
@@ -69,10 +69,10 @@ function main()
     $r = clone($p
         #__C__, sizeof(struct Point), gc_mem
     );
-    //#__C__ free($p);
     printf("%ld\n", $p->x);
     printf("%ld\n", $r->x);
-    fprintf(stderr, "end\n");
+    #__C__ free($p);
+    fprintf(STDERR, "end\n");
     return 0;
 }
 //?>

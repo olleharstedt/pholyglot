@@ -20,6 +20,8 @@
 #define array_get(type, arr, i) ((type*) arr.thing)[i]
 #define count(x) x.length
 #define pprintf printf
+#define STDERR stderr
+#define STDOUT stdout
 struct mem {
     uintptr_t* (*alloc) (void* a, size_t size);
     void* arena;
