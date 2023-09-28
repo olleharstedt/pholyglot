@@ -13,7 +13,8 @@ let alloc_to_pholyglot (a : Ast.allocation_strategy) : Pholyglot_ast.allocation_
     | Heap -> Heap
     | Memory_context var -> Pholyglot_ast.Memory_context var
     | Memory_polymorph -> Pholyglot_ast.Memory_polymorph
-    | Infer_allocation_strategy -> failwith "alloc_to_pholyglot: Must infer allocation strategy before transpile"
+    | Infer_allocation_strategy -> Pholyglot_ast.Boehm
+        (*failwith "alloc_to_pholyglot: Must infer allocation strategy before transpile"*)
 
 (** Transpile from Pholly AST to Pholyglot AST *)
 let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
@@ -107,7 +108,9 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
             args;
             builtin = is_builtin left_hand_t
         }
-    | New (None, _, _) as e -> failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)
+    | New (None, t, exprs) as e ->
+        (*failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)*)
+        Pholyglot_ast.New (alloc_to_pholyglot Boehm, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | New (Some alloc_strat, t, exprs) -> Pholyglot_ast.New (alloc_to_pholyglot alloc_strat, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | List_init t -> Pholyglot_ast.List_init (typ_to_pholyglot t)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
