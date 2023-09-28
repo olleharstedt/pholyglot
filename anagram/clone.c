@@ -8,12 +8,15 @@
 #include <gc.h>
 #define new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
 // alloc new space and copy struct to it
+#define clone(var, x, m) x ## __clone(var, m)
+/*
 void* clone(void* x, size_t s, struct mem m)
 {
     void* new_ = m.alloc(m.arena, s);
     memcpy(new_, x, s);
     return new_;
 }
+*/
 /**
  * Shallow or recursive clone of struct?
  *   keyword clone
@@ -45,6 +48,14 @@ Point Point__constructor(Point self, struct mem m)
     self->mem = m;
     return self;
 }
+// We need a custom Point__clone function, since strings have value semantics in PHP.
+Point Point__clone(Point self, struct mem m)
+{
+    Point clone = (Point) m.alloc(NULL, sizeof (struct Point));
+    memcpy(clone, self, sizeof (struct Point));
+    // TODO: Recursively copy other stuff that's not scalar.
+    return clone;
+}
 //<?php
 #if __PHP__//<?php
 define("SplDoublyLinkedList", "SplDoublyLinkedList");
@@ -67,7 +78,7 @@ function main()
 
     #__C__ Point
     $r = clone($p
-        #__C__, sizeof(struct Point), gc_mem
+        #__C__, Point, gc_mem
     );
     printf("%ld\n", $p->x);
     printf("%ld\n", $r->x);
