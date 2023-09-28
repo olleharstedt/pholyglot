@@ -14,7 +14,6 @@ void* clone(void* x, size_t s, struct mem m)
     memcpy(new_, x, s);
     return new_;
 }
-//<?php
 /**
  * Shallow or recursive clone of struct?
  *   keyword clone
@@ -40,22 +39,35 @@ Point Point__constructor(Point self, struct mem m)
     self->mem = m;
     return self;
 }
+//<?php
+#if __PHP__//<?php
+define("SplDoublyLinkedList", "SplDoublyLinkedList");
+define("Point", "Point");
+define("malloc", "malloc");
+define("arena_mem", "arena_mem");
+define("gc_mem", "gc_mem");
+define("heap_mem", "heap_mem");
+#endif
 #define function int
 function main()
 #undef function
 {
+    fprintf(stderr, "start\n");
     #__C__ Point
     $p = new(Point
-    #__C__, heap_mem
+        #__C__, heap_mem
     );
     $p->x = 10;
 
     #__C__ Point
     $r = clone($p
-    #__C__, sizeof(struct Point), gc_mem
+        #__C__, sizeof(struct Point), gc_mem
     );
-    printf("%d\n", $r->x);
-    free($p);
+    //#__C__ free($p);
+    printf("%ld\n", $p->x);
+    printf("%ld\n", $r->x);
+    fprintf(stderr, "end\n");
+    return 0;
 }
 //?>
 //<?php ob_end_clean(); main();
