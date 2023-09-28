@@ -174,6 +174,7 @@ and expression =
     | Lessthan of expression * expression
     | Greaterthan of expression * expression
     | New of allocation_strategy option * typ * expression list
+    | Clone of expression (* Must be Variable str *)
     | Variable of identifier
     | Array_init of typ * int option * expression list
     | List_init of typ (* SplDoublyLinkedList *)

@@ -91,6 +91,12 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "not all element in array_init have the same type")
     | Array_init (t, _, _) -> t
     | New (alloc_strat, t, exprs) -> t
+    | Clone (Variable s) -> begin
+        match Namespace.find_identifier ns s with
+        | Some t -> t
+        | None -> failwith "Could not find type of clone variable"
+    end
+    | Clone _ -> failwith "Invalid clone expression: can only clone a variable"
     (* $point[0]-> ? *)
     | Object_access (Array_access (id, _), Property_access prop_name)
     (* $point->x *)

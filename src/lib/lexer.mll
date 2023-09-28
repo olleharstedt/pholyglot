@@ -84,6 +84,7 @@ rule token = parse
   | "=>"                          { FATARROW }
   | "return"                      { RETURN }
   | "new"                         { NEW }
+  | "clone"                       { CLONE }
   | "function"                    { FUNCTION }
   | "class"                       { CLASS }
   | "public"                      { PUBLIC }

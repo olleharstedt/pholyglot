@@ -68,6 +68,7 @@ let get_class_methods elems =
 %token LIST_TYPE "SplDoublyLinkedList"
 %token RETURN "return"
 %token NEW "new"
+%token CLONE "clone"
 %token FUNCTION "function"
 %token CLASS "class"
 %token PUBLIC "public"
@@ -270,6 +271,9 @@ expr:
           New (Some alloc_strat, Infer_me, [List_init Infer_me])
       else
           New (Some alloc_strat, Class_type (s, alloc_strat), [])
+  }
+  | "clone" n=VAR_NAME {
+      Clone (Variable n)
   }
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init (Infer_me, None, array_init)}
