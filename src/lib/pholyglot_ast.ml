@@ -208,6 +208,7 @@ let string_of_param_without_ref (p : param) : string = match p with
 let string_of_alloc_strat strat = match strat with
     | Boehm -> "gc_mem"
     | Arena -> "arena_mem"
+    | Heap  -> "heap_mem"
     | Memory_polymorph -> failwith "string_of_alloc_strat: Cannot stringify Memory_polymorph"
     | Memory_context s -> "$" ^ s ^ "->mem"
     | _ -> failwith "string_of_alloc_strat: Unknown allocation strat"
