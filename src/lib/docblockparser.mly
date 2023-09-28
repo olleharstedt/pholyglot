@@ -13,6 +13,7 @@
 %token ALLOC_BOEHM "boehm"
 %token ALLOC_ARENA "arena"
 %token ALLOC_STACK "stack"
+%token ALLOC_HEAP "heap"
 %token DOLLAR "$"
 %token LT "<"
 %token GT ">"
@@ -52,6 +53,7 @@ alloc_typ:
   | "boehm"     {Boehm}
   | "arena"     {Arena}
   | "stack"     {Stack}
+  | "heap"      {Heap}
   | s=VAR_NAME  {Memory_context s}
   | s=NAME      {raise (Ast.DocblockParseError ("Invalid alloc type: " ^ s))}
   (* TODO: Catch all strings except *\ *)

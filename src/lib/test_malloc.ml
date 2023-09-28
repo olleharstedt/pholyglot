@@ -6,6 +6,17 @@ module Log = Dolog.Log
  *)
 
 let%test_unit "WIP" =
+    let source = {|<?php // @pholyglot
+class Point {}
+function foo(): void
+{
+    $p = /** @alloc heap */ new Point();
+}
+|}
+    in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     [%test_eq: Ast.program] (Declaration_list []) (Declaration_list [])
 
 (* TODO

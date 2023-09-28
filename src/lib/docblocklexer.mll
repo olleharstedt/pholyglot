@@ -41,6 +41,7 @@ rule docblock = parse
   | "boehm"              { ALLOC_BOEHM }
   | "arena"              { ALLOC_ARENA }
   | "stack"              { ALLOC_STACK }
+  | "heap"               { ALLOC_HEAP  }
   | "<"                  { LT }
   | ">"                  { GT }
   | ","                  { COMMA }

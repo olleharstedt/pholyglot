@@ -22,7 +22,7 @@ and allocation_strategy =
     | Stack         (* alloca *)
     | Arena         (* arena_mem *)
     | Boehm         (* gc_mem *)
-    | Malloc        (* From third-party libs like mysqli *)
+    | Heap          (* malloc; from third-party libs like mysqli; should not be allowed to escape; inject free before each return *)
     | Memory_polymorph     (* Docblock params *)
     | Memory_context of string (* Memory context is a variable from function argument *)
     | Infer_allocation_strategy

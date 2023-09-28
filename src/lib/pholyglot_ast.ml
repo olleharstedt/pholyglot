@@ -26,6 +26,7 @@ and allocation_strategy =
     | Boehm
     | Stack
     | Arena
+    | Heap
     (* TODO: Not 100% sure here, will only work for input arguments? *)
     | Memory_polymorph
     | Memory_context of string
