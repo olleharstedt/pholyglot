@@ -52,6 +52,7 @@ union Result file_get_contents(char* filename)
     } else {
         struct smartstr* sm = malloc(sizeof(struct smartstr));
         sm->str = malloc(4);
+        sm->len = 4;
         strcpy(sm->str, "asd");
         r.string = *sm;
     }
