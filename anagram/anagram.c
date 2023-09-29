@@ -13,48 +13,58 @@
 //#define COMPARE_STRING(res, val) strcmp(res.string.str, val.str)
 //#define COMPARE_INT(res, val) (res.b == val)
 #define COMPARE_MIXED(val) _Generic(val, \
-    struct smartstr: compare_string,\
-    char*: compare_string,\
+    smartstr: compare_string,\
     int: compare_int\
 	)
 
-struct smartstr
+typedef struct _smartstr smartstr;
+struct _smartstr
 {
     char* str;
     long len;
 };
 
-union Result
+enum type
 {
-    struct smartstr string;
-    bool b;
-    // TODO: Custom type field for classes
+    STRING = 0,
+    BOOL   = 1
 };
 
-int compare_string(union Result res, struct smartstr val) {
+typedef struct _Result Result;
+struct _Result
+{
+    enum type t;
+    union {
+        smartstr s;
+        bool  b;
+    };
+    // TODO: Field for custom types
+};
+
+int compare_string(Result res, smartstr val) {
     printf("compare_string\n");
-    printf("%s\n", res.string.str);
+    printf("%s\n", res.s.str);
     printf("%s\n", val.str);
-    return strcmp(res.string.str, val.str) == 0;
+    return strcmp(res.s.str, val.str) == 0;
 }
 
-int compare_int(union Result res, int val) {
+int compare_int(Result res, int val) {
     printf("compare_int\n");
     return res.b == val;
 }
 
-union Result file_get_contents(char* filename)
+Result file_get_contents(char* filename)
 {
     printf("file_get_contents\n");
-    union Result r;
+    Result r;
     if (strcmp(filename, "moo") == 0) {
         r.b = false;
     } else {
-        struct smartstr* sm = malloc(sizeof(struct smartstr));
+        smartstr* sm = malloc(sizeof(smartstr));
         sm->str = malloc(4);
         sm->len = 4;
         strcpy(sm->str, "asd");
-        r.string = *sm;
+        r.s = *sm;
     }
     return r;
 }
@@ -64,21 +74,21 @@ union Result file_get_contents(char* filename)
  */
 int main()
 {
-    union Result r;
+    Result r;
     r.b = true;
     if (COMPARE_MIXED(true)(r, true)) {
         printf("Hello\n");
     }
-    union Result r2;
-    struct smartstr s1 = {.str = "moo", .len = 3};
-    r2.string = s1;
+    Result r2;
+    smartstr s1 = {.str = "moo", .len = 3};
+    r2.s = s1;
     //r2.string = {.str = "moo", .len = 3};
-    struct smartstr s2 = {.str = "moo", .len = 3};
+    smartstr s2 = {.str = "moo", .len = 3};
     if (COMPARE_MIXED(s2)(r2, s2)) {
         printf("Hello 2\n");
     }
 
-    union Result r3 = file_get_contents("moo");
+    Result r3 = file_get_contents("moo");
     if (COMPARE_MIXED(false)(r3, false)) {
     }
 
