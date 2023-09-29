@@ -101,7 +101,7 @@ let%test_unit "trivial list infer class and allocation strat" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = true}
         }
     ])
 
@@ -124,7 +124,7 @@ let%test_unit "trivial list infer class and allocation strat to C" =
                     );
                 );
             ];
-            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = true}
         }
     ]
          |> Transpile.declarations_to_pholyglot

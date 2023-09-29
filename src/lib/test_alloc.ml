@@ -53,7 +53,7 @@ let%test_unit "alloc arena" =
             stmts = [
                 Assignment (Infer_me, Variable "p", (New (Some Arena, Class_type ("Point", Arena), [])));
             ];
-            function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
+            function_type = Function_type {return_type = Void; arguments = []; uses_arena = true}
         }
     ])
 

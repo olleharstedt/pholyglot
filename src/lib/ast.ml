@@ -50,8 +50,8 @@ and typ =
     | Infer_class_name of string
     | Function_type of {
         return_type: typ;
-        arguments: typ list;
-        uses_arena: bool;
+        arguments:   typ list;
+        uses_arena:  bool;
     }
     | Void
     | Variadic (* Used by array_make *)

@@ -87,7 +87,7 @@ function additems(SplDoublyLinkedList $list, int $nr)
  * cat list.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc - -lgc
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -E
  * cat list.c | sed -e "s/#__C__//g" | gcc -xc - -lgc -I.
- * This line might have weird result with valgrind (swallowing stderr and stdout):
+ * This line might have weird result with valgrind (swallowing stderr and stdout) but reports memory errors:
  *   cat list.c | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -fsanitize=undefined -fsanitize=address -lgc
  *
  * Compile from PHP:

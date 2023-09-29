@@ -717,12 +717,15 @@ let infer_declaration decl ns : declaration =
         ns.uses_arena <- false;
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
-        let new_stmts = if ns.uses_arena then 
+        let new_stmts = if ns.uses_arena then begin
+            print_endline "here!";
             Init_arena :: new_stmts
-        else
+        end else
             new_stmts
         in
         let _ = List.map (fun s -> check_return_type ns s return_type) new_stmts in
+        let Function_type r = ftyp in
+        let ftyp = Function_type {r with uses_arena = ns.uses_arena} in
         Function {
             name;
             docblock;
