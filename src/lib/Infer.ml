@@ -409,6 +409,11 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
     Log.debug "infer_stmt: %s" (show_statement s);
     match s with
     | Assignment (Infer_me, Variable id, expr) ->
+        (* TODO: Move to infer_expression? *)
+        begin match expr with
+            | New (Some Arena, _, _) -> ns.uses_arena <- true
+            | _ -> ()
+        end;
         Log.debug "infer_stmt: assignment to id %s" id;
         let t = typ_of_expression ns expr in
         let expr = infer_expression ns expr in
@@ -444,11 +449,6 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             Assignment (new_t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
-    | Assignment (t, Variable id, New (Some Arena, t2, exprs)) as stmt -> begin
-        print_endline "HERE";
-        ns.uses_arena <- true;
-        stmt
-    end
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->

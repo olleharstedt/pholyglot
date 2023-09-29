@@ -55,6 +55,7 @@ let%test_unit "alloc arena" =
             docblock = [];
             params = [];
             stmts = [
+                Init_arena;
                 Assignment (Class_type ("Point", Boehm), Variable "p", (New (Some Arena, Class_type ("Point", Arena), [])));
             ];
             function_type = Function_type {return_type = Void; arguments = []; uses_arena = true}
