@@ -28,6 +28,7 @@ union Result
 {
     struct smartstr string;
     bool b;
+    // TODO: Custom type field for classes
 };
 
 int compare_string(union Result res, struct smartstr val) {
