@@ -112,7 +112,7 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
         (*failwith ("No inferred allocation_strategy: " ^ Ast.show_expression e)*)
         Pholyglot_ast.New (alloc_to_pholyglot Boehm, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
     | New (Some alloc_strat, t, exprs) -> Pholyglot_ast.New (alloc_to_pholyglot alloc_strat, typ_to_pholyglot t, List.map expression_to_pholyglot exprs)
-    | Clone (Variable s) -> Pholyglot_ast.Clone s
+    | Clone {variable_name; t; alloc_strat = Some alloc_strat} -> Pholyglot_ast.Clone {variable_name; t = typ_to_pholyglot t; alloc_strat = alloc_to_pholyglot alloc_strat}
     | List_init t -> Pholyglot_ast.List_init (typ_to_pholyglot t)
     | e -> failwith ("expression_to_pholyglot: " ^ (Ast.show_expression e))
 

@@ -57,6 +57,9 @@ union Result file_get_contents(char* filename)
     return r;
 }
 
+/**
+ * Compile with:
+ */
 int main()
 {
     union Result r;

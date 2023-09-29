@@ -174,7 +174,13 @@ and expression =
     | Lessthan of expression * expression
     | Greaterthan of expression * expression
     | New of allocation_strategy option * typ * expression list
-    | Clone of expression (* Must be Variable str *)
+    | Clone of {
+        variable_name: string;
+        t: typ;
+
+        (* None if no @alloc annotation was used *)
+        alloc_strat: allocation_strategy option;
+    }
     | Variable of identifier
     | Array_init of typ * int option * expression list
     | List_init of typ (* SplDoublyLinkedList *)

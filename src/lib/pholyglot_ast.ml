@@ -133,7 +133,11 @@ and expression =
     | Array_access of identifier * expression
     | Object_access of expression * expression
     | New of allocation_strategy * typ * expression list
-    | Clone of {variable_name: string; typ: typ; alloc_strat: allocation_strategy}
+    | Clone of {
+        variable_name: string;
+        t:             typ;
+        alloc_strat:   allocation_strategy
+    }
     | Property_access of identifier (* Valid sub-expression of object access *)
     | Method_call of {
         return_type: typ;
@@ -265,6 +269,12 @@ let rec string_of_expression : expression -> string = function
 #__C__, $mem_f
 )|}]
     end
+    | Clone {variable_name; t; alloc_strat} ->
+        let t_s = string_of_typ t in
+        let mem_f = string_of_alloc_strat alloc_strat in
+        [%string {|clone($variable_name
+#__C__, $t_s, $mem_f
+)|}]
     | Array_init exprs -> sprintf {|array_make(%s)|}
         (Base.String.concat ~sep:", " (Base.List.map exprs ~f:string_of_expression))
     | Array_access (id, expr) ->

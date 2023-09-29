@@ -91,8 +91,8 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
             raise (Type_error "not all element in array_init have the same type")
     | Array_init (t, _, _) -> t
     | New (alloc_strat, t, exprs) -> t
-    | Clone (Variable s) -> begin
-        match Namespace.find_identifier ns s with
+    | Clone {variable_name; t; alloc_strat} -> begin
+        match Namespace.find_identifier ns variable_name with
         | Some t -> t
         | None -> failwith "Could not find type of clone variable"
     end
@@ -308,8 +308,20 @@ let rec infer_expression ns expr : expression =
     (*| New (alloc_strat, Class_type (class_name, Infer_allocation_strategy), args) -> New (alloc_strat, Class_type (class_name, Boehm), args)*)
     (* TODO: Hard-coded Boehm as default GC *)
     | New (None, t, args) -> New (None, infer_alloc t Boehm, args)
+
+    | Clone {variable_name; t = Infer_me; alloc_strat = None} as e -> begin
+        let t = typ_of_expression ns e in
+        let alloc_strat = match t with
+            | Class_type (_, alloc_strat) -> alloc_strat
+            | _ -> failwith "Found no alloc_strat for clone expression"
+        in
+        Clone {variable_name; t; alloc_strat = Some alloc_strat}
+    end
+    | Clone _ -> failwith "Not implemented: Infer Clone missing t = Infer_me and alloc_strat = None"
+
     (*| New (alloc_strat, List (Class_type (class_name, Infer_allocation_strategy)), args) -> New (alloc_strat, List (Class_type (class_name, Boehm)), args)*)
     | List_init t -> List_init t
+    (* TODO: Be explicit of what to not infer *)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
 

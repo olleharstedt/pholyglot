@@ -273,7 +273,7 @@ expr:
           New (Some alloc_strat, Class_type (s, alloc_strat), [])
   }
   | "clone" n=VAR_NAME {
-      Clone (Variable n)
+      Clone {variable_name = n; t = Infer_me; alloc_strat = None}
   }
   (*| "new" t=typ "{" struct_init=separated_list(COMMA, expr) "}"  {New (t, struct_init)}*)
   | "[" array_init=separated_list(COMMA, expr) "]"               {Array_init (Infer_me, None, array_init)}
