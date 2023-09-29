@@ -30,7 +30,7 @@ enum type
     BOOL   = 1
 };
 
-typedef struct _Result Result;
+typedef struct _Result Mixed;
 struct _Result
 {
     enum type t;
@@ -41,14 +41,14 @@ struct _Result
     // TODO: Field for custom types
 };
 
-bool compare_string(Result r, smartstr val)
+bool compare_string(Mixed r, smartstr val)
 {
     printf("compare_string\n");
     return strcmp(r.s.str, val.str) == 0;
 }
 
 #define DO_OP(a, op) a op a
-#define COMPARE_MIXED(res, val, op) _Generic(val,\
+#define COMPARE_MIXED(res, op, val) _Generic(val,\
     int: (res.t == BOOL && res.b op val),\
     char*: (res.t == STRING && strncmp(res.s.str, val, res.s.len) == 0)\
     )
@@ -56,15 +56,15 @@ bool compare_string(Result r, smartstr val)
 #define OP_EQUALS ==
 #define OP_PLUS +
 
-int compare_int(Result res, int val) {
+int compare_int(Mixed res, int val) {
     printf("compare_int\n");
     return res.b == val;
 }
 
-Result file_get_contents(char* filename)
+Mixed file_get_contents(char* filename)
 {
     printf("file_get_contents\n");
-    Result r;
+    Mixed r;
     if (strcmp(filename, "moo\0") != 0) {
         r.t = BOOL;
         r.b = false;
@@ -86,24 +86,24 @@ Result file_get_contents(char* filename)
  */
 int main()
 {
-    Result $r;
+    Mixed $r;
+    $r.t = BOOL;
     $r.b = true;
-    //if (COMPARE_MIXED(true)($r, true)) {
-        //printf("Hello\n");
-    //}
-    Result $r2;
+    if (COMPARE_MIXED($r, OP_EQUALS, true)) {
+        printf("Hello\n");
+    }
+    Mixed $r2;
     smartstr $s1 = {.str = "moo", .len = 3};
     $r2.s = $s1;
-    //r2.string = {.str = "moo", .len = 3};
     smartstr $s2 = {.str = "moo", .len = 3};
     //if (COMPARE_MIXED(s2)(r2, s2)) {
         //printf("Hello 2\n");
     //}
 
-    Result $r3 = file_get_contents("moo\0");
-    if (COMPARE_MIXED($r3, false, OP_EQUALS)) {
+    Mixed $r3 = file_get_contents("moo\0");
+    if (COMPARE_MIXED($r3, OP_EQUALS, false)) {
         printf("Is false\n");
-    } else if (COMPARE_MIXED($r3, "asd\0", OP_EQUALS)) {
+    } else if (COMPARE_MIXED($r3, OP_EQUALS, "asd\0")) {
         printf("Is asd\n");
     }
 
