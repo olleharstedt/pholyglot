@@ -12,10 +12,10 @@
 
 //#define COMPARE_STRING(res, val) strcmp(res.string.str, val.str)
 //#define COMPARE_INT(res, val) (res.b == val)
-#define COMPARE_MIXED(val) _Generic(val, \
-    smartstr: compare_string,\
-    int: compare_int\
-	)
+//#define COMPARE_MIXED(val) _Generic(val, \
+//smartstr: compare_string,\
+//int: compare_int\
+//)
 
 typedef struct _smartstr smartstr;
 struct _smartstr
@@ -41,12 +41,20 @@ struct _Result
     // TODO: Field for custom types
 };
 
-int compare_string(Result res, smartstr val) {
+bool compare_string(Result r, smartstr val)
+{
     printf("compare_string\n");
-    printf("%s\n", res.s.str);
-    printf("%s\n", val.str);
-    return strcmp(res.s.str, val.str) == 0;
+    return strcmp(r.s.str, val.str) == 0;
 }
+
+#define DO_OP(a, op) a op a
+#define COMPARE_MIXED(res, val, op) _Generic(val,\
+    int: (res.t == BOOL && res.b op val),\
+    char*: (res.t == STRING && strncmp(res.s.str, val, res.s.len) == 0)\
+    )
+
+#define OP_EQUALS ==
+#define OP_PLUS +
 
 int compare_int(Result res, int val) {
     printf("compare_int\n");
@@ -57,39 +65,46 @@ Result file_get_contents(char* filename)
 {
     printf("file_get_contents\n");
     Result r;
-    if (strcmp(filename, "moo") == 0) {
+    if (strcmp(filename, "moo\0") != 0) {
+        r.t = BOOL;
         r.b = false;
     } else {
         smartstr* sm = malloc(sizeof(smartstr));
-        sm->str = malloc(4);
-        sm->len = 4;
-        strcpy(sm->str, "asd");
+        sm->str = malloc(5);
+        sm->len = 5;
+        strcpy(sm->str, "asd\0");
         r.s = *sm;
+        r.t = STRING;
     }
     return r;
 }
 
 /**
  * Compile with:
+ *   gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -lgc anagram.c
+ *   gcc -g -I. -Wno-incompatible-pointer-types -xc -lgc anagram.c
  */
 int main()
 {
-    Result r;
-    r.b = true;
-    if (COMPARE_MIXED(true)(r, true)) {
-        printf("Hello\n");
-    }
-    Result r2;
-    smartstr s1 = {.str = "moo", .len = 3};
-    r2.s = s1;
+    Result $r;
+    $r.b = true;
+    //if (COMPARE_MIXED(true)($r, true)) {
+        //printf("Hello\n");
+    //}
+    Result $r2;
+    smartstr $s1 = {.str = "moo", .len = 3};
+    $r2.s = $s1;
     //r2.string = {.str = "moo", .len = 3};
-    smartstr s2 = {.str = "moo", .len = 3};
-    if (COMPARE_MIXED(s2)(r2, s2)) {
-        printf("Hello 2\n");
-    }
+    smartstr $s2 = {.str = "moo", .len = 3};
+    //if (COMPARE_MIXED(s2)(r2, s2)) {
+        //printf("Hello 2\n");
+    //}
 
-    Result r3 = file_get_contents("moo");
-    if (COMPARE_MIXED(false)(r3, false)) {
+    Result $r3 = file_get_contents("moo\0");
+    if (COMPARE_MIXED($r3, false, OP_EQUALS)) {
+        printf("Is false\n");
+    } else if (COMPARE_MIXED($r3, "asd\0", OP_EQUALS)) {
+        printf("Is asd\n");
     }
 
     return 0;

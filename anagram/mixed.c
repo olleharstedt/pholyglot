@@ -46,7 +46,7 @@ bool compare_string(struct Result r, char* val)
 #if __PHP__//<?php
 define("OP_EQUALS", "==");
 define("OP_PLUS", "+");
-function COMPARE_MIXED($res, $val, $op)
+function COMPARE_MIXED($res, $op, $val)
 {
     switch ($op) {
         case OP_EQUALS:
