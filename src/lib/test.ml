@@ -1112,3 +1112,4 @@ function main(): int
 (* Rename mem to __mem for internal class variable *)
 (* __clone and other magic functions must be disallowed? Or run as Point__clone() *)
 (* https://www.rosettacode.org/wiki/Anagrams#PHP *)
+(* Get rid of gstring glib since it won't work with multiple allocation strategies *)
