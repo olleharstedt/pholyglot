@@ -5,7 +5,7 @@ class User
     public int $id;
 }
 
-// ../src/_build/install/default/bin/pholyglot clone.php | sed -e "s/#__C__//g" | gcc -O1 -I. -Wno-incompatible-pointer-types -xc - -lgc
+// ../src/_build/install/default/bin/pholyglot clone.php | sed -e "s/#__C__//g" | gcc -xc - -lgc -I. -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/
 function main(): int
 {
     $user1 = new User();

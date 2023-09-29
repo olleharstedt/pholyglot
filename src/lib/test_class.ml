@@ -279,7 +279,7 @@ Point Point__constructor(Point $p, struct mem m)
 Point Point__clone(Point $self, struct mem m)
 {
     Point clone = (Point) m.alloc(m.arena, sizeof (struct Point));
-    memcpy(clone, self, sizeof (struct Point));
+    memcpy(clone, $self, sizeof (struct Point));
     return clone;
 }
 //<?php
@@ -460,7 +460,7 @@ Point Point__constructor(Point $p, struct mem m)
 Point Point__clone(Point $self, struct mem m)
 {
     Point clone = (Point) m.alloc(m.arena, sizeof (struct Point));
-    memcpy(clone, self, sizeof (struct Point));
+    memcpy(clone, $self, sizeof (struct Point));
     return clone;
 }
 //<?php
@@ -579,7 +579,7 @@ Body Body__constructor(Body $p, struct mem m)
 Body Body__clone(Body $self, struct mem m)
 {
     Body clone = (Body) m.alloc(m.arena, sizeof (struct Body));
-    memcpy(clone, self, sizeof (struct Body));
+    memcpy(clone, $self, sizeof (struct Body));
     return clone;
 }
 //<?php

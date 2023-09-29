@@ -505,7 +505,7 @@ $class_name $(class_name)__constructor($class_name $$p, struct mem m)
 $class_name $(class_name)__clone($class_name $$self, struct mem m)
 {
     $class_name clone = ($class_name) m.alloc(m.arena, sizeof (struct $class_name));
-    memcpy(clone, self, sizeof (struct $class_name));
+    memcpy(clone, $$self, sizeof (struct $class_name));
     return clone;
 }
 //<?php
