@@ -272,7 +272,7 @@ let rec string_of_expression : expression -> string = function
     | Clone {variable_name; t; alloc_strat} ->
         let t_s = string_of_typ t in
         let mem_f = string_of_alloc_strat alloc_strat in
-        [%string {|clone($variable_name
+        [%string {|clone($$$variable_name
 #__C__, $t_s, $mem_f
 )|}]
     | Array_init exprs -> sprintf {|array_make(%s)|}
