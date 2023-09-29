@@ -444,6 +444,11 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             Assignment (new_t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
+    | Assignment (t, Variable id, New (Some Arena, t2, exprs)) as stmt -> begin
+        print_endline "HERE";
+        ns.uses_arena <- true;
+        stmt
+    end
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
@@ -718,7 +723,7 @@ let infer_declaration decl ns : declaration =
         let inf = fun s -> infer_stmt s ns in
         let new_stmts = List.map inf stmts in
         let new_stmts = if ns.uses_arena then begin
-            print_endline "here!";
+            (*print_endline "here!";*)
             Init_arena :: new_stmts
         end else
             new_stmts

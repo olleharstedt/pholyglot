@@ -8,12 +8,14 @@ let%test_unit "alloc boehm" =
         $p = /** @alloc boehm */ new Point();
     }
     |} in
-    let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
+    let ast =Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class {
             name = "Point";
-            kind = Infer_kind;
+            kind = Val;
             properties = [];
             methods = [];
             builtin_class = false;
@@ -23,7 +25,7 @@ let%test_unit "alloc boehm" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Some Boehm, Class_type ("Point", Boehm), [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Some Boehm, Class_type ("Point", Boehm), [])));
             ];
             function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
@@ -36,12 +38,14 @@ let%test_unit "alloc arena" =
         $p = /** @alloc arena */ new Point();
     }
     |} in
-    let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
+    let ast =Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class {
             name = "Point";
-            kind = Infer_kind;
+            kind = Val;
             properties = [];
             methods = [];
             builtin_class = false;
@@ -51,7 +55,7 @@ let%test_unit "alloc arena" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Some Arena, Class_type ("Point", Arena), [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Some Arena, Class_type ("Point", Arena), [])));
             ];
             function_type = Function_type {return_type = Void; arguments = []; uses_arena = true}
         }
@@ -64,12 +68,14 @@ let%test_unit "alloc stack" =
         $p = /** @alloc stack */ new Point();
     }
     |} in
-    let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
+    let ast =Lexing.from_string source |>
+        Parser.program Lexer.token |>
+        Infer.run (Namespace.create ())
+    in
     [%test_eq: Ast.program] ast (Declaration_list [
         Class {
             name = "Point";
-            kind = Infer_kind;
+            kind = Val;
             properties = [];
             methods = [];
             builtin_class = false;
@@ -79,7 +85,7 @@ let%test_unit "alloc stack" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "p", (New (Some Stack, Class_type ("Point", Stack), [])));
+                Assignment (Class_type ("Point", Boehm), Variable "p", (New (Some Stack, Class_type ("Point", Stack), [])));
             ];
             function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
         }
