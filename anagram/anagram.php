@@ -1,14 +1,64 @@
 <?php
 
+/*
+class PhpArray implements ArrayAccess, Iterator {
+    public $container = [];
+
+    public function offsetSet($offset, $value): void {
+        if (is_null($offset)) {
+            $this->container[] = $value;
+        } else {
+            $this->container[$offset] = $value;
+        }
+    }
+
+    public function offsetExists($offset): bool {
+        return isset($this->container[$offset]);
+    }
+
+    public function offsetUnset($offset): void {
+        unset($this->container[$offset]);
+    }
+
+    public function offsetGet($offset): mixed {
+        return isset($this->container[$offset]) ? $this->container[$offset] : null;
+    }
+
+    public function rewind(): void {
+        reset($this->container);
+    }
+
+    #[\ReturnTypeWillChange]
+    public function current() {
+        return current($this->container);
+    }
+
+    #[\ReturnTypeWillChange]
+    public function key() {
+        return key($this->container);
+    }
+
+    public function next(): void {
+        next($this->container);
+    }
+
+    public function valid(){    
+    }
+}
+ */
+
+
 // strtok
 // fgets
 // curl to get url content to string
 // TODO: Return string|false? Union struct? But not polyglot?
 // TODO: Must malloc third-party or core lib memory, so free at end of scope
 // TODO: Insert free() before every return. inject_before_return recursively
-$contents = file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt');
+//$contents = file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt');
+$contents = file_get_contents('moo.txt');
+// TODO: Explode into fixed-size array or SplDoublyLinkedList?
 $words = explode("\n", $contents);
-$anagram = new SplDoublyLinkedList();
+$anagram = new ArrayObject(); //new SplDoublyLinkedList();
 foreach ($words as $word) {
     // string to array, but string is already array in C
     $chars = str_split($word);
@@ -16,8 +66,16 @@ foreach ($words as $word) {
     sort($chars);
     // implode, but string is already an array
     // $anagram is SplDoublyLinkedList<String>
-    //$anagram[implode($chars)][] = $word;
-    $anagram->push($word);
+    // TODO: This needs a hash map implementation. Or set.
+    $string = implode($chars);
+    if (!isset($anagram[$string])) {
+        $anagram[$string] = new ArrayObject();
+        $anagram[$string][] = $word;
+    } else {
+        $bucket = $anagram[$string];
+        $bucket[] = $word;
+    }
+    //$anagram->push($word);
 }
 
 // No stdlib map
@@ -34,7 +92,9 @@ int *map(int *array, int size, int (*fn)(int)) {
 define("count", "count");
 // array_map(count, $anagram) might work if count() is already define, and array_map expect proper function pointer
 // But can use void* function pointers too
-$best = max(array_map(count, $anagram));
+$array = iterator_to_array($anagram);
+var_dump($array);
+$best = max(array_map("count", $array));
 foreach ($anagram as $ana) {
     if (count($ana) == $best) {
         // Do something else than print_r here
