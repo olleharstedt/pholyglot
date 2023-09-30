@@ -1,53 +1,5 @@
 <?php
 
-/*
-class PhpArray implements ArrayAccess, Iterator {
-    public $container = [];
-
-    public function offsetSet($offset, $value): void {
-        if (is_null($offset)) {
-            $this->container[] = $value;
-        } else {
-            $this->container[$offset] = $value;
-        }
-    }
-
-    public function offsetExists($offset): bool {
-        return isset($this->container[$offset]);
-    }
-
-    public function offsetUnset($offset): void {
-        unset($this->container[$offset]);
-    }
-
-    public function offsetGet($offset): mixed {
-        return isset($this->container[$offset]) ? $this->container[$offset] : null;
-    }
-
-    public function rewind(): void {
-        reset($this->container);
-    }
-
-    #[\ReturnTypeWillChange]
-    public function current() {
-        return current($this->container);
-    }
-
-    #[\ReturnTypeWillChange]
-    public function key() {
-        return key($this->container);
-    }
-
-    public function next(): void {
-        next($this->container);
-    }
-
-    public function valid(){    
-    }
-}
- */
-
-
 // strtok
 // fgets
 // curl to get url content to string
@@ -69,8 +21,8 @@ foreach ($words as $word) {
     // TODO: This needs a hash map implementation. Or set.
     $string = implode($chars);
     if (!isset($anagram[$string])) {
-        $anagram[$string] = new ArrayObject();
-        $anagram[$string][] = $word;
+        $anagram[$string] = new SplDoublyLinkedList();
+        $anagram[$string]->push($word);
     } else {
         $bucket = $anagram[$string];
         $bucket[] = $word;
@@ -92,12 +44,13 @@ int *map(int *array, int size, int (*fn)(int)) {
 define("count", "count");
 // array_map(count, $anagram) might work if count() is already define, and array_map expect proper function pointer
 // But can use void* function pointers too
-$array = iterator_to_array($anagram);
-var_dump($array);
-$best = max(array_map("count", $array));
-foreach ($anagram as $ana) {
-    if (count($ana) == $best) {
+foreach ($anagram as $an) {
+    $best = max($best, count($an));
+}
+//$best = max(array_map("count", $array));
+foreach ($anagram as $an) {
+    if (count($an) == $best) {
         // Do something else than print_r here
-        print_r($ana);
+        print_r($an);
     }
 }
