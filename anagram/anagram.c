@@ -2,6 +2,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <stdbool.h>
+#include "phollylib.c"
 
 /**
 21:59 < DPA> olle: Oh, yes, nested generics are a pain. There are a few tricks you may want to know about.
@@ -17,40 +18,19 @@
 //int: compare_int\
 //)
 
-typedef struct _smartstr smartstr;
-struct _smartstr
-{
-    char* str;
-    long len;
-};
-
-enum type
-{
-    STRING = 0,
-    BOOL   = 1
-};
-
-typedef struct _Result Mixed;
-struct _Result
-{
-    enum type t;
-    union {
-        smartstr s;
-        bool  b;
-    };
-    // TODO: Field for custom types
-};
 
 bool compare_string(Mixed r, smartstr val)
 {
     printf("compare_string\n");
-    return strcmp(r.s.str, val.str) == 0;
+    return strcmp(r.s->str, val->str) == 0;
 }
 
 #define DO_OP(a, op) a op a
 #define COMPARE_MIXED(res, op, val) _Generic(val,\
     int: (res.t == BOOL && res.b op val),\
-    char*: (res.t == STRING && strncmp(res.s.str, val, res.s.len) == 0)\
+    bool: (res.t == BOOL && res.b op val),\
+    char*: (res.t == STRING && strncmp(res.s->str, val, res.s->len) == 0),\
+    default: false\
     )
 
 #define OP_EQUALS ==
@@ -61,24 +41,6 @@ int compare_int(Mixed res, int val) {
     return res.b == val;
 }
 
-Mixed file_get_contents(char* filename)
-{
-    printf("file_get_contents\n");
-    Mixed r;
-    if (strcmp(filename, "moo\0") != 0) {
-        r.t = BOOL;
-        r.b = false;
-    } else {
-        smartstr* sm = malloc(sizeof(smartstr));
-        sm->str = malloc(5);
-        sm->len = 5;
-        strcpy(sm->str, "asd\0");
-        r.s = *sm;
-        r.t = STRING;
-    }
-    return r;
-}
-
 /**
  * Compile with:
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -lgc anagram.c
@@ -86,12 +48,17 @@ Mixed file_get_contents(char* filename)
  */
 int main()
 {
-    Mixed $r;
-    $r.t = BOOL;
-    $r.b = true;
+    // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
+    smartstr s = malloc(sizeof(struct _smartstr));
+    s->str = malloc(sizeof(char) * 8);
+    strncpy(s->str, "moo.txt", 8);
+    s->len = 9;
+    Mixed $r = file_get_contents(s);
     if (COMPARE_MIXED($r, OP_EQUALS, true)) {
         printf("Hello\n");
     }
+    free($r.s);
+    /*
     Mixed $r2;
     smartstr $s1 = {.str = "moo", .len = 3};
     $r2.s = $s1;
@@ -106,6 +73,7 @@ int main()
     } else if (COMPARE_MIXED($r3, OP_EQUALS, "asd\0")) {
         printf("Is asd\n");
     }
+    */
 
     return 0;
 }

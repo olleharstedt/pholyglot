@@ -8,6 +8,8 @@
 // TODO: Insert free() before every return. inject_before_return recursively
 //$contents = file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt');
 $contents = file_get_contents('moo.txt');
+if ($contents === false) {
+}
 // TODO: Explode into fixed-size array or SplDoublyLinkedList?
 $words = explode("\n", $contents);
 $anagram = new ArrayObject(); //new SplDoublyLinkedList();

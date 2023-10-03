@@ -5,6 +5,7 @@
 #include <assert.h>
 #include <string.h>
 #include <stddef.h>
+#include <stdbool.h>
 #include <gc.h>
 #ifndef DEFAULT_ALIGNMENT
 #define DEFAULT_ALIGNMENT (2*sizeof(void *))
@@ -23,6 +24,8 @@
 #define pprintf printf
 #define STDERR stderr
 #define STDOUT stdout
+
+// Memory system
 struct mem {
     uintptr_t* (*alloc) (void* a, size_t size);
     void* arena;
@@ -221,4 +224,75 @@ void arena_free(Arena a) {
     }
     free(a->buf);
     free(a);
+}
+
+
+// PHP string system
+
+typedef struct _smartstr* smartstr;
+struct _smartstr
+{
+    char* str;
+    size_t len;
+};
+
+// PHP mixed result type
+
+enum type
+{
+    STRING = 0,
+    BOOL   = 1
+    // TODO: Need to extend this indefinitely for each type in the system? Or only core types?
+};
+
+typedef struct _Mixed Mixed;
+struct _Mixed
+{
+    enum type t;
+    union {
+        smartstr s;
+        bool  b;
+    };
+    // TODO: Field for custom types
+};
+
+// PHP std lib functions
+
+/**
+ * @see https://www.php.net/manual/en/function.file-get-contents.php
+ * @see https://stackoverflow.com/questions/174531/how-to-read-the-content-of-a-file-to-a-string-in-c
+ */
+Mixed file_get_contents(smartstr filename)
+{
+    Mixed result = {};
+    smartstr s = malloc(sizeof(struct _smartstr));
+    FILE * f = fopen (filename->str, "rb");
+
+    if (f) {
+        int res = fseek(f, 0, SEEK_END);
+        if (res == -1) {
+            fclose(f);
+            free(s);
+            return (Mixed) {.t = BOOL, .b = false};
+        }
+        s->len = ftell(f);
+        res = fseek(f, 0, SEEK_SET);
+        if (res == -1) {
+            fclose(f);
+            free(s);
+            return (Mixed) {.t = BOOL, .b = false};
+        }
+        s->str = malloc(s->len);
+        if (s->str) {
+            fread(s->str, 1, s->len, f);
+        } else {
+            fclose(f);
+            free(s);
+            return (Mixed) {.t = BOOL, .b = false};
+        }
+        fclose (f);
+    } else {
+        free(s);
+        return (Mixed) {.t = BOOL, .b = false};
+    }
 }
