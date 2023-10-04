@@ -256,6 +256,20 @@ struct _Mixed
     // TODO: Field for custom types
 };
 
+// Prefix functions with ph_
+void ph_free_mixed(Mixed* m)
+{
+    switch (m->t) {
+        case STRING:
+            free(m->s->str);
+            free(m->s);
+            free(m);
+            break;
+        case BOOL:
+            break;
+    }
+}
+
 // PHP std lib functions
 
 /**
