@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <stdarg.h>
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
@@ -293,6 +294,26 @@ struct _Mixed
 #define ERROR_LOG(s) 
 #endif
 
+char* my_sprintf(const char *format, ...) {
+    va_list args;
+    va_start(args, format);
+
+    int len = vsprintf(NULL, format, args);
+    if (len < 0) {
+        return NULL;
+    }
+
+    char *buffer = malloc(len + 1);
+    if (buffer == NULL) {
+        return NULL;
+    }
+
+    vsprintf(buffer, format, args);
+    va_end(args);
+
+    return buffer;
+}
+
 // TODO: Which memory strategy to use?
 struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
 {
@@ -323,8 +344,8 @@ struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int lengt
     smartstr result;
     char* tmp;
 
-    ERROR_LOG(sprintf("offset = %ld\n", offset));
-    ERROR_LOG(sprintf("length = %d\n", length));
+    ERROR_LOG(my_sprintf("offset = %ld\n", offset));
+    ERROR_LOG(my_sprintf("length = %d\n", length));
 
     if (length < 0) {
         ERROR_LOG("length < 0");
@@ -406,7 +427,7 @@ smartstr substr(smartstr _str, long f, int length, struct mem* m)
 	if (l == ZSTR_LEN(str)) {
         ERROR_LOG("Return exact copy");
         // TODO: Assuming str is null-terminated?
-        ERROR_LOG(sprintf("str->str = %.5s\n", str->str));
+        ERROR_LOG(my_sprintf("str->str = %.5s\n", str->str));
         //return ph_smartstr_new(str->str, m);
         return str;
 	} else {
@@ -487,7 +508,7 @@ struct _Mixed file_get_contents(struct _smartstr* filename)
         if (s->str) {
             ERROR_LOG("before fread\n");
             long chunk = fread(s->str, 1, s->len, f);
-            ERROR_LOG(sprintf("chunk = %ld\n", chunk));
+            //ERROR_LOG(my_sprintf("chunk = %ld\n", chunk));
             if (chunk != s->len) {
                 goto return_false;
             }
@@ -621,7 +642,7 @@ const char * zend_memnstr(const char *haystack, const char *needle, size_t needl
 }
 smartstr zend_string_alloc(size_t len, bool persistent)
 {
-    ERROR_LOG(sprintf("len = %ld\n", len));
+    ERROR_LOG(my_sprintf("len = %ld\n", len));
     smartstr ret = malloc(sizeof(*ret));
     if (ret == NULL) {
         PH_ABORT("zend_string_alloc: Could not malloc");
@@ -635,8 +656,8 @@ smartstr zend_string_alloc(size_t len, bool persistent)
 smartstr zend_string_init(const char *str, size_t len, bool persistent)
 {
     smartstr ret = zend_string_alloc(len, persistent);
-    ERROR_LOG(sprintf("zend_string_init: len = %ld\n", len));
-    ERROR_LOG(sprintf("zend_string_init: str = %s\n", str));
+    ERROR_LOG(my_sprintf("zend_string_init: len = %ld\n", len));
+    ERROR_LOG(my_sprintf("zend_string_init: str = %s\n", str));
     strncpy(ZSTR_VAL(ret), str, len);
     ZSTR_VAL(ret)[len] = '\0';
     return ret;
