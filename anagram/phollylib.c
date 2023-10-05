@@ -267,6 +267,15 @@ struct _Mixed
     // TODO: Field for custom types
 };
 
+/*
+#define CREATE_MIXED(x) _Generic(x,\
+    Mixed: x,\
+    smartstr: (Mixed) {.t = MIXED_STRING, .s = x},\
+    char*: (Mixed) {.t = MIXED_STRING, .s = ph_smartstr_new(x, NULL)}\
+    )
+*/
+
+
 #define COMPARE_MIXED(mixed, val) _Generic(val ,\
     int : (mixed.t == MIXED_BOOL && mixed.b == val),\
     char*: (mixed.t == MIXED_STRING && strncmp(mixed.s->str, val, mixed.s->len) == 0)\
@@ -276,12 +285,17 @@ struct _Mixed
 #define PH_SET_ALLOC(m) uintptr_t* (*alloc) (void* a, size_t size); if (m) alloc = m->alloc; else alloc = gc_malloc;
 #define PH_GET_ARENA(m) m == NULL ? NULL : m->arena
 #define PH_ALLOC(s) alloc(PH_GET_ARENA(m), sizeof(s))
+#define PH_ABORT(s) fprintf(stderr, "FATAL INTERNAL ERROR: %s\n", s); exit(123);
 
 // TODO: Which memory strategy to use?
 struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
 {
     PH_SET_ALLOC(m);
     smartstr result;
+
+    if (s == NULL) {
+        PH_ABORT("ph_smartstr_new: s is null");
+    }
 
     result = PH_ALLOC(*result);
     result->len = strlen(s);
@@ -300,7 +314,7 @@ smartstr substr(Unknown _str, long f, int length, struct mem* m)
 	long l = 0;
 	bool len_is_null = 1;
     Mixed mixed;
-    smartstr str;
+    smartstr str = PH_ALLOC(*str);
 
     switch (_str->t) {
         case SMART_STRING:
@@ -347,7 +361,6 @@ smartstr substr(Unknown _str, long f, int length, struct mem* m)
 
 	if (l == ZSTR_LEN(str)) {
         // TODO: Assuming str is null-terminated?
-        str->str[50] = '\0';
         return ph_smartstr_new(str->str, m);
 	} else {
         //return ph_smartstr_copy(str, f, l, m);

@@ -42,7 +42,8 @@ function main()
         //sub[49] = '\0';
         //printf("Big blob: %s\n", sub);
         #__C__ smartstr
-        $sub = substr((void*) &$r, 0, 10, NULL);
+        $sub = substr((Unknown) ph_smartstr_new("Hello", NULL), 0, 2, NULL);
+        $sub = substr((Unknown) &$r, 0, 10, NULL);
         printf("Big blob: %s\n", $sub);
         //free(sub);
     }
