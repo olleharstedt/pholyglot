@@ -255,17 +255,14 @@ struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
     return result;
 }
 
+// Some copy-paste from php-src
 #define zend_long long
 #define ZSTR_LEN(str) (str)->len
 struct _smartstr* ph_smartstr_substr(struct _smartstr* str, int offset, int length, struct mem* m)
 {
 	long l = 0, f;
 	bool len_is_null = 1;
-    uintptr_t* (*alloc) (void* a, size_t size);
-    if (m)
-        alloc = m->alloc;
-    else
-        alloc = gc_malloc;
+    PH_SET_ALLOC(m);
 
 	if (f < 0) {
 		/* if "from" position is negative, count start position from the end
@@ -277,7 +274,7 @@ struct _smartstr* ph_smartstr_substr(struct _smartstr* str, int offset, int leng
 			f = (long) str->len + f;
 		}
 	} else if ((size_t)f > ZSTR_LEN(str)) {
-		//RETURN_EMPTY_STRING();
+	    return ph_smartstr_new("", m);
 	}
 
 	if (!len_is_null) {
