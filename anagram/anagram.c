@@ -11,41 +11,27 @@
 22:00 < DPA> Secondly, the nested generics all need to match, so consider putting default branches in them. You can use a static_assert and a generic in it resolving to 0 or 1 to make it compile only in the intended cases.
  */
 
-//#define COMPARE_STRING(res, val) strcmp(res.string.str, val.str)
-//#define COMPARE_INT(res, val) (res.b == val)
-
-bool compare_string(Mixed r, smartstr val)
-{
-    printf("compare_string\n");
-    return strcmp(r.s->str, val->str) == 0;
-}
-
-#define DO_OP(a, op) a op a
-
-int compare_int(Mixed res, int val) {
-    printf("compare_int\n");
-    return res.b == val;
-}
-
 /**
  * Compile with:
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -lgc anagram.c
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc anagram.c -lgc
  *   gcc -xc -lgc -I. -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/ anagram.c
  */
-int main()
+#define function int
+function main()
+#undef function
 {
     // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
-    smartstr s = malloc(sizeof(struct _smartstr));
-    s->str = malloc(sizeof(char) * 20);
-    strcpy(s->str, "amoo.txt");
+    smartstr s = malloc(sizeof(*s));
+    s->str = malloc(20);
+    strcpy(s->str, "moo.txt");
     s->len = 9;
     Mixed $r = file_get_contents(s);
     ph_free_smartstr(s);
     if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
     } else {
-        char* sub = malloc(sizeof(char) * 51);
+        char* sub = malloc(51);
         strncpy(sub, $r.s->str, 49);
         sub[49] = '\0';
         printf("Big blob: %s\n", sub);

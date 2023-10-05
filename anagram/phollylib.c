@@ -278,7 +278,7 @@ struct _Mixed
 #define OP_PLUS +
 
 // Prefix functions with ph_
-void ph_free_mixed(Mixed* m)
+void ph_free_mixed(struct _Mixed* m)
 {
     // Mixed should always be stack allocated.
     switch (m->t) {
@@ -301,27 +301,28 @@ void ph_free_mixed(Mixed* m)
  *
  * IRC:
  *   14:10 < pekster> Each block of stuff to do looks more like: if (<allocation and it failed>) { record_error(ENUM_REASON); cleanup(ENUM_REASON); goto err; }
+ *   14:20 < pekster> Your preference for unnecessay information hiding with opaque typedefs does not make your code very readable.
+ *   14:23 < pekster> To a point it boils down to style, but the Linux (kernel) style guide would not approve of what you've done:
+ *                    https://www.kernel.org/doc/html/latest/process/coding-style.html#typedefs
  */
-Mixed file_get_contents(smartstr filename)
+struct _Mixed file_get_contents(struct _smartstr* filename)
 {
     fprintf(stderr, "file_get_contents\n");
     FILE * f = fopen(filename->str, "rb");
-    smartstr s;
-    Mixed return_value;
+    struct _smartstr* s;
+    struct _Mixed return_value;
     if (f) {
         int res = fseek(f, 0, SEEK_END);
         if (res == -1) {
             fprintf(stderr, "SEEK_END res == -1\n");
-            return_value = (Mixed) {.t = BOOL, .b = false};
-            goto cleanup;
+            goto return_false;
         }
-        s = malloc(sizeof(struct _smartstr));
+        s = malloc(sizeof(*s));
         s->len = ftell(f);
         res = fseek(f, 0, SEEK_SET);
         if (res == -1) {
             fprintf(stderr, "SEEK_SET res == -1\n");
-            return_value = (Mixed) {.t = BOOL, .b = false};
-            goto cleanup;
+            goto return_false;
         }
         s->str = malloc(s->len);
         if (s->str) {
@@ -329,27 +330,25 @@ Mixed file_get_contents(smartstr filename)
             long chunk = fread(s->str, 1, s->len, f);
             fprintf(stdout, "chunk = %ld\n", chunk);
             if (chunk != s->len) {
-                return_value = (Mixed) {.t = BOOL, .b = false};
-                goto cleanup;
+                goto return_false;
             }
             if (ferror(f)) {
-                return_value = (Mixed) {.t = BOOL, .b = false};
-                goto cleanup;
+                goto return_false;
             } else {
                 // Success case
                 return (Mixed) {.t = STRING, .s = s};
             }
         } else {
-            return_value = (Mixed) {.t = BOOL, .b = false};
-            goto cleanup;
+            goto return_false;
         }
         fclose (f);
     } else {
         fprintf(stderr, "Could not open file\n");
-        return_value = (Mixed) {.t = BOOL, .b = false};
-        goto cleanup;
+        goto return_false;
     }
 
+return_false:
+    return_value = (Mixed) {.t = BOOL, .b = false};
 cleanup:
     if (f) {
         fclose(f);
