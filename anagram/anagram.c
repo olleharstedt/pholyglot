@@ -44,20 +44,30 @@ int compare_int(Mixed res, int val) {
 /**
  * Compile with:
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -lgc anagram.c
- *   gcc -g -I. -Wno-incompatible-pointer-types -xc -lgc anagram.c
+ *   gcc -g -I. -Wno-incompatible-pointer-types -xc anagram.c -lgc
+ *   gcc -xc -lgc -I. -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/ anagram.c
  */
 int main()
 {
     // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
     smartstr s = malloc(sizeof(struct _smartstr));
-    s->str = malloc(sizeof(char) * 8);
-    strncpy(s->str, "moo.txt", 8);
+    s->str = malloc(sizeof(char) * 20);
+    strcpy(s->str, "123moo.txt");
     s->len = 9;
     Mixed $r = file_get_contents(s);
-    if (COMPARE_MIXED($r, OP_EQUALS, true)) {
-        printf("Hello\n");
+    if (COMPARE_MIXED($r, OP_EQUALS, false)) {
+        printf("Could not read from file\n");
+    } else {
+        char* sub = malloc(sizeof(char) * 51);
+        strncpy(sub, $r.s->str, 49);
+        sub[49] = '\0';
+        printf("Big blob: %s\n", sub);
+        free(sub);
     }
-    free($r.s);
+    ph_free_smartstr(s);
+    ph_free_smartstr($r.s);
+    //ph_free_mixed(&$r);
+
     /*
     Mixed $r2;
     smartstr $s1 = {.str = "moo", .len = 3};

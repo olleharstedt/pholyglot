@@ -236,6 +236,16 @@ struct _smartstr
     size_t len;
 };
 
+void ph_free_smartstr(smartstr s)
+{
+    if (s->str) {
+        free(s->str);
+    }
+    if (s) {
+        free(s);
+    }
+}
+
 // PHP mixed result type
 
 enum type
@@ -266,6 +276,7 @@ void ph_free_mixed(Mixed* m)
             free(m);
             break;
         case BOOL:
+            free(m);
             break;
     }
 }
@@ -279,34 +290,32 @@ void ph_free_mixed(Mixed* m)
 Mixed file_get_contents(smartstr filename)
 {
     Mixed result = {};
-    smartstr s = malloc(sizeof(struct _smartstr));
     FILE * f = fopen (filename->str, "rb");
-
     if (f) {
         int res = fseek(f, 0, SEEK_END);
         if (res == -1) {
             fclose(f);
-            free(s);
             return (Mixed) {.t = BOOL, .b = false};
         }
+        smartstr s = malloc(sizeof(struct _smartstr));
         s->len = ftell(f);
         res = fseek(f, 0, SEEK_SET);
         if (res == -1) {
             fclose(f);
-            free(s);
+            ph_free_smartstr(s);
             return (Mixed) {.t = BOOL, .b = false};
         }
         s->str = malloc(s->len);
         if (s->str) {
             fread(s->str, 1, s->len, f);
+            return (Mixed) {.t = STRING, .s = s};
         } else {
             fclose(f);
-            free(s);
+            ph_free_smartstr(s);
             return (Mixed) {.t = BOOL, .b = false};
         }
         fclose (f);
     } else {
-        free(s);
         return (Mixed) {.t = BOOL, .b = false};
     }
 }
