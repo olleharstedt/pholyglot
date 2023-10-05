@@ -254,6 +254,8 @@ struct _smartstr
     // TODO: Add size of current buffer?
 };
 
+#define GET_STRING(s) s->str
+
 // PHP mixed result type
 
 typedef struct _Mixed Mixed;
@@ -284,7 +286,12 @@ struct _Mixed
 #define PH_GET_ARENA(m) m == NULL ? NULL : m->arena
 #define PH_ALLOC(s) alloc(PH_GET_ARENA(m), sizeof(s))
 #define PH_ABORT(s) fprintf(stderr, "FATAL INTERNAL ERROR: %s\n", s); exit(123);
+#define PH_DEBUG 0
+#if PH_DEBUG
 #define ERROR_LOG(s) fprintf(stderr, "ERROR_LOG: %s\n", s)
+#else
+#define ERROR_LOG(s) 
+#endif
 
 // TODO: Which memory strategy to use?
 struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
@@ -316,8 +323,8 @@ struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int lengt
     smartstr result;
     char* tmp;
 
-    fprintf(stderr, "offset = %ld\n", offset);
-    fprintf(stderr, "length = %d\n", length);
+    ERROR_LOG(sprintf("offset = %ld\n", offset));
+    ERROR_LOG(sprintf("length = %d\n", length));
 
     if (length < 0) {
         ERROR_LOG("length < 0");
@@ -326,7 +333,6 @@ struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int lengt
 
     result = PH_ALLOC(*result);
     result->str = PH_ALLOC(length);
-    fprintf(stderr, "%.10s\n", str->str);
     tmp = &str->str[offset];
     strncpy(result->str, tmp, length);
     return result;
@@ -398,7 +404,7 @@ smartstr substr(smartstr _str, long f, int length, struct mem* m)
 	if (l == ZSTR_LEN(str)) {
         ERROR_LOG("Return exact copy");
         // TODO: Assuming str is null-terminated?
-        printf("str->str = %.5s\n", str->str);
+        ERROR_LOG(sprintf("str->str = %.5s\n", str->str));
         //return ph_smartstr_new(str->str, m);
         return str;
 	} else {
@@ -458,28 +464,28 @@ struct _Mixed file_get_contents(struct _smartstr* filename)
 {
     // TODO: Custom memory alloc here?
 
-    fprintf(stderr, "file_get_contents\n");
+    ERROR_LOG("file_get_contents");
     FILE * f = fopen(filename->str, "rb");
     struct _smartstr* s;
     struct _Mixed return_value;
     if (f) {
         int res = fseek(f, 0, SEEK_END);
         if (res == -1) {
-            fprintf(stderr, "SEEK_END res == -1\n");
+            ERROR_LOG("SEEK_END res == -1\n");
             goto return_false;
         }
         s = malloc(sizeof(*s));
         s->len = ftell(f);
         res = fseek(f, 0, SEEK_SET);
         if (res == -1) {
-            fprintf(stderr, "SEEK_SET res == -1\n");
+            ERROR_LOG("SEEK_SET res == -1\n");
             goto return_false;
         }
         s->str = malloc(s->len);
         if (s->str) {
-            fprintf(stderr, "before fread\n");
+            ERROR_LOG("before fread\n");
             long chunk = fread(s->str, 1, s->len, f);
-            fprintf(stdout, "chunk = %ld\n", chunk);
+            ERROR_LOG(sprintf("chunk = %ld\n", chunk));
             if (chunk != s->len) {
                 goto return_false;
             }

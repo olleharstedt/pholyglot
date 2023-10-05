@@ -1,3 +1,4 @@
+//<?php echo "\x08\x08"; ob_start(); ?>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -11,6 +12,25 @@
 22:00 < DPA> Secondly, the nested generics all need to match, so consider putting default branches in them. You can use a static_assert and a generic in it resolving to 0 or 1 to make it compile only in the intended cases.
  */
 
+//<?php
+#if __PHP__//<?php
+function COMPARE_MIXED($a, $b)
+{
+    return $a == $b;
+}
+function GET_MIXED_STRING($a)
+{
+    return $a;
+}
+function GET_STRING($a)
+{
+    return $a;
+}
+function ph_smartstr_new($a, $_)
+{
+    return $a;
+}
+#endif
 
 /**
  * Compile with:
@@ -37,38 +57,17 @@ function main()
     if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
     } else {
-        //char* sub = malloc(51);
-        //strncpy(sub, $r.s->str, 49);
-        //sub[49] = '\0';
-        //printf("Big blob: %s\n", sub);
         #__C__ smartstr
-        hello = ph_smartstr_new("Hello", NULL);
-        ERROR_LOG(hello->str);
-        #__C__ smartstr
-        //$sub = substr(hello, 0, 2, NULL);
-        $sub = substr(GET_MIXED_STRING($r), 0, 10, NULL);
-        printf("Sub: %.100s\n", $sub->str);
+        $sub = substr(GET_MIXED_STRING($r), 0, 10
+            #__C__ ,NULL
+        );
+        printf("Sub: %s\n", GET_STRING($sub));
         //free(sub);
     }
     //ph_smartstr_free($s);
-    ph_free_mixed(&$r);
-
-    /*
-    Mixed $r2;
-    smartstr $s1 = {.str = "moo", .len = 3};
-    $r2.s = $s1;
-    smartstr $s2 = {.str = "moo", .len = 3};
-    //if (COMPARE_MIXED(s2)(r2, s2)) {
-        //printf("Hello 2\n");
-    //}
-
-    Mixed $r3 = file_get_contents("moo\0");
-    if (COMPARE_MIXED($r3, OP_EQUALS, false)) {
-        printf("Is false\n");
-    } else if (COMPARE_MIXED($r3, OP_EQUALS, "asd\0")) {
-        printf("Is asd\n");
-    }
-    */
+    #__C__ ph_free_mixed(&$r);
 
     return 0;
 }
+//?>
+//<?php ob_end_clean(); main();
