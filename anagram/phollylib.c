@@ -11,7 +11,7 @@
 #define DEFAULT_ALIGNMENT (2*sizeof(void *))
 #endif
 #define float double
-#define int long
+// #define int long // TODO: This can cause some problems with COMPARE_MIXED on _Bool, since false is an int
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
 #define class struct
 #define __PHP__ 0
@@ -266,6 +266,14 @@ struct _Mixed
     // TODO: Field for custom types
 };
 
+#define COMPARE_MIXED(mixed, val) _Generic(val ,\
+    int : (mixed.t == BOOL && mixed.b == val),\
+    char*: (mixed.t == STRING && strncmp(mixed.s->str, val, mixed.s->len) == 0)\
+    )
+
+#define OP_EQUALS ==
+#define OP_PLUS +
+
 // Prefix functions with ph_
 void ph_free_mixed(Mixed* m)
 {
@@ -289,11 +297,12 @@ void ph_free_mixed(Mixed* m)
  */
 Mixed file_get_contents(smartstr filename)
 {
-    Mixed result = {};
-    FILE * f = fopen (filename->str, "rb");
+    fprintf(stderr, "file_get_contents\n");
+    FILE * f = fopen(filename->str, "rb");
     if (f) {
         int res = fseek(f, 0, SEEK_END);
         if (res == -1) {
+            fprintf(stderr, "SEEK_END res == -1\n");
             fclose(f);
             return (Mixed) {.t = BOOL, .b = false};
         }
@@ -301,14 +310,28 @@ Mixed file_get_contents(smartstr filename)
         s->len = ftell(f);
         res = fseek(f, 0, SEEK_SET);
         if (res == -1) {
+            fprintf(stderr, "SEEK_SET res == -1\n");
             fclose(f);
             ph_free_smartstr(s);
             return (Mixed) {.t = BOOL, .b = false};
         }
         s->str = malloc(s->len);
         if (s->str) {
-            fread(s->str, 1, s->len, f);
-            return (Mixed) {.t = STRING, .s = s};
+            fprintf(stderr, "before fread\n");
+            long chunk = fread(s->str, 1, s->len, f);
+            fprintf(stdout, "chunk = %ld\n", chunk);
+            if (chunk != s->len) {
+                ph_free_smartstr(s);
+                fclose(f);
+                return (Mixed) {.t = BOOL, .b = false};
+            }
+            if (ferror(f)) {
+                ph_free_smartstr(s);
+                fclose(f);
+                return (Mixed) {.t = BOOL, .b = false};
+            } else {
+                return (Mixed) {.t = STRING, .s = s};
+            }
         } else {
             fclose(f);
             ph_free_smartstr(s);
@@ -316,6 +339,7 @@ Mixed file_get_contents(smartstr filename)
         }
         fclose (f);
     } else {
+        fprintf(stderr, "Could not open file\n");
         return (Mixed) {.t = BOOL, .b = false};
     }
 }

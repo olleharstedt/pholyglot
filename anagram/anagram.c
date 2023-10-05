@@ -13,11 +13,6 @@
 
 //#define COMPARE_STRING(res, val) strcmp(res.string.str, val.str)
 //#define COMPARE_INT(res, val) (res.b == val)
-//#define COMPARE_MIXED(val) _Generic(val, \
-//smartstr: compare_string,\
-//int: compare_int\
-//)
-
 
 bool compare_string(Mixed r, smartstr val)
 {
@@ -26,15 +21,6 @@ bool compare_string(Mixed r, smartstr val)
 }
 
 #define DO_OP(a, op) a op a
-#define COMPARE_MIXED(res, op, val) _Generic(val,\
-    int: (res.t == BOOL && res.b op val),\
-    bool: (res.t == BOOL && res.b op val),\
-    char*: (res.t == STRING && strncmp(res.s->str, val, res.s->len) == 0),\
-    default: false\
-    )
-
-#define OP_EQUALS ==
-#define OP_PLUS +
 
 int compare_int(Mixed res, int val) {
     printf("compare_int\n");
@@ -52,10 +38,12 @@ int main()
     // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
     smartstr s = malloc(sizeof(struct _smartstr));
     s->str = malloc(sizeof(char) * 20);
-    strcpy(s->str, "123moo.txt");
+    strcpy(s->str, "moo.txt");
     s->len = 9;
     Mixed $r = file_get_contents(s);
-    if (COMPARE_MIXED($r, OP_EQUALS, false)) {
+    fprintf(stderr, "t = %d\n", $r.t);
+    fprintf(stderr, "t = %d\n", $r.b);
+    if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
     } else {
         char* sub = malloc(sizeof(char) * 51);
@@ -65,7 +53,9 @@ int main()
         free(sub);
     }
     ph_free_smartstr(s);
-    ph_free_smartstr($r.s);
+    if ($r.s) {
+        ph_free_smartstr($r.s);
+    }
     //ph_free_mixed(&$r);
 
     /*
