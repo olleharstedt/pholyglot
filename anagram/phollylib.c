@@ -238,6 +238,9 @@ struct _smartstr
 
 void ph_free_smartstr(smartstr s)
 {
+    if (s == NULL) {
+        return;
+    }
     if (s->str) {
         free(s->str);
     }
@@ -295,26 +298,30 @@ void ph_free_mixed(Mixed* m)
  * @see https://www.php.net/manual/en/function.file-get-contents.php
  * @see https://stackoverflow.com/questions/174531/how-to-read-the-content-of-a-file-to-a-string-in-c
  * @see https://www.kernel.org/doc/html/v4.10/process/coding-style.html#centralized-exiting-of-functions
+ *
+ * IRC:
+ *   14:10 < pekster> Each block of stuff to do looks more like: if (<allocation and it failed>) { record_error(ENUM_REASON); cleanup(ENUM_REASON); goto err; }
  */
 Mixed file_get_contents(smartstr filename)
 {
     fprintf(stderr, "file_get_contents\n");
     FILE * f = fopen(filename->str, "rb");
+    smartstr s;
+    Mixed return_value;
     if (f) {
         int res = fseek(f, 0, SEEK_END);
         if (res == -1) {
             fprintf(stderr, "SEEK_END res == -1\n");
-            fclose(f);
-            return (Mixed) {.t = BOOL, .b = false};
+            return_value = (Mixed) {.t = BOOL, .b = false};
+            goto cleanup;
         }
-        smartstr s = malloc(sizeof(struct _smartstr));
+        s = malloc(sizeof(struct _smartstr));
         s->len = ftell(f);
         res = fseek(f, 0, SEEK_SET);
         if (res == -1) {
             fprintf(stderr, "SEEK_SET res == -1\n");
-            fclose(f);
-            ph_free_smartstr(s);
-            return (Mixed) {.t = BOOL, .b = false};
+            return_value = (Mixed) {.t = BOOL, .b = false};
+            goto cleanup;
         }
         s->str = malloc(s->len);
         if (s->str) {
@@ -322,25 +329,31 @@ Mixed file_get_contents(smartstr filename)
             long chunk = fread(s->str, 1, s->len, f);
             fprintf(stdout, "chunk = %ld\n", chunk);
             if (chunk != s->len) {
-                ph_free_smartstr(s);
-                fclose(f);
-                return (Mixed) {.t = BOOL, .b = false};
+                return_value = (Mixed) {.t = BOOL, .b = false};
+                goto cleanup;
             }
             if (ferror(f)) {
-                ph_free_smartstr(s);
-                fclose(f);
-                return (Mixed) {.t = BOOL, .b = false};
+                return_value = (Mixed) {.t = BOOL, .b = false};
+                goto cleanup;
             } else {
+                // Success case
                 return (Mixed) {.t = STRING, .s = s};
             }
         } else {
-            fclose(f);
-            ph_free_smartstr(s);
-            return (Mixed) {.t = BOOL, .b = false};
+            return_value = (Mixed) {.t = BOOL, .b = false};
+            goto cleanup;
         }
         fclose (f);
     } else {
         fprintf(stderr, "Could not open file\n");
-        return (Mixed) {.t = BOOL, .b = false};
+        return_value = (Mixed) {.t = BOOL, .b = false};
+        goto cleanup;
     }
+
+cleanup:
+    if (f) {
+        fclose(f);
+    }
+    ph_free_smartstr(s);
+    return return_value;
 }

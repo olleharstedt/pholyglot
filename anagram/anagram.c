@@ -38,7 +38,7 @@ int main()
     // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
     smartstr s = malloc(sizeof(struct _smartstr));
     s->str = malloc(sizeof(char) * 20);
-    strcpy(s->str, "moo.txt");
+    strcpy(s->str, "amoo.txt");
     s->len = 9;
     Mixed $r = file_get_contents(s);
     ph_free_smartstr(s);
