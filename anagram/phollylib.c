@@ -304,10 +304,33 @@ struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
     return result;
 }
 
+// This is used, assuming it's already known that Mixed is indeed a packaged smartstr.
 #define GET_MIXED_STRING(x) _Generic(x,\
     smartstr: x,\
     Mixed: x.s\
     )
+
+struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int length, struct mem* m)
+{
+    PH_SET_ALLOC(m);
+    smartstr result;
+    char* tmp;
+
+    fprintf(stderr, "offset = %ld\n", offset);
+    fprintf(stderr, "length = %d\n", length);
+
+    if (length < 0) {
+        ERROR_LOG("length < 0");
+        return NULL;
+    }
+
+    result = PH_ALLOC(*result);
+    result->str = PH_ALLOC(length);
+    fprintf(stderr, "%.10s\n", str->str);
+    tmp = &str->str[offset];
+    strncpy(result->str, tmp, length);
+    return result;
+}
 
 // Some copy-paste from php-src
 #define zend_long long
@@ -316,7 +339,7 @@ smartstr substr(smartstr _str, long f, int length, struct mem* m)
 {
     ERROR_LOG("substr");
     PH_SET_ALLOC(m);
-	long l = 0;
+	long l = length;
 	bool len_is_null = 0;
     Mixed* mixed;
     //smartstr str = PH_ALLOC(*str);
@@ -383,21 +406,6 @@ smartstr substr(smartstr _str, long f, int length, struct mem* m)
         return ph_smartstr_copy(str, f, l, m);
 		//RETURN_STRINGL_FAST(ZSTR_VAL(str) + f, l);
 	}
-}
-
-struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int length, struct mem* m)
-{
-    PH_SET_ALLOC(m);
-    if (length < 0) {
-        return NULL;
-    }
-
-    smartstr result = PH_ALLOC(*result);
-    size_t new_length = length - offset;
-    result->str = PH_ALLOC(new_length);
-    char* tmp = str->str[offset];
-    strncpy(result->str, str->str, length);
-    return result;
 }
 
 
