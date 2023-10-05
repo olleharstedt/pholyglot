@@ -286,9 +286,9 @@ struct _Mixed
 #define PH_GET_ARENA(m) m == NULL ? NULL : m->arena
 #define PH_ALLOC(s) alloc(PH_GET_ARENA(m), sizeof(s))
 #define PH_ABORT(s) fprintf(stderr, "FATAL INTERNAL ERROR: %s\n", s); exit(123);
-#define PH_DEBUG 0
+#define PH_DEBUG 1
 #if PH_DEBUG
-#define ERROR_LOG(s) fprintf(stderr, "ERROR_LOG: %s\n", s)
+#define ERROR_LOG(s) fprintf(stderr, "ERROR_LOG: %s\n", (s))
 #else
 #define ERROR_LOG(s) 
 #endif
@@ -341,6 +341,8 @@ struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int lengt
 // Some copy-paste from php-src
 #define zend_long long
 #define ZSTR_LEN(str) (str)->len
+#define ZSTR_VAL(s) (s)->str
+#define ZEND_LONG_MAX INT64_MAX
 smartstr substr(smartstr _str, long f, int length, struct mem* m)
 {
     ERROR_LOG("substr");
@@ -514,6 +516,193 @@ cleanup:
     return return_value;
 }
 
-char** explode(smartstr delim, smartstr str)
+typedef struct _Array* Array;
+struct _Array
 {
+    smartstr* strings;
+    // Current items in strings
+    size_t len;
+    // Current total size
+    size_t size;
+};
+
+#define UNEXPECTED(x) x
+#define EXPECTED(x) x
+#define ZEND_FASTCALL 
+void zend_memnstr_ex_pre(unsigned int td[], const char *needle, size_t needle_len, int reverse) /* {{{ */ {
+	int i;
+
+	for (i = 0; i < 256; i++) {
+		td[i] = needle_len + 1;
+	}
+
+	if (reverse) {
+		for (i = needle_len - 1; i >= 0; i--) {
+			td[(unsigned char)needle[i]] = i + 1;
+		}
+	} else {
+		size_t i;
+
+		for (i = 0; i < needle_len; i++) {
+			td[(unsigned char)needle[i]] = (int)needle_len - i;
+		}
+	}
+}
+const char* ZEND_FASTCALL zend_memnstr_ex(const char *haystack, const char *needle, size_t needle_len, const char *end) /* {{{ */
+{
+	unsigned int td[256];
+	size_t i;
+	const char *p;
+
+	if (needle_len == 0 || (end - haystack) < needle_len) {
+		return NULL;
+	}
+
+	zend_memnstr_ex_pre(td, needle, needle_len, 0);
+
+	p = haystack;
+	end -= needle_len;
+
+	while (p <= end) {
+		for (i = 0; i < needle_len; i++) {
+			if (needle[i] != p[i]) {
+				break;
+			}
+		}
+		if (i == needle_len) {
+			return p;
+		}
+		if (UNEXPECTED(p == end)) {
+			return NULL;
+		}
+		p += td[(unsigned char)(p[needle_len])];
+	}
+
+	return NULL;
+}
+const char * zend_memnstr(const char *haystack, const char *needle, size_t needle_len, const char *end)
+{
+	const char *p = haystack;
+	size_t off_s;
+
+	//ZEND_ASSERT(end >= p);
+
+	if (needle_len == 1) {
+		return (const char *)memchr(p, *needle, (end-p));
+	} else if (UNEXPECTED(needle_len == 0)) {
+		return p;
+	}
+
+	off_s = (size_t)(end - p);
+
+	if (needle_len > off_s) {
+		return NULL;
+	}
+
+	if (EXPECTED(off_s < 1024 || needle_len < 9)) {	/* glibc memchr is faster when needle is too short */
+		const char ne = needle[needle_len-1];
+		end -= needle_len;
+
+		while (p <= end) {
+			if ((p = (const char *)memchr(p, *needle, (end-p+1)))) {
+				if (ne == p[needle_len-1] && !memcmp(needle+1, p+1, needle_len-2)) {
+					return p;
+				}
+			} else {
+				return NULL;
+			}
+			p++;
+		}
+
+        return NULL;
+    } else {
+        return zend_memnstr_ex(haystack, needle, needle_len, end);
+    }
+}
+smartstr zend_string_alloc(size_t len, bool persistent)
+{
+    ERROR_LOG(sprintf("len = %ld\n", len));
+    smartstr ret = malloc(sizeof(*ret));
+    if (ret == NULL) {
+        PH_ABORT("zend_string_alloc: Could not malloc");
+    }
+    //GC_SET_REFCOUNT(ret, 1);
+    //GC_TYPE_INFO(ret) = GC_STRING | ((persistent ? IS_STR_PERSISTENT : 0) << GC_FLAGS_SHIFT);
+    //ZSTR_H(ret) = 0;
+    ZSTR_LEN(ret) = len;
+    return ret;
+}
+smartstr zend_string_init(const char *str, size_t len, bool persistent)
+{
+    smartstr ret = zend_string_alloc(len, persistent);
+    ERROR_LOG(sprintf("zend_string_init: len = %ld\n", len));
+    ERROR_LOG(sprintf("zend_string_init: str = %s\n", str));
+    strncpy(ZSTR_VAL(ret), str, len);
+    ZSTR_VAL(ret)[len] = '\0';
+    return ret;
+}
+smartstr zend_string_init_fast(const char *str, size_t len)
+{
+    if (len > 1) {
+        return zend_string_init(str, len, 0);
+    } else if (len == 0) {
+        return NULL;
+    } else /* if (len == 1) */ {
+        return zend_string_init(str, 1, 0);
+    }
+}
+
+
+#define php_memnstr zend_memnstr
+Array explode(smartstr delim, smartstr str)
+{
+	const char *p1 = ZSTR_VAL(str);
+	const char *endp = ZSTR_VAL(str) + ZSTR_LEN(str);
+	const char *p2 = php_memnstr(ZSTR_VAL(str), ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+    zend_long limit = ZEND_LONG_MAX; /* No limit */
+    smartstr tmp = malloc(sizeof(*tmp));
+    Array arr = malloc(sizeof(*arr));
+    arr->strings = malloc(sizeof(uintptr_t) * 10);
+    arr->size = 10;
+
+	if (p2 == NULL) {
+		//ZVAL_STR_COPY(&tmp, str);
+        size_t len = strlen(str->str);
+        tmp->str = malloc(strlen(str->str));
+        tmp->len = len;
+        strncpy(tmp->str, str->str, len);
+        arr->strings[0] = tmp;
+        arr->len = 1;
+        return arr;
+		//zend_hash_next_index_insert_new(Z_ARRVAL_P(return_value), &tmp);
+	} else {
+		//zend_hash_real_init_packed(Z_ARRVAL_P(return_value));
+		//ZEND_HASH_FILL_PACKED(Z_ARRVAL_P(return_value)) {
+        size_t j = 0;
+			do {
+                if (arr->len >= arr->size) {
+                    smartstr* tmp = realloc(arr->strings, arr->size * 2);
+                    for (size_t i = 0; i < arr->len; i++)
+                        tmp[i] = arr->strings[i];
+                    free(arr->strings);
+                    arr->strings = tmp;
+                    arr->size = arr->size * 2;
+                }
+				//ZEND_HASH_FILL_GROW();
+				arr->strings[j] = zend_string_init_fast(p1, p2 - p1);
+				arr->len++;
+				//ZEND_HASH_FILL_NEXT();
+				p1 = p2 + ZSTR_LEN(delim);
+				p2 = php_memnstr(p1, ZSTR_VAL(delim), ZSTR_LEN(delim), endp);
+                j++;
+			} while (p2 != NULL && --limit > 1);
+
+			if (p1 <= endp) {
+				//ZEND_HASH_FILL_GROW();
+				//ZEND_HASH_FILL_SET_STR(zend_string_init_fast(p1, endp - p1));
+				//ZEND_HASH_FILL_NEXT();
+			}
+		//} ZEND_HASH_FILL_END();
+        return arr;
+	}
 }

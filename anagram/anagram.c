@@ -56,6 +56,7 @@ function main()
     $r = file_get_contents($s);
     if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
+        return 0;
     } else {
         #__C__ smartstr
         $sub = substr(GET_MIXED_STRING($r), 0, 10
@@ -63,6 +64,8 @@ function main()
         );
         printf("Sub: %s\n", GET_STRING($sub));
         //free(sub);
+        Array
+        $words = explode(zend_string_init("\n", 1, 0), $r.s);
     }
     //ph_smartstr_free($s);
     #__C__ ph_free_mixed(&$r);
