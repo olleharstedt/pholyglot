@@ -12,7 +12,7 @@
 #endif
 // #define float double
 // #define int long // TODO: This can cause some problems with COMPARE_MIXED on _Bool, since false is an int
-// TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
+// TODO: static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
 #define class struct
 #define __PHP__ 0
 #define new(x, m) x ## __constructor((x) m.alloc(m.arena, sizeof(struct x)), m)
@@ -54,6 +54,7 @@ array array_slice(array old, int offset)
     }
     array new = {
         .length = new_length,
+        // TODO: Hard-coded malloc should use PH_SET_ALLOC
         .thing = malloc(sizeof(uintptr_t) * new_length)
     };
     size_t j = 0;
@@ -226,16 +227,51 @@ void arena_free(Arena a) {
     free(a);
 }
 
+// Must be used as header for all internal types, to support usage of both mixed and others.
+// Example: substr(file_get_contents("filename")) vs substr("moo")
+enum type
+{
+    MIXED_STRING = 0,
+    MIXED_BOOL   = 2,
+    SMART_STRING = 1
+    // TODO: Need to extend this indefinitely for each type in the system? Or only core types?
+};
+
+typedef struct _Unknown* Unknown;
+struct _Unknown
+{
+    enum type t;
+};
 
 // PHP string system
 
 typedef struct _smartstr* smartstr;
 struct _smartstr
 {
+    enum type t;
     char* str;
     size_t len;
     // TODO: Add size of current buffer?
 };
+
+// PHP mixed result type
+
+typedef struct _Mixed Mixed;
+struct _Mixed
+{
+    enum type t;
+    union {
+        smartstr s;
+        bool  b;
+    };
+    // TODO: Field for custom types
+};
+
+#define COMPARE_MIXED(mixed, val) _Generic(val ,\
+    int : (mixed.t == MIXED_BOOL && mixed.b == val),\
+    char*: (mixed.t == MIXED_STRING && strncmp(mixed.s->str, val, mixed.s->len) == 0)\
+    )
+
 
 #define PH_SET_ALLOC(m) uintptr_t* (*alloc) (void* a, size_t size); if (m) alloc = m->alloc; else alloc = gc_malloc;
 #define PH_GET_ARENA(m) m == NULL ? NULL : m->arena
@@ -244,8 +280,8 @@ struct _smartstr
 // TODO: Which memory strategy to use?
 struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
 {
-    smartstr result;
     PH_SET_ALLOC(m);
+    smartstr result;
 
     result = PH_ALLOC(*result);
     result->len = strlen(s);
@@ -258,22 +294,37 @@ struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
 // Some copy-paste from php-src
 #define zend_long long
 #define ZSTR_LEN(str) (str)->len
-struct _smartstr* ph_smartstr_substr(struct _smartstr* str, int offset, int length, struct mem* m)
+smartstr substr(Unknown _str, long f, int length, struct mem* m)
 {
-	long l = 0, f;
-	bool len_is_null = 1;
     PH_SET_ALLOC(m);
+	long l = 0;
+	bool len_is_null = 1;
+    Mixed mixed;
+    smartstr str;
+
+    switch (_str->t) {
+        case SMART_STRING:
+            str = (smartstr) _str;
+            break;
+        case MIXED_STRING:
+            str = ((Mixed*) _str)->s;
+            break;
+        default:
+            exit(123);
+            break;
+    }
 
 	if (f < 0) {
 		/* if "from" position is negative, count start position from the end
 		 * of the string
 		 */
-		if (-(size_t)f > str->len) {
+		if (-(size_t)f > ZSTR_LEN(str)) {
 			f = 0;
 		} else {
-			f = (long) str->len + f;
+			f = (long) ZSTR_LEN(str) + f;
 		}
 	} else if ((size_t)f > ZSTR_LEN(str)) {
+        // Return empty string
 	    return ph_smartstr_new("", m);
 	}
 
@@ -295,17 +346,34 @@ struct _smartstr* ph_smartstr_substr(struct _smartstr* str, int offset, int leng
 	}
 
 	if (l == ZSTR_LEN(str)) {
-		//RETURN_STR_COPY(str);
+        // TODO: Assuming str is null-terminated?
+        str->str[50] = '\0';
+        return ph_smartstr_new(str->str, m);
 	} else {
+        //return ph_smartstr_copy(str, f, l, m);
 		//RETURN_STRINGL_FAST(ZSTR_VAL(str) + f, l);
 	}
 }
 
+struct _smartstr* ph_smartstr_copy(struct _smartstr* str, long offset, int length, struct mem* m)
+{
+    PH_SET_ALLOC(m);
+    if (length < 0) {
+        return NULL;
+    }
+
+    smartstr result = PH_ALLOC(*result);
+    size_t new_length = length - offset;
+    result->str = PH_ALLOC(new_length);
+    char* tmp = str->str[offset];
+    strncpy(result->str, str->str, length);
+    return result;
+}
+
+
 // TODO: To free a string depends on how it was alloced - arena, gc, stack, or heap.
 void ph_smartstr_free(smartstr s)
 {
-    return;
-    /*
     if (s == NULL) {
         return;
     }
@@ -315,33 +383,7 @@ void ph_smartstr_free(smartstr s)
     if (s) {
         free(s);
     }
-    */
 }
-
-// PHP mixed result type
-
-enum type
-{
-    STRING = 0,
-    BOOL   = 1
-    // TODO: Need to extend this indefinitely for each type in the system? Or only core types?
-};
-
-typedef struct _Mixed Mixed;
-struct _Mixed
-{
-    enum type t;
-    union {
-        smartstr s;
-        bool  b;
-    };
-    // TODO: Field for custom types
-};
-
-#define COMPARE_MIXED(mixed, val) _Generic(val ,\
-    int : (mixed.t == BOOL && mixed.b == val),\
-    char*: (mixed.t == STRING && strncmp(mixed.s->str, val, mixed.s->len) == 0)\
-    )
 
 #define OP_EQUALS ==
 #define OP_PLUS +
@@ -351,11 +393,11 @@ void ph_free_mixed(struct _Mixed* m)
 {
     // Mixed should always be stack allocated.
     switch (m->t) {
-        case STRING:
+        case MIXED_STRING:
             free(m->s->str);
             free(m->s);
             break;
-        case BOOL:
+        case MIXED_BOOL:
             // Nothing to do.
             break;
     }
@@ -376,6 +418,8 @@ void ph_free_mixed(struct _Mixed* m)
  */
 struct _Mixed file_get_contents(struct _smartstr* filename)
 {
+    // TODO: Custom memory alloc here?
+
     fprintf(stderr, "file_get_contents\n");
     FILE * f = fopen(filename->str, "rb");
     struct _smartstr* s;
@@ -405,7 +449,7 @@ struct _Mixed file_get_contents(struct _smartstr* filename)
                 goto return_false;
             } else {
                 // Success case
-                return (Mixed) {.t = STRING, .s = s};
+                return (Mixed) {.t = MIXED_STRING, .s = s};
             }
         } else {
             goto return_false;
@@ -417,7 +461,7 @@ struct _Mixed file_get_contents(struct _smartstr* filename)
     }
 
 return_false:
-    return_value = (Mixed) {.t = BOOL, .b = false};
+    return_value = (Mixed) {.t = MIXED_BOOL, .b = false};
 cleanup:
     if (f) {
         fclose(f);

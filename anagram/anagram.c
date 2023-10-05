@@ -17,25 +17,36 @@
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -lgc anagram.c
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc anagram.c -lgc
  *   gcc -xc -lgc -I. -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/ anagram.c
+ *   cat anagram.c | sed -e "s/#__C__//g" | gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -xc - -lgc
  */
 #define function int
 function main()
 #undef function
 {
+    #__C__ GC_INIT();  // Boehm init
+    #__C__ Arena __a = malloc(sizeof(struct Arena));
+    #__C__ arena_init(__a, malloc(256), 256);
+    #__C__ arena_mem.alloc = &arena_alloc;
+    #__C__ arena_mem.arena = __a;
+
     // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
-    smartstr
+    #__C__ smartstr
     $s = ph_smartstr_new("moo.txt", NULL);
-    Mixed $r = file_get_contents($s);
+    #__C__ Mixed
+    $r = file_get_contents($s);
     if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
     } else {
-        char* sub = malloc(51);
-        strncpy(sub, $r.s->str, 49);
-        sub[49] = '\0';
-        printf("Big blob: %s\n", sub);
-        free(sub);
+        //char* sub = malloc(51);
+        //strncpy(sub, $r.s->str, 49);
+        //sub[49] = '\0';
+        //printf("Big blob: %s\n", sub);
+        #__C__ smartstr
+        $sub = substr((void*) &$r, 0, 10, NULL);
+        printf("Big blob: %s\n", $sub);
+        //free(sub);
     }
-    ph_smartstr_free($s);
+    //ph_smartstr_free($s);
     ph_free_mixed(&$r);
 
     /*
