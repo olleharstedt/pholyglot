@@ -234,10 +234,81 @@ struct _smartstr
 {
     char* str;
     size_t len;
+    // TODO: Add size of current buffer?
 };
 
-void ph_free_smartstr(smartstr s)
+#define PH_SET_ALLOC(m) uintptr_t* (*alloc) (void* a, size_t size); if (m) alloc = m->alloc; else alloc = gc_malloc;
+#define PH_GET_ARENA(m) m == NULL ? NULL : m->arena
+#define PH_ALLOC(s) alloc(PH_GET_ARENA(m), sizeof(s))
+
+// TODO: Which memory strategy to use?
+struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
 {
+    smartstr result;
+    PH_SET_ALLOC(m);
+
+    result = PH_ALLOC(*result);
+    result->len = strlen(s);
+    result->str = alloc(NULL, result->len);
+    result->str = strcpy(result->str, s);
+
+    return result;
+}
+
+#define zend_long long
+#define ZSTR_LEN(str) (str)->len
+struct _smartstr* ph_smartstr_substr(struct _smartstr* str, int offset, int length, struct mem* m)
+{
+	long l = 0, f;
+	bool len_is_null = 1;
+    uintptr_t* (*alloc) (void* a, size_t size);
+    if (m)
+        alloc = m->alloc;
+    else
+        alloc = gc_malloc;
+
+	if (f < 0) {
+		/* if "from" position is negative, count start position from the end
+		 * of the string
+		 */
+		if (-(size_t)f > str->len) {
+			f = 0;
+		} else {
+			f = (long) str->len + f;
+		}
+	} else if ((size_t)f > ZSTR_LEN(str)) {
+		//RETURN_EMPTY_STRING();
+	}
+
+	if (!len_is_null) {
+		if (l < 0) {
+			/* if "length" position is negative, set it to the length
+			 * needed to stop that many chars from the end of the string
+			 */
+			if (-(size_t)l > ZSTR_LEN(str) - (size_t)f) {
+				l = 0;
+			} else {
+				l = (zend_long)ZSTR_LEN(str) - f + l;
+			}
+		} else if ((size_t)l > ZSTR_LEN(str) - (size_t)f) {
+			l = (zend_long)ZSTR_LEN(str) - f;
+		}
+	} else {
+		l = (zend_long)ZSTR_LEN(str) - f;
+	}
+
+	if (l == ZSTR_LEN(str)) {
+		//RETURN_STR_COPY(str);
+	} else {
+		//RETURN_STRINGL_FAST(ZSTR_VAL(str) + f, l);
+	}
+}
+
+// TODO: To free a string depends on how it was alloced - arena, gc, stack, or heap.
+void ph_smartstr_free(smartstr s)
+{
+    return;
+    /*
     if (s == NULL) {
         return;
     }
@@ -247,6 +318,7 @@ void ph_free_smartstr(smartstr s)
     if (s) {
         free(s);
     }
+    */
 }
 
 // PHP mixed result type
@@ -353,6 +425,6 @@ cleanup:
     if (f) {
         fclose(f);
     }
-    ph_free_smartstr(s);
+    ph_smartstr_free(s);
     return return_value;
 }

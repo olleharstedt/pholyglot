@@ -7,6 +7,8 @@
 // TODO: Must malloc third-party or core lib memory, so free at end of scope
 // TODO: Insert free() before every return. inject_before_return recursively
 //$contents = file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt');
+function STRING($s) { return $s; }
+$s = STRING("moo.txt");
 $contents = file_get_contents('moo.txt');
 if ($contents === false) {
     return;

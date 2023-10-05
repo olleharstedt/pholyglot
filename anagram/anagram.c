@@ -11,6 +11,7 @@
 22:00 < DPA> Secondly, the nested generics all need to match, so consider putting default branches in them. You can use a static_assert and a generic in it resolving to 0 or 1 to make it compile only in the intended cases.
  */
 
+
 /**
  * Compile with:
  *   gcc -g -I. -Wno-incompatible-pointer-types -xc -fsanitize=undefined -fsanitize=address -lgc anagram.c
@@ -22,12 +23,9 @@ function main()
 #undef function
 {
     // @see https://stackoverflow.com/questions/8915230/invalid-application-of-sizeof-to-incomplete-type-with-a-struct
-    smartstr s = malloc(sizeof(*s));
-    s->str = malloc(20);
-    strcpy(s->str, "moo.txt");
-    s->len = 9;
-    Mixed $r = file_get_contents(s);
-    ph_free_smartstr(s);
+    smartstr
+    $s = ph_smartstr_new("moo.txt", NULL);
+    Mixed $r = file_get_contents($s);
     if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
     } else {
@@ -37,6 +35,7 @@ function main()
         printf("Big blob: %s\n", sub);
         free(sub);
     }
+    ph_smartstr_free($s);
     ph_free_mixed(&$r);
 
     /*
