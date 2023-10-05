@@ -9,6 +9,7 @@
 //$contents = file_get_contents('http://wiki.puzzlers.org/pub/wordlists/unixdict.txt');
 $contents = file_get_contents('moo.txt');
 if ($contents === false) {
+    return;
 }
 // TODO: Explode into fixed-size array or SplDoublyLinkedList?
 $words = explode("\n", $contents);

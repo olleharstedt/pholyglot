@@ -10,7 +10,7 @@
 #ifndef DEFAULT_ALIGNMENT
 #define DEFAULT_ALIGNMENT (2*sizeof(void *))
 #endif
-#define float double
+// #define float double
 // #define int long // TODO: This can cause some problems with COMPARE_MIXED on _Bool, since false is an int
 // TODO:  static_assert(sizeof(long) == sizeof(double) == sizeof(uintptr_t));
 #define class struct
@@ -277,14 +277,14 @@ struct _Mixed
 // Prefix functions with ph_
 void ph_free_mixed(Mixed* m)
 {
+    // Mixed should always be stack allocated.
     switch (m->t) {
         case STRING:
             free(m->s->str);
             free(m->s);
-            free(m);
             break;
         case BOOL:
-            free(m);
+            // Nothing to do.
             break;
     }
 }
@@ -294,6 +294,7 @@ void ph_free_mixed(Mixed* m)
 /**
  * @see https://www.php.net/manual/en/function.file-get-contents.php
  * @see https://stackoverflow.com/questions/174531/how-to-read-the-content-of-a-file-to-a-string-in-c
+ * @see https://www.kernel.org/doc/html/v4.10/process/coding-style.html#centralized-exiting-of-functions
  */
 Mixed file_get_contents(smartstr filename)
 {

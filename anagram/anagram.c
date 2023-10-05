@@ -41,8 +41,7 @@ int main()
     strcpy(s->str, "moo.txt");
     s->len = 9;
     Mixed $r = file_get_contents(s);
-    fprintf(stderr, "t = %d\n", $r.t);
-    fprintf(stderr, "t = %d\n", $r.b);
+    ph_free_smartstr(s);
     if (COMPARE_MIXED($r, false)) {
         printf("Could not read from file\n");
     } else {
@@ -52,11 +51,7 @@ int main()
         printf("Big blob: %s\n", sub);
         free(sub);
     }
-    ph_free_smartstr(s);
-    if ($r.s) {
-        ph_free_smartstr($r.s);
-    }
-    //ph_free_mixed(&$r);
+    ph_free_mixed(&$r);
 
     /*
     Mixed $r2;
