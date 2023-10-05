@@ -513,3 +513,7 @@ cleanup:
     ph_smartstr_free(s);
     return return_value;
 }
+
+char** explode(smartstr delim, smartstr str)
+{
+}
