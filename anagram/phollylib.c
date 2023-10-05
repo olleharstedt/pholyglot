@@ -275,17 +275,16 @@ struct _Mixed
     )
 */
 
-
 #define COMPARE_MIXED(mixed, val) _Generic(val ,\
     int : (mixed.t == MIXED_BOOL && mixed.b == val),\
     char*: (mixed.t == MIXED_STRING && strncmp(mixed.s->str, val, mixed.s->len) == 0)\
     )
 
-
 #define PH_SET_ALLOC(m) uintptr_t* (*alloc) (void* a, size_t size); if (m) alloc = m->alloc; else alloc = gc_malloc;
 #define PH_GET_ARENA(m) m == NULL ? NULL : m->arena
 #define PH_ALLOC(s) alloc(PH_GET_ARENA(m), sizeof(s))
 #define PH_ABORT(s) fprintf(stderr, "FATAL INTERNAL ERROR: %s\n", s); exit(123);
+#define ERROR_LOG(s) fprintf(stderr, "ERROR_LOG: %s\n", s)
 
 // TODO: Which memory strategy to use?
 struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
@@ -294,7 +293,7 @@ struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
     smartstr result;
 
     if (s == NULL) {
-        PH_ABORT("ph_smartstr_new: s is null");
+        //PH_ABORT("ph_smartstr_new: s is null");
     }
 
     result = PH_ALLOC(*result);
@@ -305,28 +304,41 @@ struct _smartstr* ph_smartstr_new(const char* s, struct mem* m)
     return result;
 }
 
+#define GET_MIXED_STRING(x) _Generic(x,\
+    smartstr: x,\
+    Mixed: x.s\
+    )
+
 // Some copy-paste from php-src
 #define zend_long long
 #define ZSTR_LEN(str) (str)->len
-smartstr substr(Unknown _str, long f, int length, struct mem* m)
+smartstr substr(smartstr _str, long f, int length, struct mem* m)
 {
+    ERROR_LOG("substr");
     PH_SET_ALLOC(m);
 	long l = 0;
-	bool len_is_null = 1;
-    Mixed mixed;
-    smartstr str = PH_ALLOC(*str);
+	bool len_is_null = 0;
+    Mixed* mixed;
+    //smartstr str = PH_ALLOC(*str);
+    smartstr str = _str;
 
+    /*
     switch (_str->t) {
         case SMART_STRING:
+            ERROR_LOG("_str->t = SMART_STRING");
             str = (smartstr) _str;
             break;
         case MIXED_STRING:
+            ERROR_LOG("_str->t = MIXED_STRING");
+            mixed = (Mixed*) _str;
+            ERROR_LOG(mixed->s->str);
             str = ((Mixed*) _str)->s;
             break;
         default:
-            exit(123);
+            PH_ABORT("substr: Invalid type");
             break;
     }
+    */
 
 	if (f < 0) {
 		/* if "from" position is negative, count start position from the end
@@ -339,6 +351,7 @@ smartstr substr(Unknown _str, long f, int length, struct mem* m)
 		}
 	} else if ((size_t)f > ZSTR_LEN(str)) {
         // Return empty string
+        ERROR_LOG("Return empty string");
 	    return ph_smartstr_new("", m);
 	}
 
@@ -360,10 +373,14 @@ smartstr substr(Unknown _str, long f, int length, struct mem* m)
 	}
 
 	if (l == ZSTR_LEN(str)) {
+        ERROR_LOG("Return exact copy");
         // TODO: Assuming str is null-terminated?
-        return ph_smartstr_new(str->str, m);
+        printf("str->str = %.5s\n", str->str);
+        //return ph_smartstr_new(str->str, m);
+        return str;
 	} else {
-        //return ph_smartstr_copy(str, f, l, m);
+        ERROR_LOG("l not equal ZSTR_LEN");
+        return ph_smartstr_copy(str, f, l, m);
 		//RETURN_STRINGL_FAST(ZSTR_VAL(str) + f, l);
 	}
 }

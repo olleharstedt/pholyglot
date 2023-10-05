@@ -42,9 +42,12 @@ function main()
         //sub[49] = '\0';
         //printf("Big blob: %s\n", sub);
         #__C__ smartstr
-        $sub = substr((Unknown) ph_smartstr_new("Hello", NULL), 0, 2, NULL);
-        $sub = substr((Unknown) &$r, 0, 10, NULL);
-        printf("Big blob: %s\n", $sub);
+        hello = ph_smartstr_new("Hello", NULL);
+        ERROR_LOG(hello->str);
+        #__C__ smartstr
+        //$sub = substr(hello, 0, 2, NULL);
+        $sub = substr(GET_MIXED_STRING($r), 0, 10, NULL);
+        printf("Sub: %.100s\n", $sub->str);
         //free(sub);
     }
     //ph_smartstr_free($s);
