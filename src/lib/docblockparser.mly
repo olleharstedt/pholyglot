@@ -41,6 +41,7 @@ docblock_line:
   | "@var" t=typ                               {DocVar (None, t)}
   | "@var" "array" s=VAR_NAME                  { failwith "Must be more precise in docblock than just 'array'" }
   | "@var" "array" "<" t=typ ">"               {DocVar (None, Dynamic_array t) }
+  | "@var" "array" "<" t=typ "," s=typ ">"     {DocVar (None, Hash_table (t, s)) }
   | "@var" LIST_TYPE "<" t=typ ">" {DocVar (None, List t) }
 
 typ:

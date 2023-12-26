@@ -66,6 +66,7 @@ let get_class_methods elems =
 %token STRING_TYPE "string"
 %token ARRAY_TYPE "array"
 %token LIST_TYPE "SplDoublyLinkedList"
+%token HASH_TABLE_TYPE "ArrayObject"
 %token RETURN "return"
 %token NEW "new"
 %token CLONE "clone"
@@ -212,10 +213,10 @@ typ:
   | "array"                     {Fixed_array (Infer_me, None) : Ast.typ}
   | s=CLASS_NAME                {
       (* TODO: Wasn't able to put this in the list above :( *)
-      if s = "SplDoublyLinkedList" then
-          List Infer_me
-      else
-          Class_type (s, Infer_allocation_strategy) : Ast.typ
+      match s with
+      | "SplDoublyLinkedList" -> List Infer_me
+      | "ArrayObject" -> Hash_table (Infer_me, Infer_me)
+      | s -> Class_type (s, Infer_allocation_strategy) : Ast.typ
   }
   (* TODO: User-defined type, class must start with upper-case letter *)
   | s=NAME                      {failwith ("Unknown type: " ^ s)}
@@ -254,11 +255,13 @@ expr:
   | e=expr "->" m=NAME                                               {Object_access (e, Property_access ("__prop_" ^ m)) }
   | n=VAR_NAME                                                   {Variable n}
   | "new" s=CLASS_NAME "(" ")"                                   {
-      if s = "SplDoublyLinkedList" then
+      match s with
+      | "SplDoublyLinkedList" ->
           (* TODO: Two Infer_me in same expression? *)
           New (None,  Infer_me, [List_init Infer_me])
-      else
-          New (None, Class_type (s, Infer_allocation_strategy), [])
+      | "ArrayObject" ->
+          New (None, Infer_me, [Hash_init Infer_me])
+      | s -> New (None, Class_type (s, Infer_allocation_strategy), [])
   }
   | doc=DOCBLOCK_AS_STR "new" s=CLASS_NAME "(" ")"                 {
       let linebuf = Lexing.from_string doc in
@@ -267,10 +270,10 @@ expr:
         | [DocAlloc s] -> s
         | _ -> failwith "Faulty docblock before 'new' keyword"
       in
-      if s = "SplDoublyLinkedList" then
-          New (Some alloc_strat, Infer_me, [List_init Infer_me])
-      else
-          New (Some alloc_strat, Class_type (s, alloc_strat), [])
+      match s with
+      | "SplDoublyLinkedList" -> New (Some alloc_strat, Infer_me, [List_init Infer_me])
+      | "ArrayObject"         -> New (Some alloc_strat, Infer_me, [Hash_init Infer_me])
+      | s                     -> New (Some alloc_strat, Class_type (s, alloc_strat), [])
   }
   | "clone" n=VAR_NAME {
       Clone {variable_name = n; t = Infer_me; alloc_strat = None}

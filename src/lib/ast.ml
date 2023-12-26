@@ -44,7 +44,7 @@ and typ =
     | List of typ
     (*| Tuple of typ              (* Example: Fixed_array (Tuple Int) *) *)
     (*| Linked_list*)
-    (*| Hash_table*)
+    | Hash_table of typ * typ     (* Key type, value type *)
     | Infer_me
     (* TODO: Infer_me of string option ? *)
     | Infer_class_name of string
@@ -183,6 +183,7 @@ and expression =
     }
     | Variable of identifier
     | Array_init of typ * int option * expression list
+    | Hash_init of typ
     | List_init of typ (* SplDoublyLinkedList *)
     | Array_access of identifier * expression
     (*

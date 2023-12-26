@@ -4,6 +4,7 @@ module Log = Dolog.Log
 let%test_unit "trivial arrayobject" =
     let source = {|<?php // @pholyglot
     function main(): int {
+        /** @var array<string, int> */
         $hash = new ArrayObject();
         return 0;
     }
@@ -17,7 +18,11 @@ let%test_unit "trivial arrayobject" =
             docblock = [];
             params = [];
             stmts = [
-                Assignment (Infer_me, Variable "arr", Array_init (Infer_me, None, [Num 1; Num 2; Num 3]));
+                Assignment (
+                    Hash_table (String, Int),
+                    Variable "hash",
+                    New (None, Infer_me, [Hash_init (Infer_me)])
+                );
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
