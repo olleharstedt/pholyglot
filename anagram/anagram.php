@@ -1,4 +1,7 @@
-<?php
+<?php // @pholyglot
+
+// Compile with ../src/_build/default/bin/main.exe anagram.php
+// Taken from https://rosettacode.org/wiki/Anagrams#PHP
 
 // strtok
 // fgets
@@ -15,7 +18,8 @@ if ($contents === false) {
 }
 // TODO: Explode into fixed-size array or SplDoublyLinkedList?
 $words = explode("\n", $contents);
-$anagram = new ArrayObject(); //new SplDoublyLinkedList();
+// TODO: NEW FEATURE 
+$anagram = new ArrayObject();
 foreach ($words as $word) {
     // string to array, but string is already array in C
     $chars = str_split($word);

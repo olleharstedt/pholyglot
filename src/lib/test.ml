@@ -1069,7 +1069,6 @@ function main(): int
 (* Array value semantics - must use '&'? *)
 (* When type-infer array, refine it as much as possible: Start conservative with C array, the degrade when needed during inference *)
 (*   Degrade order: C array, dynamic array (glib), linked list?, tuple OR hash table with string keys, or exception *)
-(* $arr["moo"] = 4 Hash table *)
 (* function foo(mixed $a): array *)
 (* new Foo() *)
 (* MySQL *)
