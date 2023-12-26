@@ -1050,9 +1050,6 @@ function main(): int
 
 (* TODO: *)
 (* Write shorter test for assignment + new + boehm in new test file; don't use inline tests? *)
-(* SplDoublyLinkedList as dlist, $list = new SplDoublyLinkedList(); $list[] = $item; *)
-(*   foreach works with SplDoublyLinkedList --> transpile to do-while $list->valid()
- *   $list->valid() - must pass self in C but not PHP - special typ of method? "Implied self" *)
 (* @memory-context $argument1 for function docblock *)
 (* Are there other ways than "new" to alloc mem? *)
 (* Memory_context for variable or typ *)

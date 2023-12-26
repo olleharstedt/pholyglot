@@ -1,0 +1,28 @@
+((Declaration_list
+     ((Class (name Point) (kind Val) (properties ((__object_property_x Int)))
+        (methods
+          (((name getX) (docblock ()) (params ())
+             (stmts
+               ((Function_call
+                  (Function_type (return_type Void)
+                    (arguments (String_literal)))
+                  printf ((Coerce String_literal (String "\"Hello\""))))
+                 (Return
+                   (Object_access (Variable this)
+                     (Property_access __object_property_x)))))
+             (function_type (Function_type (return_type Int) (arguments ())))))))
+       (Function
+         ((name main) (docblock ()) (params ())
+           (stmts
+             ((Assignment (Class_type Point) (Variable p)
+                (New (Class_type Point) ()))
+               (Function_call
+                 (Function_type (return_type Void)
+                   (arguments (String_literal Int)))
+                 printf
+                 ((Coerce String_literal (String "\"%d\""))
+                   (Method_call (return_type Int) (method_name getX)
+                     (left_hand (Variable p)) (args ()))))
+               (Return (Num 0))))
+           (function_type (Function_type (return_type Int) (arguments ())))))))
+

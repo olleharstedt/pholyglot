@@ -1,0 +1,275 @@
+
+** Conflict (shift/reduce) in state 85.
+** Token involved: LPAREN
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE NAME
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           (?)
+
+** In state 85, looking ahead at LPAREN, reducing production
+** lvalue -> NAME
+** is permitted because of the following sub-derivation:
+
+lvalue LPAREN loption(separated_nonempty_list(COMMA,expr)) RPAREN SEMICOLON // lookahead token appears
+NAME . 
+
+** In state 85, looking ahead at LPAREN, shifting is permitted
+** because of the following sub-derivation:
+
+NAME . LPAREN loption(separated_nonempty_list(COMMA,expr)) RPAREN SEMICOLON 
+
+** Conflict (shift/reduce) in state 74.
+** Tokens involved: LT GT ARROW
+** The following explanations concentrate on token LT.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr DOT expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 74, looking ahead at LT, reducing production
+** expr -> expr DOT expr
+** is permitted because of the following sub-derivation:
+
+expr LT expr // lookahead token appears
+expr DOT expr . 
+
+** In state 74, looking ahead at LT, shifting is permitted
+** because of the following sub-derivation:
+
+expr DOT expr 
+         expr . LT expr 
+
+** Conflict (shift/reduce) in state 67.
+** Tokens involved: LT GT ARROW
+** The following explanations concentrate on token LT.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr DIV expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 67, looking ahead at LT, reducing production
+** expr -> expr DIV expr
+** is permitted because of the following sub-derivation:
+
+expr LT expr // lookahead token appears
+expr DIV expr . 
+
+** In state 67, looking ahead at LT, shifting is permitted
+** because of the following sub-derivation:
+
+expr DIV expr 
+         expr . LT expr 
+
+** Conflict (shift/reduce) in state 65.
+** Tokens involved: LT GT ARROW
+** The following explanations concentrate on token LT.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr MINUS expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 65, looking ahead at LT, reducing production
+** expr -> expr MINUS expr
+** is permitted because of the following sub-derivation:
+
+expr LT expr // lookahead token appears
+expr MINUS expr . 
+
+** In state 65, looking ahead at LT, shifting is permitted
+** because of the following sub-derivation:
+
+expr MINUS expr 
+           expr . LT expr 
+
+** Conflict (shift/reduce) in state 63.
+** Tokens involved: TIMES PLUS MINUS LT GT DOT DIV ARROW
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr GT expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 63, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr GT expr 
+        expr . TIMES expr 
+
+** In state 63, looking ahead at TIMES, reducing production
+** expr -> expr GT expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+expr GT expr . 
+
+** Conflict (shift/reduce) in state 61.
+** Tokens involved: LT GT ARROW
+** The following explanations concentrate on token LT.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr PLUS expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 61, looking ahead at LT, reducing production
+** expr -> expr PLUS expr
+** is permitted because of the following sub-derivation:
+
+expr LT expr // lookahead token appears
+expr PLUS expr . 
+
+** In state 61, looking ahead at LT, shifting is permitted
+** because of the following sub-derivation:
+
+expr PLUS expr 
+          expr . LT expr 
+
+** Conflict (shift/reduce) in state 59.
+** Tokens involved: TIMES PLUS MINUS LT GT DOT DIV ARROW
+** The following explanations concentrate on token TIMES.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr LT expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 59, looking ahead at TIMES, shifting is permitted
+** because of the following sub-derivation:
+
+expr LT expr 
+        expr . TIMES expr 
+
+** In state 59, looking ahead at TIMES, reducing production
+** expr -> expr LT expr
+** is permitted because of the following sub-derivation:
+
+expr TIMES expr // lookahead token appears
+expr LT expr . 
+
+** Conflict (shift/reduce) in state 57.
+** Tokens involved: LT GT ARROW
+** The following explanations concentrate on token LT.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE RETURN expr TIMES expr
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                                                                                           statement list(statement) 
+                                                                                                           RETURN expr SEMICOLON 
+                                                                                                                  (?)
+
+** In state 57, looking ahead at LT, reducing production
+** expr -> expr TIMES expr
+** is permitted because of the following sub-derivation:
+
+expr LT expr // lookahead token appears
+expr TIMES expr . 
+
+** In state 57, looking ahead at LT, shifting is permitted
+** because of the following sub-derivation:
+
+expr TIMES expr 
+           expr . LT expr 
+
+** Conflict (shift/reduce) in state 11.
+** Tokens involved: VAR_NAME AMPERSAND
+** The following explanations concentrate on token VAR_NAME.
+** This state is reached from program after reading:
+
+START_SCRIPT FUNCTION NAME LPAREN ARRAY_TYPE
+
+** The derivations that appear below have the following common factor:
+** (The question mark symbol (?) represents the spot where the derivations begin to differ.)
+
+program 
+START_SCRIPT list(declaration) EOF 
+             declaration list(declaration) 
+             FUNCTION NAME LPAREN loption(separated_nonempty_list(COMMA,arg_decl)) RPAREN COLON typ LBRACE list(statement) RBRACE 
+                                  separated_nonempty_list(COMMA,arg_decl) 
+                                  arg_decl 
+                                  (?)
+
+** In state 11, looking ahead at VAR_NAME, shifting is permitted
+** because of the following sub-derivation:
+
+ARRAY_TYPE . VAR_NAME 
+
+** In state 11, looking ahead at VAR_NAME, reducing production
+** typ -> ARRAY_TYPE
+** is permitted because of the following sub-derivation:
+
+typ VAR_NAME // lookahead token appears
+ARRAY_TYPE . 
