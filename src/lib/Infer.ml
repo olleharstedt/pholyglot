@@ -27,6 +27,7 @@ let typ_of_docblock d : typ = match d with
 let rec infer_alloc t strat = match t with
     | Class_type (s, Infer_allocation_strategy) -> Class_type (s, strat)
     | List t -> List (infer_alloc t strat)
+    | Hash_table (k, v) -> Hash_table (infer_alloc k strat, infer_alloc v strat)
     | t -> t
 
 let rec typ_of_lvalue ns lv : typ = 
@@ -321,6 +322,7 @@ let rec infer_expression ns expr : expression =
 
     (*| New (alloc_strat, List (Class_type (class_name, Infer_allocation_strategy)), args) -> New (alloc_strat, List (Class_type (class_name, Boehm)), args)*)
     | List_init t -> List_init t
+    | Hash_init t -> Hash_init t
     (* TODO: Be explicit of what to not infer *)
     | e -> e
     (*| e -> failwith ("infer_expression " ^ show_expression expr)*)
@@ -422,6 +424,7 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
+
     (* If t is not Infer_me, we have a @var annotation. Note that expr can still contain a @alloc annotation *)
     | Assignment (t, Variable id, New (alloc_opt, t2, [List_init t3])) ->
         if match alloc_opt with | Some Arena -> true | _ -> false then ns.uses_arena <- true;
@@ -449,6 +452,35 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             Assignment (new_t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
+
+    (* Hash_init same logic as List_init? *)
+    | Assignment (t, Variable id, New (alloc_opt, t2, [Hash_init t3])) ->
+        if match alloc_opt with | Some Arena -> true | _ -> false then ns.uses_arena <- true;
+        (* TODO: Code duplication *)
+        if t <> Infer_me then begin
+            let expr = infer_expression ns (New (alloc_opt, t2, [Hash_init t3])) in
+            let expr_t = typ_of_expression ns expr in
+            if t <> expr_t then begin
+                (*
+                print_endline "463: t <> expr_t";
+                print_endline ("t = " ^ show_typ t);
+                print_endline ("infer_alloc t Boehm = " ^ show_typ (infer_alloc t Boehm));
+                print_endline ("expr_t = " ^ show_typ expr_t);
+                *)
+            end;
+            let new_t = match t, expr_t with 
+                | Hash_table (k, v), Infer_me -> Hash_table (infer_alloc k Boehm, infer_alloc v Boehm)
+                | Infer_me, _ -> failwith "Infer_me should not happen here"
+                | u, v ->failwith "Could not combine @var and expr type"
+            in
+            (*
+            print_endline ("new_t = " ^ show_typ new_t);
+            *)
+            let expr = New (alloc_opt, new_t, [Hash_init new_t]) in
+            Assignment (new_t, Variable id, expr)
+        end else
+            failwith "infer_stmt: impossible"
+
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
