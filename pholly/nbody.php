@@ -1,5 +1,6 @@
 <?php // @pholyglot
 
+// ../src/_build/install/default/bin/pholyglot nbody.php | sed -e "s/#__C__//g" | gcc -xc - -lgc -lm -I. -I/usr/include/glib-2.0 -I/usr/lib/x86_64-linux-gnu/glib-2.0/include/
 class Body
 {
     public float $x;
