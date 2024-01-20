@@ -87,4 +87,6 @@ let%test_unit "trivial arrayobject C" =
 (* TODO
  * alloc type
  * element alloc type?
+ * hash table and value must use same mem alloc strat
+ * hash table iterator
  *)

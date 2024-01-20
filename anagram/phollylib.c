@@ -709,7 +709,11 @@ Array explode(smartstr delim, smartstr str)
 /**
  * Hash table implementation for ArrayObject.
  *
+ * Can also use array + linear search? Or binary search (but requires a sorted list).
+ *
  * @see https://www.php.net/manual/en/class.arrayobject.php
+ * @see https://benhoyt.com/writings/hash-table-in-c/
+ * @see https://github.com/benhoyt/ht
  */
 
 /**
@@ -732,7 +736,7 @@ unsigned long hash(unsigned char *str)
 /**
  * @see https://stackoverflow.com/a/7666799/2138090
  */
-uint32_t jenkins_one_at_a_time_hash(char *key, size_t len)
+uint32_t jenkins_one_at_a_time_hash(uintptr_t* key, size_t len)
 {
     uint32_t hash, i;
     for(hash = i = 0; i < len; ++i)
@@ -749,6 +753,7 @@ uint32_t jenkins_one_at_a_time_hash(char *key, size_t len)
 
 struct ArrayObject__entry
 {
+    // TODO: Hash function assumes this is a string
     uintptr_t* key;
     uintptr_t* value;
 };
@@ -767,25 +772,36 @@ struct ArrayObject
     uintptr_t* (*offsetGet) (ArrayObject self, uintptr_t* key);
 };
 
+/**
+ * @todo Make sure self and value use same allocation strategy.
+ */
+void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
+{
+}
+
+/**
+ * Nullable return type - mixed?
+ */
+uintptr_t* ArrayObject__offsetGet(ArrayObject self, uintptr_t* key)
+{
+    uint32_t index = hash((unsigned char*) key) % self->size;
+
+    if (self->entries[index] != NULL) {
+        return self->entries[index]->value;
+    }
+    return NULL;
+}
+
 ArrayObject ArrayObject__constructor(ArrayObject self, struct mem m)
 {
     self->offsetSet = &ArrayObject__offsetSet;
     self->offsetGet = &ArrayObject__offsetGet;
 
-    self->len  = 100;
-    self->size = 0;
-    self->entries = m.alloc(m.arena, sizeof(struct ArrayObject__entry) * self->len);
+    self->len  = 0;
+    self->size = 100;
+    self->entries = m.alloc(m.arena, sizeof(struct ArrayObject__entry) * self->size);
 
     self->mem = m;
 
     return self;
-}
-
-void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
-{
-}
-
-uintptr_t* ArrayObject__offsetGet(ArrayObject self, uintptr_t* key)
-{
-    return;
 }
