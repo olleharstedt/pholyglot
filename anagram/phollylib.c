@@ -3,7 +3,6 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
-#include <string.h>
 #include <stddef.h>
 #include <stdbool.h>
 #include <gc.h>
@@ -705,4 +704,39 @@ Array explode(smartstr delim, smartstr str)
 		//} ZEND_HASH_FILL_END();
         return arr;
 	}
+}
+
+/**
+ * @see http://www.cse.yorku.ca/~oz/hash.html
+ * @see https://stackoverflow.com/questions/7666509/hash-function-for-string
+ * @see http://burtleburtle.net/bob/hash/evahash.html
+ * @see https://github.com/GNOME/glib/blob/main/glib/ghash.c
+ */
+unsigned long hash(unsigned char *str)
+{
+    unsigned long hash = 5381;
+    int c;
+
+    while ((c = *str++))
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+
+    return hash;
+}
+
+/**
+ * @see https://stackoverflow.com/a/7666799/2138090
+ */
+uint32_t jenkins_one_at_a_time_hash(char *key, size_t len)
+{
+    uint32_t hash, i;
+    for(hash = i = 0; i < len; ++i)
+    {
+        hash += key[i];
+        hash += (hash << 10);
+        hash ^= (hash >> 6);
+    }
+    hash += (hash << 3);
+    hash ^= (hash >> 11);
+    hash += (hash << 15);
+    return hash;
 }
