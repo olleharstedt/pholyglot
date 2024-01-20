@@ -48,6 +48,7 @@ and typ =
         arguments: typ list
     }
     | Class_type of class_name * allocation_strategy
+    | Hash_table of typ * typ     (* Key type, value type *)
 
 and param =
     | Param of identifier * typ
@@ -129,6 +130,7 @@ and expression =
     | Equal of expression * expression
     | Variable of identifier
     | Array_init of expression list
+    | Hash_init of typ
     | List_init of typ (* SplDoublyLinkedList *)
     | Array_access of identifier * expression
     | Object_access of expression * expression
@@ -192,6 +194,7 @@ let rec string_of_typ (t : typ) : string = match t with
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
     | Class_type (n, a) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
+    | Hash_table (k, v) -> "TODO: HASH"
 
 (** Type notation that goes AFTER the variable name, as in array init *)
 (* TODO: No longer needed with array struct {.thing void*, .length int} *)
@@ -268,6 +271,9 @@ let rec string_of_expression : expression -> string = function
         [%string {|new($ct
 #__C__, $mem_f
 )|}]
+    end
+    | New (alloc_strat, Hash_table (k, v), exprs) -> begin
+        "TODO HASH"
     end
     | Clone {variable_name; t; alloc_strat} ->
         let t_s = string_of_typ t in

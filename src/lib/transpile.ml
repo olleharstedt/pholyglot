@@ -32,6 +32,7 @@ let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     (** TODO: Should we infer types before moving to Pholyglot_ast? *)
     | Infer_me -> failwith "typ_to_pholyglot: Infer before transpiling"
     | Class_type (n, a) -> Pholyglot_ast.Class_type (n, alloc_to_pholyglot a)
+    | Hash_table (k, v) -> Pholyglot_ast.Hash_table (typ_to_pholyglot k, typ_to_pholyglot v)
     | t -> raise (Transpile_error ("typ_to_pholyglot: " ^ Ast.show_typ t))
 
 let typ_to_pholyglot_constant (t : Ast.typ) : Pholyglot_ast.expression = match t with
@@ -77,6 +78,9 @@ and expression_to_pholyglot (exp : Ast.expression) : Pholyglot_ast.expression = 
     | Array_init (Infer_me, _, _) -> raise (Transpile_error "Array_init: Infer before transpiling")
     | Array_init (_, None, _) -> raise (Transpile_error "Array_init: Array init has no inferred length")
     | Array_init _ -> raise (Transpile_error "Array_init: This should be a function call to array_make")
+    | Hash_init Infer_me -> raise (Transpile_error "Hash_init: Infer before transpiling")
+    | Hash_init t -> Pholyglot_ast.Hash_init (typ_to_pholyglot t)
+
     (* Array init must be converted to Function_call already during infer to carry length *)
     (*
     | Ast.Array_init (Fixed_array (typ, _), Some length, exprs) ->
