@@ -707,6 +707,12 @@ Array explode(smartstr delim, smartstr str)
 }
 
 /**
+ * Hash table implementation for ArrayObject.
+ *
+ * @see https://www.php.net/manual/en/class.arrayobject.php
+ */
+
+/**
  * @see http://www.cse.yorku.ca/~oz/hash.html
  * @see https://stackoverflow.com/questions/7666509/hash-function-for-string
  * @see http://burtleburtle.net/bob/hash/evahash.html
@@ -739,4 +745,47 @@ uint32_t jenkins_one_at_a_time_hash(char *key, size_t len)
     hash ^= (hash >> 11);
     hash += (hash << 15);
     return hash;
+}
+
+struct ArrayObject__entry
+{
+    uintptr_t* key;
+    uintptr_t* value;
+};
+
+typedef struct ArrayObject* ArrayObject;
+struct ArrayObject
+{
+    struct mem mem;
+    size_t len;
+    size_t size;
+    struct ArrayObject__entry** entries;
+
+    // offsetSet
+    // offsetGet
+    void (*offsetSet) (ArrayObject self, uintptr_t* key, uintptr_t* value);
+    uintptr_t* (*offsetGet) (ArrayObject self, uintptr_t* key);
+};
+
+ArrayObject ArrayObject__constructor(ArrayObject self, struct mem m)
+{
+    self->offsetSet = &ArrayObject__offsetSet;
+    self->offsetGet = &ArrayObject__offsetGet;
+
+    self->len  = 100;
+    self->size = 0;
+    self->entries = m.alloc(m.arena, sizeof(struct ArrayObject__entry) * self->len);
+
+    self->mem = m;
+
+    return self;
+}
+
+void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
+{
+}
+
+uintptr_t* ArrayObject__offsetGet(ArrayObject self, uintptr_t* key)
+{
+    return;
 }
