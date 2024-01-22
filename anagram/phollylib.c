@@ -714,6 +714,8 @@ Array explode(smartstr delim, smartstr str)
  * @see https://www.php.net/manual/en/class.arrayobject.php
  * @see https://benhoyt.com/writings/hash-table-in-c/
  * @see https://github.com/benhoyt/ht
+ *
+ * @todo destructor? Only needed for manually malloc?
  */
 
 /**
@@ -773,21 +775,82 @@ struct ArrayObject
 };
 
 /**
+ * Internal function to set an entry (without expanding table).
+ *
+ * @see https://github.com/benhoyt/ht
+ */
+void ht_set_entry(ArrayObject self, const char* key, void* value)
+{
+    // AND hash with capacity-1 to ensure it's within entries array.
+    uint64_t hash_ = hash(key);
+    size_t index = (size_t)(hash_ & (uint64_t)(self->size - 1));
+
+    // Loop till we find an empty entry.
+    while (self->entries[index]->key != NULL) {
+        if (strcmp(key, self->entries[index]->key) == 0) {
+            // Found key (it already exists), update value.
+            self->entries[index]->value = value;
+            //return self->entries[index]key;
+        }
+        // Key wasn't in this slot, move to next (linear probing).
+        index++;
+        if (index >= self->size) {
+            // At end of entries array, wrap around.
+            index = 0;
+        }
+    }
+
+    // Didn't find key, allocate+copy if needed, then insert it.
+    if (self->len != 0) {
+        key = strdup(key);
+        if (key == NULL) {
+            return;
+        }
+        self->len++;
+    }
+    self->entries[index]->key = (char*)key;
+    self->entries[index]->value = value;
+}
+/**
  * @todo Make sure self and value use same allocation strategy.
  */
 void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
 {
+    if (value == NULL) {
+        return;
+    }
+
+    // If length will exceed half of current capacity, expand it.
+    if (self->len >= self->size) {
+        fprintf(stderr, "Hash table too small, implement expand\n");
+        exit(2);
+    }
+
+    // Set entry and update length.
+    ht_set_entry(self, key, value);
 }
 
 /**
  * Nullable return type - mixed?
  */
-uintptr_t* ArrayObject__offsetGet(ArrayObject self, uintptr_t* key)
+uintptr_t* ArrayObject__offsetGet(ArrayObject self, unsigned char* key)
 {
-    uint32_t index = hash((unsigned char*) key) % self->size;
+    // AND hash with capacity-1 to ensure it's within entries array.
+    uint64_t hash_ = hash(key);
+    size_t index = (size_t)(hash_ & (uint64_t)(self->size - 1));
 
-    if (self->entries[index] != NULL) {
-        return self->entries[index]->value;
+    // Loop till we find an empty entry.
+    while (self->entries[index]->key != NULL) {
+        if (strcmp(key, self->entries[index]->key) == 0) {
+            // Found key, return value.
+            return self->entries[index]->value;
+        }
+        // Key wasn't in this slot, move to next (linear probing).
+        index++;
+        if (index >= self->size) {
+            // At end of entries array, wrap around.
+            index = 0;
+        }
     }
     return NULL;
 }
