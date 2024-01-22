@@ -756,7 +756,7 @@ uint32_t jenkins_one_at_a_time_hash(uintptr_t* key, size_t len)
 struct ArrayObject__entry
 {
     // TODO: Hash function assumes this is a string
-    uintptr_t* key;
+    char* key;
     uintptr_t* value;
 };
 
@@ -766,7 +766,7 @@ struct ArrayObject
     struct mem mem;
     size_t len;
     size_t size;
-    struct ArrayObject__entry** entries;
+    struct ArrayObject__entry* entries;
 
     // offsetSet
     // offsetGet
@@ -774,22 +774,53 @@ struct ArrayObject
     uintptr_t* (*offsetGet) (ArrayObject self, uintptr_t* key);
 };
 
+void ht_set_entry(ArrayObject self, char* key, void* value);
+
+static bool ht_expand(ArrayObject self)
+{
+    // Allocate new entries array.
+    size_t new_capacity = self->size * 2;
+    if (new_capacity < self->size) {
+        return false;  // overflow (capacity would be too big)
+    }
+    struct ArrayObject__entry* new_entries = self->mem.alloc(new_capacity, sizeof(struct ArrayObject__entry));
+    if (new_entries == NULL) {
+        return false;
+    }
+
+    // Iterate entries, move all non-empty ones to new table's entries.
+    for (size_t i = 0; i < self->size; i++) {
+        struct ArrayObject__entry entry = self->entries[i];
+        if (entry.key != NULL) {
+            ht_set_entry(new_entries, new_capacity, entry.key, entry.value, NULL);
+        }
+    }
+
+    // Free old entries array and update this table's details.
+    // TODO: Free?
+    //free(self->entries);
+    self->entries = new_entries;
+    self->size = new_capacity;
+    return true;
+}
+
+
 /**
  * Internal function to set an entry (without expanding table).
  *
  * @see https://github.com/benhoyt/ht
  */
-void ht_set_entry(ArrayObject self, const char* key, void* value)
+void ht_set_entry(ArrayObject self, char* key, void* value)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash_ = hash(key);
     size_t index = (size_t)(hash_ & (uint64_t)(self->size - 1));
 
     // Loop till we find an empty entry.
-    while (self->entries[index]->key != NULL) {
-        if (strcmp(key, self->entries[index]->key) == 0) {
+    while (self->entries[index].key != NULL) {
+        if (strcmp(key, self->entries[index].key) == 0) {
             // Found key (it already exists), update value.
-            self->entries[index]->value = value;
+            self->entries[index].value = value;
             //return self->entries[index]key;
         }
         // Key wasn't in this slot, move to next (linear probing).
@@ -808,8 +839,8 @@ void ht_set_entry(ArrayObject self, const char* key, void* value)
         }
         self->len++;
     }
-    self->entries[index]->key = (char*)key;
-    self->entries[index]->value = value;
+    self->entries[index].key = (char*)key;
+    self->entries[index].value = value;
 }
 /**
  * @todo Make sure self and value use same allocation strategy.
@@ -821,9 +852,8 @@ void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
     }
 
     // If length will exceed half of current capacity, expand it.
-    if (self->len >= self->size) {
-        fprintf(stderr, "Hash table too small, implement expand\n");
-        exit(2);
+    if (self->len >= self->size / 2) {
+        ht_expand(self);
     }
 
     // Set entry and update length.
@@ -840,10 +870,10 @@ uintptr_t* ArrayObject__offsetGet(ArrayObject self, unsigned char* key)
     size_t index = (size_t)(hash_ & (uint64_t)(self->size - 1));
 
     // Loop till we find an empty entry.
-    while (self->entries[index]->key != NULL) {
-        if (strcmp(key, self->entries[index]->key) == 0) {
+    while (self->entries[index].key != NULL) {
+        if (strcmp(key, self->entries[index].key) == 0) {
             // Found key, return value.
-            return self->entries[index]->value;
+            return self->entries[index].value;
         }
         // Key wasn't in this slot, move to next (linear probing).
         index++;
@@ -863,6 +893,7 @@ ArrayObject ArrayObject__constructor(ArrayObject self, struct mem m)
     self->len  = 0;
     self->size = 100;
     self->entries = m.alloc(m.arena, sizeof(struct ArrayObject__entry) * self->size);
+    //self->entries = calloc(self->entries, sizeof(struct ArrayObject__entry) * self->size);
 
     self->mem = m;
 
