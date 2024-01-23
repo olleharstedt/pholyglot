@@ -865,13 +865,23 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
 
     // Didn't find key, allocate+copy if needed, then insert it.
     if (len != 0) {
+        // TODO: Don't use strdup
+        //char *newKey = malloc(strlen(key) + 1);
+        //if (newKey != NULL) {
+              //strcpy(newKey, key);
+              //free(key);
+              //key = newKey;
+        //} else {
+              //// Handle memory allocation error
+        //}
+        //char* newkey = m.alloc
         key = strdup(key);
         if (key == NULL) {
             return NULL;
         }
         len++;
     }
-    entries[index].key = (char*)key;
+    entries[index].key   = (char*) key;
     entries[index].value = value;
     return key;
 }

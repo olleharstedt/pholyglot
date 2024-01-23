@@ -27,7 +27,7 @@ int main()
 }
 */
 
-int main()
+void foo()
 {
     //GC_INIT();
     //smartstr s1 = heap_mem.alloc(NULL, sizeof(struct _smartstr));
@@ -35,14 +35,30 @@ int main()
     //s1->len     = 12;
     //s1->str     = (char*) heap_mem.alloc(NULL, 12);
     //strcpy(s1->str, "Hello world\0");
+    Arena __a = malloc(sizeof(struct Arena));
+    arena_init(__a, malloc(256), 256);
+    arena_mem.alloc = &arena_alloc;
+    arena_mem.arena = __a;
 
-    smartstr s1 = smartstr_of_chars("Hello world\0", &heap_mem);
+    struct mem m = arena_mem;
 
-    ArrayObject ao = ArrayObject__constructor(new(ArrayObject, heap_mem), heap_mem);
+    smartstr s1 = smartstr_of_chars("Hello world\0", &m);
+    smartstr s2 = smartstr_of_chars("Hello foo bar\0", &m);
+
+    ArrayObject ao = ArrayObject__constructor(new(ArrayObject, m), m);
     
     ArrayObject__offsetSet(ao, "foo", (void*) s1);
-    smartstr s2 =ArrayObject__offsetGet(ao, "foo");
-    printf("Smart string: %s\n", s2->str);
+    ArrayObject__offsetSet(ao, "bar", (void*) s2);
 
+
+    smartstr s3 =ArrayObject__offsetGet(ao, "bar");
+    printf("Smart string: %s\n", s3->str);
+
+    arena_free(m.arena);
+}
+
+int main()
+{
+    foo();
     return 0;
 }
