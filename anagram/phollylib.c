@@ -803,13 +803,16 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
 
 static bool ht_expand(ArrayObject self)
 {
+    fprintf(stderr, "ht_expand\n");
     // Allocate new entries array.
     size_t new_capacity = self->size * 2;
     if (new_capacity < self->size) {
+        fprintf(stderr, "overflow\n");
         return false;  // overflow (capacity would be too big)
     }
     struct ArrayObject__entry* new_entries = self->mem.alloc(NULL, sizeof(struct ArrayObject__entry) * new_capacity);
     if (new_entries == NULL) {
+        fprintf(stderr, "new_entries = null\n");
         return false;
     }
 
@@ -817,9 +820,11 @@ static bool ht_expand(ArrayObject self)
     for (int i = 0; i < new_capacity; i++) {
         memset(&new_entries[i], 0, sizeof(struct ArrayObject__entry));
     }
+    fprintf(stderr, "memset done\n");
 
     // Iterate entries, move all non-empty ones to new table's entries.
     for (size_t i = 0; i < self->size; i++) {
+        fprintf(stderr, "move element %ld\n", i);
         struct ArrayObject__entry entry = self->entries[i];
         if (entry.key != NULL) {
             ht_set_entry(new_entries, new_capacity, entry.key, entry.value, NULL, self->mem);
@@ -831,6 +836,7 @@ static bool ht_expand(ArrayObject self)
     //free(self->entries);
     self->entries = new_entries;
     self->size = new_capacity;
+    fprintf(stderr, "ht_expand end\n");
     return true;
 }
 
@@ -849,9 +855,12 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
     fprintf(stderr, "index = %ld\n", index);
 
     // Loop till we find an empty entry.
+    fprintf(stderr, "while loop\n");
     while (entries[index].key != NULL) {
+        //fprintf(stderr, ".");
         if (strcmp(key, entries[index].key) == 0) {
             // Found key (it already exists), update value.
+            fprintf(stderr, "found key\n");
             entries[index].value = value;
             return entries[index].key;
         }
@@ -864,7 +873,8 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
     }
 
     // Didn't find key, allocate+copy if needed, then insert it.
-    if (len != 0) {
+    if (len != NULL) {
+        fprintf(stderr, "len not null\n");
         // TODO: Don't use strdup
         char *newKey = m.alloc(m.arena, strlen(key) + 1);
         if (newKey != NULL) {
@@ -878,7 +888,7 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
         if (key == NULL) {
             return NULL;
         }
-        len++;
+        (*len)++;
     }
     entries[index].key   = (char*) key;
     entries[index].value = value;
@@ -894,7 +904,8 @@ void ArrayObject__offsetSet(ArrayObject self, char* key, uintptr_t* value)
     }
 
     // If length will exceed half of current capacity, expand it.
-    if (self->len >= self->size / 2) {
+    fprintf(stderr, "len = %ld\n", self->len);
+    if (self->len >= (self->size / 2)) {
         ht_expand(self);
     }
 

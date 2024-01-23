@@ -1,4 +1,5 @@
 #include "phollylib.c"
+#include <time.h>
 
 /**
  * Compile like:
@@ -39,24 +40,30 @@ void foo()
     arena_mem.alloc = &arena_alloc;
     arena_mem.arena = __a;
 
-    struct mem m = gc_mem;
+    struct mem m = arena_mem;
 
     smartstr s1 = smartstr_of_chars("Hello world\0", &m);
     smartstr s2 = smartstr_of_chars("Hello foo bar\0", &m);
 
     ArrayObject ao = ArrayObject__constructor(new(ArrayObject, m), m);
     
-    ArrayObject__offsetSet(ao, "foo", (void*) s1);
-    ArrayObject__offsetSet(ao, "bar", (void*) s2);
+    char* key = malloc(100);
+    for (int i = 0; i < 10000; i++) {
+        sprintf(key, "foo%d", rand());
+        fprintf(stderr, "%s\n", key);
+        ArrayObject__offsetSet(ao, key, (void*) s1);
+        //ArrayObject__offsetSet(ao, "bar", (void*) s2);
+    }
 
-    smartstr s3 =ArrayObject__offsetGet(ao, "bar");
-    printf("Smart string: %s\n", s3->str);
+    smartstr s3 =ArrayObject__offsetGet(ao, key);
+    printf("Smart string, key, value: %s, %s\n", key, s3->str);
 
-    //arena_free(m.arena);
+    arena_free(m.arena);
 }
 
 int main()
 {
+    srand(time(NULL));
     GC_INIT();
     foo();
     return 0;
