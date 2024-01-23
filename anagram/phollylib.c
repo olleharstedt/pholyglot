@@ -878,7 +878,7 @@ void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
     }
 
     // Set entry and update length.
-    ht_set_entry(self->entries, self->size, key, value, self->len);
+    ht_set_entry(self->entries, self->size, key, value, &self->len);
     //static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len)
 }
 
