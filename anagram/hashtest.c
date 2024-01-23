@@ -40,8 +40,8 @@ int main()
 
     ArrayObject ao = ArrayObject__constructor(new(ArrayObject, heap_mem), heap_mem);
     
-    ArrayObject__offsetSet(ao, "foo", &s1);
-    smartstr s2 = ArrayObject__offsetGet(ao, "foo");
+    ArrayObject__offsetSet(ao, "foo", (void*) s1);
+    smartstr s2 =ArrayObject__offsetGet(ao, "foo");
     printf("Smart string: %s\n", s2->str);
 
     return 0;

@@ -255,7 +255,8 @@ struct _smartstr
 
 smartstr smartstr_of_chars(const char* chars, const struct mem* m)
 {
-    size_t len = strlen(chars);
+    size_t len = strlen(chars) + 1;
+    fprintf(stderr, "len = %ld\n", len);
     smartstr s = m->alloc(m->arena, sizeof(struct _smartstr));
     s->t       = SMART_STRING;
     s->len     = len;
@@ -735,7 +736,7 @@ Array explode(smartstr delim, smartstr str)
  * @see http://burtleburtle.net/bob/hash/evahash.html
  * @see https://github.com/GNOME/glib/blob/main/glib/ghash.c
  */
-unsigned long hash(unsigned char *str)
+unsigned long hash(char *str)
 {
     unsigned long hash = 5381;
     int c;
@@ -877,7 +878,7 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
 /**
  * @todo Make sure self and value use same allocation strategy.
  */
-void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
+void ArrayObject__offsetSet(ArrayObject self, char* key, uintptr_t* value)
 {
     if (value == NULL) {
         return;
@@ -896,7 +897,7 @@ void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
 /**
  * Nullable return type - mixed?
  */
-uintptr_t* ArrayObject__offsetGet(ArrayObject self, unsigned char* key)
+uintptr_t* ArrayObject__offsetGet(ArrayObject self, char* key)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash_ = hash(key);
