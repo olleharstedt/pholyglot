@@ -29,7 +29,6 @@ int main()
 
 void foo()
 {
-    //GC_INIT();
     //smartstr s1 = heap_mem.alloc(NULL, sizeof(struct _smartstr));
     //s1->t       = SMART_STRING;
     //s1->len     = 12;
@@ -40,7 +39,7 @@ void foo()
     arena_mem.alloc = &arena_alloc;
     arena_mem.arena = __a;
 
-    struct mem m = arena_mem;
+    struct mem m = gc_mem;
 
     smartstr s1 = smartstr_of_chars("Hello world\0", &m);
     smartstr s2 = smartstr_of_chars("Hello foo bar\0", &m);
@@ -50,15 +49,15 @@ void foo()
     ArrayObject__offsetSet(ao, "foo", (void*) s1);
     ArrayObject__offsetSet(ao, "bar", (void*) s2);
 
-
     smartstr s3 =ArrayObject__offsetGet(ao, "bar");
     printf("Smart string: %s\n", s3->str);
 
-    arena_free(m.arena);
+    //arena_free(m.arena);
 }
 
 int main()
 {
+    GC_INIT();
     foo();
     return 0;
 }

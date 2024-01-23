@@ -799,7 +799,7 @@ struct ArrayObject
     uintptr_t* (*offsetGet) (ArrayObject self, uintptr_t* key);
 };
 
-static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len);
+static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len, const struct mem m);
 
 static bool ht_expand(ArrayObject self)
 {
@@ -822,7 +822,7 @@ static bool ht_expand(ArrayObject self)
     for (size_t i = 0; i < self->size; i++) {
         struct ArrayObject__entry entry = self->entries[i];
         if (entry.key != NULL) {
-            ht_set_entry(new_entries, new_capacity, entry.key, entry.value, NULL);
+            ht_set_entry(new_entries, new_capacity, entry.key, entry.value, NULL, self->mem);
         }
     }
 
@@ -840,7 +840,7 @@ static bool ht_expand(ArrayObject self)
  *
  * @see https://github.com/benhoyt/ht
  */
-static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len)
+static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len, const struct mem m)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash_ = hash(key);
@@ -866,16 +866,15 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
     // Didn't find key, allocate+copy if needed, then insert it.
     if (len != 0) {
         // TODO: Don't use strdup
-        //char *newKey = malloc(strlen(key) + 1);
-        //if (newKey != NULL) {
-              //strcpy(newKey, key);
-              //free(key);
-              //key = newKey;
-        //} else {
-              //// Handle memory allocation error
-        //}
-        //char* newkey = m.alloc
-        key = strdup(key);
+        char *newKey = m.alloc(m.arena, strlen(key) + 1);
+        if (newKey != NULL) {
+            strcpy(newKey, key);
+            //free(key);
+            key = newKey;
+        } else {
+            // No memory? :( 
+            exit(2);
+        }
         if (key == NULL) {
             return NULL;
         }
@@ -900,7 +899,7 @@ void ArrayObject__offsetSet(ArrayObject self, char* key, uintptr_t* value)
     }
 
     // Set entry and update length.
-    ht_set_entry(self->entries, self->size, key, value, &self->len);
+    ht_set_entry(self->entries, self->size, key, value, &self->len, self->mem);
     //static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len)
 }
 
