@@ -253,6 +253,17 @@ struct _smartstr
     // TODO: Add size of current buffer?
 };
 
+smartstr smartstr_of_chars(const char* chars, const struct mem* m)
+{
+    size_t len = strlen(chars);
+    smartstr s = m->alloc(m->arena, sizeof(struct _smartstr));
+    s->t       = SMART_STRING;
+    s->len     = len;
+    s->str     = (char*) m->alloc(m->arena, len);
+    strcpy(s->str, chars);
+    return s;
+}
+
 #define GET_STRING(s) s->str
 
 // PHP mixed result type
@@ -796,7 +807,7 @@ static bool ht_expand(ArrayObject self)
     if (new_capacity < self->size) {
         return false;  // overflow (capacity would be too big)
     }
-    struct ArrayObject__entry* new_entries = self->mem.alloc(new_capacity, sizeof(struct ArrayObject__entry));
+    struct ArrayObject__entry* new_entries = self->mem.alloc(NULL, sizeof(struct ArrayObject__entry) * new_capacity);
     if (new_entries == NULL) {
         return false;
     }
