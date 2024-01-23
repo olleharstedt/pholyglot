@@ -801,6 +801,11 @@ static bool ht_expand(ArrayObject self)
         return false;
     }
 
+    // Zero memory
+    for (int i = 0; i < new_capacity; i++) {
+        memset(&new_entries[i], 0, sizeof(struct ArrayObject__entry));
+    }
+
     // Iterate entries, move all non-empty ones to new table's entries.
     for (size_t i = 0; i < self->size; i++) {
         struct ArrayObject__entry entry = self->entries[i];
