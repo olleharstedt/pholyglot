@@ -753,6 +753,19 @@ uint32_t jenkins_one_at_a_time_hash(uintptr_t* key, size_t len)
     return hash;
 }
 
+// Return 64-bit FNV-1a hash for key (NUL-terminated). See description:
+// https://en.wikipedia.org/wiki/Fowler–Noll–Vo_hash_function
+#define FNV_OFFSET 14695981039346656037UL
+#define FNV_PRIME 1099511628211UL
+static uint64_t hash_key(const char* key) {
+    uint64_t hash = FNV_OFFSET;
+    for (const char* p = key; *p; p++) {
+        hash ^= (uint64_t)(unsigned char)(*p);
+        hash *= FNV_PRIME;
+    }
+    return hash;
+}
+
 struct ArrayObject__entry
 {
     // TODO: Hash function assumes this is a string
@@ -774,7 +787,7 @@ struct ArrayObject
     uintptr_t* (*offsetGet) (ArrayObject self, uintptr_t* key);
 };
 
-void ht_set_entry(ArrayObject self, char* key, void* value);
+static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len);
 
 static bool ht_expand(ArrayObject self)
 {
@@ -810,37 +823,40 @@ static bool ht_expand(ArrayObject self)
  *
  * @see https://github.com/benhoyt/ht
  */
-void ht_set_entry(ArrayObject self, char* key, void* value)
+static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len)
 {
     // AND hash with capacity-1 to ensure it's within entries array.
     uint64_t hash_ = hash(key);
-    size_t index = (size_t)(hash_ & (uint64_t)(self->size - 1));
+    size_t index = (size_t)(hash_ & (uint64_t)(size - 1));
+
+    fprintf(stderr, "index = %ld\n", index);
 
     // Loop till we find an empty entry.
-    while (self->entries[index].key != NULL) {
-        if (strcmp(key, self->entries[index].key) == 0) {
+    while (entries[index].key != NULL) {
+        if (strcmp(key, entries[index].key) == 0) {
             // Found key (it already exists), update value.
-            self->entries[index].value = value;
-            //return self->entries[index]key;
+            entries[index].value = value;
+            return entries[index].key;
         }
         // Key wasn't in this slot, move to next (linear probing).
         index++;
-        if (index >= self->size) {
+        if (index >= size) {
             // At end of entries array, wrap around.
             index = 0;
         }
     }
 
     // Didn't find key, allocate+copy if needed, then insert it.
-    if (self->len != 0) {
+    if (len != 0) {
         key = strdup(key);
         if (key == NULL) {
-            return;
+            return NULL;
         }
-        self->len++;
+        len++;
     }
-    self->entries[index].key = (char*)key;
-    self->entries[index].value = value;
+    entries[index].key = (char*)key;
+    entries[index].value = value;
+    return key;
 }
 /**
  * @todo Make sure self and value use same allocation strategy.
@@ -857,7 +873,8 @@ void ArrayObject__offsetSet(ArrayObject self, uintptr_t* key, uintptr_t* value)
     }
 
     // Set entry and update length.
-    ht_set_entry(self, key, value);
+    ht_set_entry(self->entries, self->size, key, value, self->len);
+    //static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size, char* key, void* value, size_t* len)
 }
 
 /**
@@ -891,9 +908,11 @@ ArrayObject ArrayObject__constructor(ArrayObject self, struct mem m)
     self->offsetGet = &ArrayObject__offsetGet;
 
     self->len  = 0;
-    self->size = 100;
+    self->size = 16;
     self->entries = m.alloc(m.arena, sizeof(struct ArrayObject__entry) * self->size);
-    //self->entries = calloc(self->entries, sizeof(struct ArrayObject__entry) * self->size);
+    for (int i = 0; i < self->size; i++) {
+        memset(&self->entries[i], 0, sizeof(struct ArrayObject__entry));
+    }
 
     self->mem = m;
 
