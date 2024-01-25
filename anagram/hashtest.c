@@ -6,6 +6,8 @@
  *   gcc hashtest.c -lgc -lm -g
  * or
  *   gcc -Wno-incompatible-pointer-types hashtest.c -lgc -lm -g
+ *
+ * TODO: Read https://nullprogram.com/blog/2023/09/27/
  */
 /*
 int main()
