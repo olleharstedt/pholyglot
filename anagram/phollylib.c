@@ -175,7 +175,6 @@ struct Arena {
 
 void arena_init(Arena a, uintptr_t* backing_buffer, size_t buf_len) {
     a->buf = (unsigned char*) backing_buffer;
-    void* ptr = &a->buf[buf_len];
     a->buf_len = buf_len;
     a->curr_offset = 0;
     a->prev_offset = 0;
@@ -185,6 +184,7 @@ void arena_init(Arena a, uintptr_t* backing_buffer, size_t buf_len) {
 
 void* arena_alloc_align(Arena a, size_t size, size_t align) {
     // Align 'curr_offset' forward to the specified alignment
+    assert(a != NULL);
     uintptr_t curr_offset = a->curr_offset;
     uintptr_t a_buf = (uintptr_t) a->buf;
     uintptr_t curr_ptr = (uintptr_t)a->buf + (uintptr_t)a->curr_offset;
@@ -206,6 +206,7 @@ void* arena_alloc_align(Arena a, size_t size, size_t align) {
         } else {
             size_t new_len = a->buf_len * 2;
             Arena next     = malloc(sizeof(struct Arena));
+            assert(next != NULL);
             arena_init(next, malloc(new_len), new_len);
             a->next        = next;
             return arena_alloc_align(a->next, size, align);
@@ -217,6 +218,7 @@ void* arena_alloc_align(Arena a, size_t size, size_t align) {
 
 // Because C doesn't have default parameters
 uintptr_t* arena_alloc(Arena a, size_t size) {
+    assert(a != NULL);
     return arena_alloc_align(a, size, DEFAULT_ALIGNMENT);
 }
 
@@ -812,7 +814,7 @@ static bool ht_expand(ArrayObject self)
         fprintf(stderr, "overflow\n");
         return false;  // overflow (capacity would be too big)
     }
-    struct ArrayObject__entry* new_entries = self->mem.alloc(NULL, sizeof(struct ArrayObject__entry) * new_capacity);
+    struct ArrayObject__entry* new_entries = self->mem.alloc(self->mem.arena, sizeof(struct ArrayObject__entry) * new_capacity);
     if (new_entries == NULL) {
         fprintf(stderr, "new_entries = null\n");
         return false;

@@ -61,6 +61,7 @@ void foo()
     printf("Smart string, key, value: %s, %s\n", key, s3->str);
 
     arena_free(m.arena);
+    free(key);
 }
 
 int main()
