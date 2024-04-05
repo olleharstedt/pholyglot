@@ -194,7 +194,7 @@ let rec string_of_typ (t : typ) : string = match t with
     (* Assuming we have a proper typedef, this is OK in both PHP and C *)
     | Class_type (n, a) -> n
     | Function_type {return_type; arguments} -> string_of_typ return_type
-    | Hash_table (k, v) -> "TODO: HASH"
+    | Hash_table (k, v) -> "ArrayObject"
 
 (** Type notation that goes AFTER the variable name, as in array init *)
 (* TODO: No longer needed with array struct {.thing void*, .length int} *)
@@ -273,7 +273,10 @@ let rec string_of_expression : expression -> string = function
 )|}]
     end
     | New (alloc_strat, Hash_table (k, v), exprs) -> begin
-        "TODO HASH"
+        let mem_f = string_of_alloc_strat alloc_strat in
+        [%string {|new(ArrayObject
+#__C__, $mem_f
+)|}]
     end
     | Clone {variable_name; t; alloc_strat} ->
         let t_s = string_of_typ t in

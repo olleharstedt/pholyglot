@@ -82,7 +82,18 @@ let%test_unit "trivial arrayobject C" =
     in
     let phast = Transpile.declaration_to_pholyglot fn in
     let pholyglot_code = Pholyglot_ast.string_of_declare phast in
-    [%test_eq: Base.string] pholyglot_code {|#define function int|}
+    [%test_eq: Base.string] pholyglot_code {|#define function int
+function main()
+#undef function
+{
+    #__C__ GC_INIT();
+#__C__ ArrayObject
+    $hash = new(ArrayObject
+#__C__, gc_mem
+);
+    return 0;
+}
+|}
 
 (* TODO
  * alloc type

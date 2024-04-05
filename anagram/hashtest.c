@@ -47,7 +47,8 @@ void foo()
     smartstr s1 = smartstr_of_chars("Hello world\0", &m);
     smartstr s2 = smartstr_of_chars("Hello foo bar\0", &m);
 
-    ArrayObject ao = ArrayObject__constructor(new(ArrayObject, m), m);
+    //ArrayObject ao = ArrayObject__constructor(new(ArrayObject, m), m);
+    ArrayObject ao = new(ArrayObject, m);
     
     char* key = malloc(100);
     for (int i = 0; i < 10000; i++) {

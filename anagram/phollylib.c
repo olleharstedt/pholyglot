@@ -859,7 +859,6 @@ static const char* ht_set_entry(struct ArrayObject__entry* entries, size_t size,
     fprintf(stderr, "index = %ld\n", index);
 
     // Loop till we find an empty entry.
-    fprintf(stderr, "while loop\n");
     while (entries[index].key != NULL) {
         //fprintf(stderr, ".");
         if (strcmp(key, entries[index].key) == 0) {
