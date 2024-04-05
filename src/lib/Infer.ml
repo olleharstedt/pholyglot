@@ -406,6 +406,7 @@ let infer_arg_typ_param p : param =
 
 (**
  * Infer types inside Ast.statement
+ * infer_statement
  *)
 let rec infer_stmt (s : statement) (ns : Namespace.t) : statement = 
     Log.debug "infer_stmt: %s" (show_statement s);
@@ -615,8 +616,22 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
                 lvalue_t;
                 args;
             }
-    (** TODO: This is not so good *)
-    | s -> s
+    | Hash_set {
+        hash_var = Variable name; hash_typ = Infer_me; key; value
+    } -> begin
+        (* TODO *)
+        let t = match Namespace.find_identifier ns name with
+            | Some typ -> typ
+            | None -> raise (Type_error (sprintf "infer_stmt: Could not find variable %s in namespace" name))
+        in
+        Hash_set {hash_var = Variable name; hash_typ = t; key; value}
+    end
+    | Plusplus e -> Plusplus e
+    | Minusminus e -> Minusminus e
+    | Pluseq (lv, e) -> Pluseq (lv, e)
+    | Minuseq (lv, e) -> Minuseq (lv, e)
+    | Return e -> Return e
+    | s -> failwith ("Missing match statement in infer_stmt: " ^ show_statement s)
 
 let rec kind_of_typ ns t : kind = match t with
     | Int | Float | Void -> Val

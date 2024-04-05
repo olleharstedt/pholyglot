@@ -117,6 +117,12 @@ and statement =
     | Minuseq of lvalue * expression
     | Pluseq of lvalue * expression
     | Function_call of typ * identifier * expression list
+    | Hash_set of {
+        hash_var: lvalue;
+        hash_typ: typ; 
+        key: expression;    (* 10 in $ht[10] *)
+        value: expression;  (* $ht[10] = <value> *)
+    }
     | Method_call of {
         lvalue:   lvalue;
         lvalue_t: typ;
@@ -157,6 +163,7 @@ and lvalue =
     | Variable of identifier
     | Property_access of class_property_name
     | Object_access of identifier * lvalue
+    (* TODO: Add hash set access here? *)
 
 and expression =
     | Nil (* Empty expression for internal use in foreach *)

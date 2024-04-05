@@ -299,9 +299,6 @@ function main()
 |}
 
 let%test_unit "string class property" =
-    Log.set_log_level Log.DEBUG;
-    (* Location becomes ./_build/default/lib/debug.txt *)
-    Log.set_output (open_out "string_class_property.txt");
     let source = {|<?php // @pholyglot
 class Thing {
     public string $name;
@@ -313,8 +310,6 @@ function foo(Thing $t): void {
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
     [%test_eq: Ast.program] ast (Ast.Declaration_list [
         Class {
             name = "Thing";

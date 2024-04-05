@@ -244,10 +244,6 @@ function foo(array &$bodies, float $dt): void
 |}
 
 let%test_unit "array slice test" =
-    Log.set_log_level Log.DEBUG;
-    (* Location becomes ./_build/default/lib/debug.txt *)
-    Log.set_output (open_out "debug.txt");
-    Log.debug "array slice test";
     let source = {|<?php // @pholyglot
     function foo(): void {
         $arr = [1, 2, 3];
@@ -261,9 +257,6 @@ let%test_unit "array slice test" =
         Parser.program Lexer.token |>
         Infer.run (Namespace.create ())
     in
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
-    Log.debug "should not be visible";
     [%test_eq: Ast.program] ast (Declaration_list [
         Function {
             name = "foo";

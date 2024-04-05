@@ -138,6 +138,7 @@ statement:
         in
         Assignment (Infer.typ_of_docblock cb, v, e)
   }
+  | v=lvalue "[" e=expr "]" "=" f=expr ";"                   {Hash_set {hash_var = v; hash_typ = Infer_me; key = e; value = f}}
   | v=lvalue "=" e=expr ";"                                  {Assignment (Infer_me, v, e)}
   | v=lvalue "++" ";"                                        {Plusplus v}
   | v=lvalue "--" ";"                                        {Minusminus v}

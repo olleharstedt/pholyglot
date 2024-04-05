@@ -95,6 +95,52 @@ function main()
 }
 |}
 
+let%test_unit "foreach arrayobject" =
+    Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/arrayobject1.txt *)
+    Log.set_output (open_out "arrayobject1.txt");
+    let source = {|<?php // @pholyglot
+    function main(): int {
+        /** @var array<string, int> */
+        $hash = new ArrayObject();
+        $hash[10] = "Hello";
+        return 0;
+    }
+    |}
+    (* 
+       TODO
+       $hash[10] = "Hello";
+       $hash[20] = "world!";
+       foreach ($hash as $k => $v) {
+           printf("Key is %d, value is %s", $k, $v);
+       }
+       *)
+    in
+    let linebuf = Lexing.from_string source in
+    let ast = Parser.program Lexer.token linebuf in
+    let ns = Namespace.create () in
+    let ast = Infer.run ns ast in
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
+    Log.debug "should not be visible";
+    [%test_eq: Ast.program] ast (Declaration_list [
+        (Ast.Function {
+            name = "main";
+            docblock = [];
+            params = [];
+            stmts = [
+                Assignment (
+                    Hash_table (String, Int),
+                    Variable "hash",
+                    New (None, Hash_table (String, Int), [Hash_init (Hash_table (String, Int))])
+                );
+                Return (Num 0);
+            ];
+            function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
+        })
+    ])
+
+
 (* TODO
  * alloc type
  * element alloc type?
