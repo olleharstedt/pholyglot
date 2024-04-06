@@ -103,17 +103,13 @@ let%test_unit "foreach arrayobject" =
     function main(): int {
         /** @var array<string, int> */
         $hash = new ArrayObject();
-        $hash[10] = "Hello";
+        $hash["Hello"] = "Hello";
         return 0;
     }
     |}
     (* 
        TODO
        $hash[10] = "Hello";
-       $hash[20] = "world!";
-       foreach ($hash as $k => $v) {
-           printf("Key is %d, value is %s", $k, $v);
-       }
        *)
     in
     let linebuf = Lexing.from_string source in
@@ -134,6 +130,12 @@ let%test_unit "foreach arrayobject" =
                     Variable "hash",
                     New (None, Hash_table (String, Int), [Hash_init (Hash_table (String, Int))])
                 );
+                Hash_set {
+                    hash_var = Variable "hash";
+                    hash_typ = Hash_table (String, Int);
+                    key = Num 10;
+                    value = String "\"Hello\"";
+                };
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}

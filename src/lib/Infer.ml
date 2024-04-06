@@ -149,11 +149,13 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         | Some t -> failwith ("not a function: " ^ show_typ t)
         | _ -> failwith ("found no function declared with name " ^ id)
     end
+    (* TODO: Can be both array and hash table access *)
     | Array_access (id, expr) -> begin
         Log.debug "%s %s" "Array_access " id;
         match Namespace.find_identifier ns id with
         | Some (Fixed_array (t, length)) -> t
         | Some (Dynamic_array t) -> t
+        | Some (Hash_table (k, v)) -> v
         | _ -> raise (Type_error (sprintf "typ_of_expression: Found no array with id %s in namespace, or could not infer type" id))
     end
     | e -> failwith ("typ_of_expression: " ^ (show_expression e))
@@ -626,6 +628,28 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             | Some typ -> typ
             | None -> raise (Type_error (sprintf "infer_stmt: Could not find variable %s in namespace" name))
         in
+        let key_t   = typ_of_expression ns key in
+        let value_t = typ_of_expression ns value in
+        (* Check so that key and value is proper type *)
+        begin match t with 
+            | Hash_table (k, v) -> begin
+                if key_t <> k then failwith (
+                    sprintf 
+                    "Hash table key is wrong type for variable '%s' - found %s but expected %s"
+                    name
+                    (show_typ key_t)
+                    (show_typ k)
+                );
+                if value_t <> v then failwith (
+                    sprintf
+                    "Hash table value is wrong type for variable '%s' - found %s but expected %s"
+                    name
+                    (show_typ value_t)
+                    (show_typ v)
+                )
+            end
+            | t -> failwith ("Hash table is not hash table type, but " ^ show_typ t)
+        end;
         Hash_set {hash_var = Variable name; hash_typ = t; key; value}
     end
     | Plusplus e -> Plusplus e
