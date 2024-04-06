@@ -101,9 +101,10 @@ let%test_unit "foreach arrayobject" =
     Log.set_output (open_out "arrayobject1.txt");
     let source = {|<?php // @pholyglot
     function main(): int {
-        /** @var array<string, int> */
+        /** @var array<int, string> */
         $hash = new ArrayObject();
-        $hash["Hello"] = "Hello";
+        $hash[10] = "Hello";
+        printf("Value is %s", $hash[10]);
         return 0;
     }
     |}
@@ -136,6 +137,21 @@ let%test_unit "foreach arrayobject" =
                     key = Num 10;
                     value = String "\"Hello\"";
                 };
+                (*
+                Function_call
+                (Function_type (return_type Void)
+                  (arguments (String_literal String_literal))
+                  (uses_arena false))
+                printf
+                ((Coerce String_literal (String "\"Value is %s\""))
+                  (Coerce String_literal
+                    (Function_call
+                      (Function_type (return_type String)
+                        (arguments (Constant (Dynamic_array String) Int))
+                        (uses_arena false))
+                      array_get ((Constant string) (Variable hash) (Num 10)))))
+				;
+                *)
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}

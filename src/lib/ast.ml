@@ -192,6 +192,8 @@ and expression =
     | Array_init of typ * int option * expression list
     | Hash_init of typ
     | List_init of typ (* SplDoublyLinkedList *)
+    (* This expression needs to be inferred further *)
+    | Array_or_hash_access of identifier * expression
     | Array_access of identifier * expression
     (*
      * Examples:

@@ -22,6 +22,18 @@ let%test_unit "trivial array" =
         }
     ])
 
+let%test_unit "trivial array infer 2" =
+    let source = {|<?php // @pholyglot
+    function main(): void {
+        $arr = [1];
+        $a = $arr[0];
+    }
+    |} in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    [%test_eq: Ast.program] ast (Declaration_list [])
+
 let%test_unit "trivial array infer" =
     let source = {|<?php // @pholyglot
     function main(): int {
@@ -73,7 +85,7 @@ let%test_unit "trivial array infer and print" =
             params = [];
             stmts = [
                 Assignment (Infer_me, Variable "arr", Array_init (Infer_me, None, [Num 1; Num 2; Num 3]));
-                Function_call (Infer_me, "printf", [String "\"%d\""; Array_access ("arr", Num 0)]);
+                Function_call (Infer_me, "printf", [String "\"%d\""; Array_or_hash_access ("arr", Num 0)]);
                 Return (Num 0);
             ];
             function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}

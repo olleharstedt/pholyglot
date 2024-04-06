@@ -150,6 +150,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         | _ -> failwith ("found no function declared with name " ^ id)
     end
     (* TODO: Can be both array and hash table access *)
+    | Array_or_hash_access (id, expr)
     | Array_access (id, expr) -> begin
         Log.debug "%s %s" "Array_access " id;
         match Namespace.find_identifier ns id with
@@ -158,7 +159,7 @@ let rec typ_of_expression (ns : Namespace.t) (expr : expression) : typ =
         | Some (Hash_table (k, v)) -> v
         | _ -> raise (Type_error (sprintf "typ_of_expression: Found no array with id %s in namespace, or could not infer type" id))
     end
-    | e -> failwith ("typ_of_expression: " ^ (show_expression e))
+    | e -> failwith ("typ_of_expression: missing match case for " ^ (show_expression e))
 
 (**
  * Params always have Memory_polymorph alloc strategy for now.
@@ -296,6 +297,24 @@ let rec infer_expression ns expr : expression =
             "array_make",
             typ_to_constant tt :: Num length :: exprs
         )
+    | Array_or_hash_access (id, expr) as e -> begin
+        match Namespace.find_identifier ns id with
+            | Some (Fixed_array (t, _))
+            | Some (Dynamic_array t) -> begin
+                let t = typ_of_expression ns e in
+                Function_call (
+                    Function_type {
+                        return_type = t;
+                        arguments   = Constant :: Dynamic_array t :: Int :: [];
+                        uses_arena  = false;
+                    },
+                    "array_get",
+                    typ_to_constant t :: Variable id :: expr :: [];
+                )
+            end
+            | Some t -> failwith ("infer_expression: Faulty type in array/hash access: " ^ show_typ t)
+            | None -> failwith ("infer_expression: Could not find identifier " ^ id)
+    end 
     | Array_access (id, expr) as e ->
         let t = typ_of_expression ns e in
         Function_call (
