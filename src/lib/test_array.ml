@@ -22,6 +22,7 @@ let%test_unit "trivial array" =
         }
     ])
 
+    (* TODO Have only one header: #include "phollylib.c";
 let%test_unit "trivial array infer 2" =
     let source = {|<?php // @pholyglot
     function main(): void {
@@ -32,7 +33,10 @@ let%test_unit "trivial array infer 2" =
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
-    [%test_eq: Ast.program] ast (Declaration_list [])
+    let phast = Transpile.ast_to_pholyglot ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: Base.string] pholyglot_code {||}
+    *)
 
 let%test_unit "trivial array infer" =
     let source = {|<?php // @pholyglot

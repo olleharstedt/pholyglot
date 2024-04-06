@@ -312,6 +312,13 @@ let rec infer_expression ns expr : expression =
                     typ_to_constant t :: Variable id :: expr :: [];
                 )
             end
+            | Some (Hash_table (k, v)) ->
+                let t = typ_of_expression ns e in
+                Lib_method_call {
+                    lvalue = Object_access (id, Property_access "offsetGet");
+                    lvalue_t = v;
+                    args = [expr];
+                }
             | Some t -> failwith ("infer_expression: Faulty type in array/hash access: " ^ show_typ t)
             | None -> failwith ("infer_expression: Could not find identifier " ^ id)
     end 

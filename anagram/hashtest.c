@@ -1,5 +1,6 @@
-#include "phollylib.c"
 #include <time.h>
+#include <glib.h>
+#include "phollylib.c"
 
 /**
  * Compile like:
@@ -54,7 +55,8 @@ void foo()
     for (int i = 0; i < 10000; i++) {
         sprintf(key, "foo%d", rand());
         fprintf(stderr, "%s\n", key);
-        ArrayObject__offsetSet(ao, key, (void*) s1);
+        //ArrayObject__offsetSet(ao, key, (void*) s1);
+        ao->offsetSet(ao, key, (void*) s1);
         //ArrayObject__offsetSet(ao, "bar", (void*) s2);
     }
 
@@ -63,6 +65,26 @@ void foo()
 
     arena_free(m.arena);
     free(key);
+}
+
+#define function int
+function bar()
+#undef function
+{
+   GC_INIT();
+ArrayObject
+   $hash = new(ArrayObject
+, gc_mem
+);
+   $hash->offsetSet(
+   $hash,
+   $10, $g_string_new("Hello"));
+GString*
+   $s = $hash->offsetGet(
+$hash
+);
+	printf("Value is %s", $s);
+   return 0;
 }
 
 int main()

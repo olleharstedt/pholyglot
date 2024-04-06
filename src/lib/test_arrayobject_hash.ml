@@ -104,7 +104,8 @@ let%test_unit "foreach arrayobject" =
         /** @var array<int, string> */
         $hash = new ArrayObject();
         $hash[10] = "Hello";
-        printf("Value is %s", $hash[10]);
+        $s = $hash[10];
+        printf("Value is %s", $s);
         return 0;
     }
     |}
@@ -113,13 +114,16 @@ let%test_unit "foreach arrayobject" =
        $hash[10] = "Hello";
        *)
     in
-    let linebuf = Lexing.from_string source in
-    let ast = Parser.program Lexer.token linebuf in
-    let ns = Namespace.create () in
-    let ast = Infer.run ns ast in
     Log.set_log_level Log.FATAL;
     Log.clear_prefix ();
     Log.debug "should not be visible";
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    let phast = Transpile.ast_to_pholyglot ast in
+    let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    [%test_eq: Base.string] pholyglot_code {||}
+    (*
     [%test_eq: Ast.program] ast (Declaration_list [
         (Ast.Function {
             name = "main";
@@ -157,9 +161,11 @@ let%test_unit "foreach arrayobject" =
             function_type = Function_type {return_type = Int; arguments = []; uses_arena = false}
         })
     ])
+    *)
 
 
 (* TODO
+ * Check that you can't assign wrong value to a hash table
  * alloc type
  * element alloc type?
  * hash table and value must use same mem alloc strat

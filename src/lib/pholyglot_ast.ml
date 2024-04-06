@@ -106,6 +106,13 @@ and statement =
         condition: expression;
         body:      statement list;
     }
+    | Hash_set of {
+        hash_var: lvalue;   (* $ht *)
+        hash_typ: typ;      (* Hash_table (key, value) *)
+        key: expression;    (* 10 in $ht[10] *)
+        value: expression;  (* $ht[10] = <value> *)
+        (* No value_t? Assuming value_t = Hash_table value def? *)
+    }
     | C_only of statement (* Used for #__C__ GC_INIT() etc *)
     | C_only_string of string
 
@@ -237,7 +244,13 @@ let rec string_of_expression : expression -> string = function
     | Constant s -> s
     | Parenth e -> "(" ^ string_of_expression e ^ ")"
     | Coerce (String_literal, String s) -> s
-    | Coerce (_, _) -> failwith "string_of_expression: Coerce: Do not know what to coerce"
+    | Coerce (String_literal, Variable s) -> "$" ^ s
+    | Coerce (t, expr) -> failwith (
+        sprintf
+        "string_of_expression: Coerce: Expected String_literal String s, but got %s %s"
+        (show_typ t)
+        (show_expression expr)
+    )
     | Plus (i, j) -> (string_of_expression i) ^ " + " ^ (string_of_expression j)
     | Minus (i, j) -> (string_of_expression i) ^ " - " ^ (string_of_expression j)
     | Times (i, j) -> (string_of_expression i) ^ " * " ^ (string_of_expression j)
@@ -384,6 +397,15 @@ do {
 $body_s} while ($condition_s);
 |}]
     | C_only_string s -> s
+    | Hash_set {hash_var; hash_typ; key; value;} ->
+        let Variable id = hash_var in
+        let m = "offsetSet" in
+        let key = string_of_expression key in
+        let value = string_of_expression value in
+        [%string {|$$$id->$m(
+    #__C__ $$$id,
+    $key, $value);
+|}]
     | s -> failwith ("Pholyglot_ast.string_of_statement: Unsupported statement: " ^ show_statement s)
 
 
