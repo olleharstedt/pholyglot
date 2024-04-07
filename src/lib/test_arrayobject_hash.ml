@@ -114,14 +114,14 @@ let%test_unit "foreach arrayobject" =
        $hash[10] = "Hello";
        *)
     in
-    Log.set_log_level Log.FATAL;
-    Log.clear_prefix ();
-    Log.debug "should not be visible";
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
     let phast = Transpile.ast_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
+    Log.set_log_level Log.FATAL;
+    Log.clear_prefix ();
+    Log.debug "should not be visible";
     [%test_eq: Base.string] pholyglot_code {||}
     (*
     [%test_eq: Ast.program] ast (Declaration_list [
@@ -170,4 +170,9 @@ let%test_unit "foreach arrayobject" =
  * element alloc type?
  * hash table and value must use same mem alloc strat
  * hash table iterator
+ * what type of keys are supported?
+ *   other hash tables
+ *   strings
+ *   int, float
+ *   class?
  *)

@@ -730,6 +730,8 @@ Array explode(smartstr delim, smartstr str)
  * @see https://www.php.net/manual/en/class.arrayobject.php
  * @see https://benhoyt.com/writings/hash-table-in-c/
  * @see https://github.com/benhoyt/ht
+ * @see https://github.com/php/php-src/blob/master/Zend/zend_hash.h
+ *      and https://github.com/php/php-src/blob/master/Zend/zend_hash.c
  *
  * @todo destructor? Only needed for manually malloc?
  */

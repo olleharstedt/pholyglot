@@ -6,7 +6,7 @@
  * Compile like:
  *   gcc hashtest.c -lgc -lm -g
  * or
- *   gcc -Wno-incompatible-pointer-types hashtest.c -lgc -lm -g
+ *   gcc -Wno-incompatible-pointer-types hashtest.c -lgc -lm -g `pkg-config --cflags --libs glib-2.0`
  *
  * TODO: Read https://nullprogram.com/blog/2023/09/27/
  */
@@ -71,26 +71,19 @@ void foo()
 function bar()
 #undef function
 {
-   GC_INIT();
-ArrayObject
-   $hash = new(ArrayObject
-, gc_mem
-);
-   $hash->offsetSet(
-   $hash,
-   $10, $g_string_new("Hello"));
-GString*
-   $s = $hash->offsetGet(
-$hash
-);
-	printf("Value is %s", $s);
-   return 0;
+    ArrayObject $hash = new(ArrayObject, gc_mem);
+    char* key = malloc(100);
+    sprintf(key, "10");
+    $hash->offsetSet($hash, key, g_string_new("Hello"));
+    //GString* $s = $hash->offsetGet( $hash, 10);
+    //printf("Value is %s", $s);
+    return 0;
 }
 
 int main()
 {
     srand(time(NULL));
     GC_INIT();
-    foo();
+    bar();
     return 0;
 }

@@ -313,6 +313,7 @@ let rec infer_expression ns expr : expression =
                 )
             end
             | Some (Hash_table (k, v)) ->
+                Log.debug "infer_expression: hash access expr %s " (show_expression expr);
                 let t = typ_of_expression ns e in
                 Lib_method_call {
                     lvalue = Object_access (id, Property_access "offsetGet");
