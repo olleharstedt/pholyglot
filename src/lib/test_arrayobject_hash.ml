@@ -95,6 +95,64 @@ function main()
 }
 |}
 
+let%test_unit "foreach string key" =
+    Log.set_log_level Log.DEBUG;
+    (* Location becomes ./_build/default/lib/arrayobject1.txt *)
+    Log.set_output (open_out "arrayobject1.txt");
+    let source = {|<?php // @pholyglot
+    function main(): void {
+        /** @var array<string, string> */
+        $hash = new ArrayObject();
+        $key = "a";
+        $hash[$key] = "Hello";
+        $hash["b"] = "world!";
+        $hash["a" . $key] = "end";
+    }
+    |}
+    in
+    let linebuf = Lexing.from_string source in
+    let ns = Namespace.create () in
+    let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    [%test_eq: Ast.program] ast (Declaration_list [
+        Function {
+                name = "main";
+                docblock = [];
+                params = [];
+                stmts = [
+                    Assignment (
+                        Hash_table (String, String),
+                        Variable "hash",
+                        New (None, Hash_table (String, String), [Hash_init (Hash_table (String, String))])
+                    );
+                    Assignment (
+                        String,
+                        (Variable "key"),
+                        (String "\"a\"")
+                    );
+                    Hash_set {
+                        hash_var = Variable "hash";
+                        hash_typ = Hash_table (String, String);
+                        key = Variable "key";
+                        value = String "\"Hello\"";
+                    };
+                    Hash_set {
+                        hash_var = Variable "hash";
+                        hash_typ = Hash_table (String, String);
+                        key = String "\"b\"";
+                        value = String "\"world!\"";
+                    };
+                    Hash_set {
+                        hash_var = Variable "hash";
+                        hash_typ = Hash_table (String, String);
+                        key = Concat (String "\"a\"", Variable "key");
+                        value = String "\"end\"";
+                    };
+                ];
+                function_type = Function_type {return_type = Void; arguments = []; uses_arena = false}
+            }
+    ])
+
+(*
 let%test_unit "foreach arrayobject" =
     Log.set_log_level Log.DEBUG;
     (* Location becomes ./_build/default/lib/arrayobject1.txt *)
@@ -163,6 +221,7 @@ let%test_unit "foreach arrayobject" =
         })
     ])
     *)
+    *)
 
 
 (* TODO
@@ -176,4 +235,5 @@ let%test_unit "foreach arrayobject" =
  *   strings
  *   int, float
  *   class?
+ * nested access: $hash[$foo[$key]] = "moo";
  *)
