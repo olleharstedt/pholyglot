@@ -36,6 +36,7 @@ and typ =
     | Float
     | String                (* Actually GString pointer *)
     | String_literal
+    | String_gstring
     | Constant
     | Void
     | Var_args
@@ -244,7 +245,7 @@ let rec string_of_expression : expression -> string = function
     | Constant s -> s
     | Parenth e -> "(" ^ string_of_expression e ^ ")"
     | Coerce (String_literal, String s) -> s
-    | Coerce (String_literal, Variable s) -> "$" ^ s
+    | Coerce (String_gstring, Variable s) -> "$" ^ s ^ "->str"
     | Coerce (t, expr) -> failwith (
         sprintf
         "string_of_expression: Coerce: Expected String_literal String s, but got %s %s"
@@ -406,15 +407,13 @@ $body_s} while ($condition_s);
     | C_only_string s -> s
     | Hash_set {hash_var; hash_typ; key; value;} ->
         let Variable id = hash_var in
-        let m = "offsetSet" in
         let key = string_of_expression key in
         let value = string_of_expression value in
-        [%string {|$$$id->$m(
+        [%string {|$$$id->offsetSet(
     #__C__ $$$id,
     $key, $value);
 |}]
     | s -> failwith ("Pholyglot_ast.string_of_statement: Unsupported statement: " ^ show_statement s)
-
 
 let string_of_prop (p : class_property) : string = match p with
     | (n, t) -> sprintf {|#define public %s

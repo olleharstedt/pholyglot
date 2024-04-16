@@ -313,6 +313,11 @@ let rec infer_expression ns expr : expression =
                 )
             end
             | Some (Hash_table (k, v)) ->
+                (* TODO: Hash key can be more complex expression? *)
+                let expr = match expr with
+                    | String s -> Coerce (String_gstring, String s)
+                    | e -> e
+                in
                 Log.debug "infer_expression: hash access expr %s " (show_expression expr);
                 let t = typ_of_expression ns e in
                 Lib_method_call {
@@ -454,7 +459,6 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
         Log.debug "id %s typ = %s" id (show_typ t);
         Namespace.add_identifier ns id t;
         Assignment (t, Variable id, expr)
-
     (* If t is not Infer_me, we have a @var annotation. Note that expr can still contain a @alloc annotation *)
     | Assignment (t, Variable id, New (alloc_opt, t2, [List_init t3])) ->
         if match alloc_opt with | Some Arena -> true | _ -> false then ns.uses_arena <- true;
@@ -483,7 +487,6 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             Assignment (new_t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
-
     (* Hash_init same logic as List_init? *)
     | Assignment (t, Variable id, New (alloc_opt, t2, [Hash_init t3])) ->
         if match alloc_opt with | Some Arena -> true | _ -> false then ns.uses_arena <- true;
@@ -512,7 +515,6 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             Assignment (new_t, Variable id, expr)
         end else
             failwith "infer_stmt: impossible"
-
     (* TODO: Generalize this with lvalue *)
     (* TODO: variable_name is expression? *)
     | Assignment (Infer_me, Object_access (variable_name, Property_access prop_name), expr) ->
@@ -677,7 +679,12 @@ let rec infer_stmt (s : statement) (ns : Namespace.t) : statement =
             end
             | t -> failwith ("Hash table is not hash table type, but " ^ show_typ t)
         end;
-        Hash_set {hash_var = Variable name; hash_typ = t; key; value}
+        Hash_set {
+            hash_var = Variable name;
+            hash_typ = t;
+            key;
+            value
+        }
     end
     | Plusplus e -> Plusplus e
     | Minusminus e -> Minusminus e

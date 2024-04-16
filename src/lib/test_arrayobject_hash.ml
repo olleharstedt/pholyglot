@@ -95,18 +95,17 @@ function main()
 }
 |}
 
-    (*
 let%test_unit "foreach arrayobject" =
     Log.set_log_level Log.DEBUG;
     (* Location becomes ./_build/default/lib/arrayobject1.txt *)
     Log.set_output (open_out "arrayobject1.txt");
     let source = {|<?php // @pholyglot
     function main(): int {
-        /** @var array<int, string> */
+        /** @var array<string, string> */
         $hash = new ArrayObject();
         $hash["a"] = "Hello";
         $s = $hash["a"];
-        printf("Value is %s", $s);
+        printf("Value is %s\n", $s);
         return 0;
     }
     |}
@@ -118,12 +117,14 @@ let%test_unit "foreach arrayobject" =
     let linebuf = Lexing.from_string source in
     let ns = Namespace.create () in
     let ast = Parser.program Lexer.token linebuf |> Infer.run ns in
+    (*[%test_eq: Ast.program] ast (Declaration_list [])*)
     let phast = Transpile.ast_to_pholyglot ast in
     let pholyglot_code = Pholyglot_ast.string_of_program phast in
     Log.set_log_level Log.FATAL;
     Log.clear_prefix ();
     Log.debug "should not be visible";
     [%test_eq: Base.string] pholyglot_code {||}
+    (*
     [%test_eq: Ast.program] ast (Declaration_list [
         (Ast.Function {
             name = "main";

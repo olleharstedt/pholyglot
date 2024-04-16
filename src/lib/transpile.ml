@@ -22,6 +22,7 @@ let rec typ_to_pholyglot (t : Ast.typ) : Pholyglot_ast.typ = match t with
     | Float -> Pholyglot_ast.Float
     | String -> Pholyglot_ast.String
     | String_literal -> Pholyglot_ast.String_literal
+    | String_gstring -> Pholyglot_ast.String_gstring
     | Constant -> Pholyglot_ast.Constant
     | Fixed_array (t, Some n) -> Pholyglot_ast.Fixed_array ((typ_to_pholyglot t), n)
     | Dynamic_array t -> Pholyglot_ast.Dynamic_array (typ_to_pholyglot t)

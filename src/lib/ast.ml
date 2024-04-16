@@ -36,6 +36,7 @@ and typ =
     (*| GString Glib string buffer *)
     | String
     | String_literal            (* For library code *)
+    | String_gstring            (* To insert s->str in correct places when coering *)
     | Constant
     | Class_type of class_name * allocation_strategy
     (* Fixed array can have Infer_me * None, when size is not yet known *)

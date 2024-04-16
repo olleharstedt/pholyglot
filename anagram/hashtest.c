@@ -71,13 +71,10 @@ void foo()
 function bar()
 #undef function
 {
-    ArrayObject $hash = new(ArrayObject, gc_mem);
-    char* key = malloc(100);
-    sprintf(key, "10");
-    $hash->offsetSet($hash, key, g_string_new("Hello"));
-    //GString* $s = $hash->offsetGet( $hash, 10);
-    //printf("Value is %s", $s);
-    return 0;
+   ArrayObject $hash = new(ArrayObject, gc_mem);
+   $hash->offsetSet($hash, "a", g_string_new("Hello"));
+   GString* $s = $hash->offsetGet($hash, "a");
+   printf("Value is %s\n", $s->str);
 }
 
 int main()
