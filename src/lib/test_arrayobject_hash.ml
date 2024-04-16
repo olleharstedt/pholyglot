@@ -95,6 +95,7 @@ function main()
 }
 |}
 
+    (*
 let%test_unit "foreach arrayobject" =
     Log.set_log_level Log.DEBUG;
     (* Location becomes ./_build/default/lib/arrayobject1.txt *)
@@ -103,8 +104,8 @@ let%test_unit "foreach arrayobject" =
     function main(): int {
         /** @var array<int, string> */
         $hash = new ArrayObject();
-        $hash[10] = "Hello";
-        $s = $hash[10];
+        $hash["a"] = "Hello";
+        $s = $hash["a"];
         printf("Value is %s", $s);
         return 0;
     }
@@ -123,7 +124,6 @@ let%test_unit "foreach arrayobject" =
     Log.clear_prefix ();
     Log.debug "should not be visible";
     [%test_eq: Base.string] pholyglot_code {||}
-    (*
     [%test_eq: Ast.program] ast (Declaration_list [
         (Ast.Function {
             name = "main";

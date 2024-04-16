@@ -732,6 +732,8 @@ Array explode(smartstr delim, smartstr str)
  * @see https://github.com/benhoyt/ht
  * @see https://github.com/php/php-src/blob/master/Zend/zend_hash.h
  *      and https://github.com/php/php-src/blob/master/Zend/zend_hash.c
+ * @see https://medium.com/@tibagni/a-simple-hash-table-6faa9c17693f
+ * @see https://en.wikipedia.org/wiki/Hash_table#Separate_chaining
  *
  * @todo destructor? Only needed for manually malloc?
  */

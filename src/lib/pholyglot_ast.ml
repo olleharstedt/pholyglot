@@ -321,10 +321,15 @@ let rec string_of_expression : expression -> string = function
         name
         (Base.String.concat ~sep:", " (Base.List.map param_exprs ~f:string_of_expression))
     | Lib_method_call {lvalue = Object_access (id, Property_access m); args} ->
-        let args = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
-        [%string {|$$$id->$m(
+        if List.length args > 0 then begin
+            let args = Base.String.concat ~sep:", " (Base.List.map args ~f:string_of_expression) in
+            [%string {|$$$id->$m(
 #__C__ $$$id,
 $args
+)|}]
+        end else
+            [%string {|$$$id->$m(
+#__C__ $$$id
 )|}]
     (*| Method_call {return_type; method_name; object_name; args} ->*)
     | e -> failwith ("string_of_expression: " ^ show_expression e)
