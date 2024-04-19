@@ -1,5 +1,4 @@
 #include <time.h>
-#include <glib.h>
 #include "phollylib.c"
 
 /**
@@ -72,8 +71,8 @@ function bar()
 #undef function
 {
    ArrayObject $hash = new(ArrayObject, gc_mem);
-   $hash->offsetSet($hash, "a", g_string_new("Hello"));
-   GString* $s = $hash->offsetGet($hash, "a");
+   $hash->offsetSet($hash, smartstr_of_chars("a", &gc_mem), smartstr_of_chars("Hello", &gc_mem));
+   smartstr $s = $hash->offsetGet($hash, smartstr_of_chars("a", &gc_mem));
    printf("Value is %s\n", $s->str);
 }
 
